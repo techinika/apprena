@@ -10,11 +10,27 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { signInWithPopup } from "firebase/auth";
+import { auth, googleProvider } from "@/db/firebase";
+import { useRouter } from "next/navigation";
 
 export function UserAuthForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
+  const router = useRouter();
+
+  const signInWithGoogle = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      console.log("User signed in:", user);
+      router.push("/home");
+    } catch (error) {
+      console.error("Error signing in with Google:", error);
+    }
+  };
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -58,7 +74,15 @@ export function UserAuthForm({
               </span>
             </div>
             <div className="flex flex-col gap-4">
-              <Button variant="outline" className="w-full">
+              <Button
+                variant="outline"
+                onClick={(e) => {
+                  e.preventDefault();
+                  console.log(process.env)
+                  signInWithGoogle();
+                }}
+                className="w-full"
+              >
                 Login with Google
               </Button>
             </div>
