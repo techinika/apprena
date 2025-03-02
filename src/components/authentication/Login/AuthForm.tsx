@@ -10,15 +10,50 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { signInWithPopup } from "firebase/auth";
+import { signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
 import { auth, googleProvider } from "@/db/firebase";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const loginSchema = z.object({
+  email: z.string().email("Invalid email format"),
+  password: z.string().min(6, "Password must be at least 6 characters long"),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function UserAuthForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
   const router = useRouter();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const handleLogin = async (data: LoginFormValues) => {
+    try {
+      await signInWithEmailAndPassword(auth, data.email, data.password);
+      router.push("/home");
+    } catch (error: { message: string; code: number }) {
+      if (error.message === "auth/user-not-found") {
+        toast("User not found");
+      } else if (error.message === "INVALID_LOGIN_CREDENTIALS") {
+        toast("Incorrect credentials");
+      } else {
+        toast("An error occurred. Please try again later.");
+        console.error("Login error:", error);
+      }
+    }
+  };
 
   const signInWithGoogle = async () => {
     try {
@@ -50,7 +85,11 @@ export function UserAuthForm({
                   type="email"
                   placeholder="m@example.com"
                   required
+                  {...register("email")}
                 />
+                {errors.email && (
+                  <p className="text-red-500 text-sm">{errors.email.message}</p>
+                )}
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
@@ -62,9 +101,23 @@ export function UserAuthForm({
                     Forgot your password?
                   </Link>
                 </div>
-                <Input id="password" type="password" required />
+                <Input
+                  id="password"
+                  type="password"
+                  required
+                  {...register("password")}
+                />
+                {errors.password && (
+                  <p className="text-red-500 text-sm">
+                    {errors.password.message}
+                  </p>
+                )}
               </div>
-              <Button type="submit" className="w-full">
+              <Button
+                type="submit"
+                className="w-full"
+                onClick={handleSubmit(handleLogin)}
+              >
                 Login
               </Button>
             </div>
@@ -78,7 +131,7 @@ export function UserAuthForm({
                 variant="outline"
                 onClick={(e) => {
                   e.preventDefault();
-                  console.log(process.env)
+                  console.log(process.env);
                   signInWithGoogle();
                 }}
                 className="w-full"

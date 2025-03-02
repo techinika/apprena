@@ -10,11 +10,56 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { sendPasswordResetEmail } from "firebase/auth";
+import { toast } from "sonner";
+import { auth } from "@/db/firebase";
+
+const loginSchema = z.object({
+  email: z.string().email("Invalid email format"),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function RequestForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
+  const router = useRouter();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const handleRequest = async (data: LoginFormValues) => {
+    try {
+      const actionCodeSettings = {
+        url: `${process.env.NEXT_PUBLIC_BASE_URL}/reset-password?mode=resetPassword`,
+        handleCodeInApp: true,
+      };
+
+      await sendPasswordResetEmail(auth, data.email, actionCodeSettings);
+      toast("Password reset email sent. Check your inbox.");
+      // Optionally, redirect to login after sending the email:
+      router.push("/login");
+    } catch (error) {
+      if (error.code === "auth/invalid-email") {
+        toast("Invalid email address.");
+      } else if (error.code === "auth/user-not-found") {
+        toast("User not found.");
+      } else {
+        toast("An error occurred. Please try again later.");
+        console.error("Forgot Password error:", error);
+      }
+    }
+  };
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -34,9 +79,17 @@ export function RequestForm({
                   type="email"
                   placeholder="m@example.com"
                   required
+                  {...register("email")}
                 />
+                {errors.email && (
+                  <p className="text-red-500 text-sm">{errors.email.message}</p>
+                )}
               </div>
-              <Button type="submit" className="w-full">
+              <Button
+                type="submit"
+                className="w-full"
+                onClick={handleSubmit(handleRequest)}
+              >
                 Request to Reset
               </Button>
               <Link
