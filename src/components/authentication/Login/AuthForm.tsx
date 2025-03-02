@@ -52,6 +52,22 @@ export function UserAuthForm({
                 Login
               </Button>
             </div>
+            <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border py-3">
+              <span className="relative z-10 bg-background px-2 text-muted-foreground">
+                Or continue with
+              </span>
+            </div>
+            <div className="flex flex-col gap-4">
+              <Button variant="outline" className="w-full">
+                Login with Google
+              </Button>
+            </div>
+            <div className="text-center text-sm py-3">
+              Don&apos;t have an account?{" "}
+              <Link href="/register" className="underline underline-offset-4">
+                Sign up
+              </Link>
+            </div>
           </form>
         </CardContent>
       </Card>

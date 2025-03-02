@@ -1,5 +1,5 @@
 export enum APP {
-  NAME = "Evolve",
+  NAME = "Apprena",
   OWNER = "Techinika",
   VERSION = "1.0",
   SLOGAN = "The Learning Platform You Deserve",
