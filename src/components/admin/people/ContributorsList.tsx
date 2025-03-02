@@ -160,7 +160,13 @@ export function ContributorsList() {
 
   return (
     <div className="w-full space-y-4 p-8 pt-6">
-      <PageHeader title="Contributors" />
+      <PageHeader
+        title="Contributors"
+        newItem={false}
+        onExport={() => null}
+        onPublish={() => null}
+        saveDraft={() => null}
+      />
       <div className="flex items-center py-4">
         <Input
           placeholder="Filter contributors..."

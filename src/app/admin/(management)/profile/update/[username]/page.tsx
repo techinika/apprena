@@ -1,15 +1,9 @@
 import React from "react";
 
-export default function UpdateProfile({
-  params,
-}: {
-  params: { username: string };
-}) {
-  const { username } = params;
-
+export default function UpdateProfile() {
   return (
     <div>
-      <h1 className="text-2xl font-bold">Update Profile for {username}</h1>
+      <h1 className="text-2xl font-bold">Update Profile for</h1>
       <form>
         <input type="text" placeholder="Name" className="border p-2" />
         <input type="email" placeholder="Email" className="border p-2" />
