@@ -14,7 +14,11 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { auth } from "@/db/firebase";
-import { checkActionCode, confirmPasswordReset } from "firebase/auth";
+import {
+  AuthError,
+  checkActionCode,
+  confirmPasswordReset,
+} from "firebase/auth";
 import { toast } from "sonner";
 
 const loginSchema = z.object({
@@ -26,7 +30,7 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-export default function ResetForm({
+export function ResetForm({
   className,
   token,
 }: {
@@ -58,9 +62,15 @@ export default function ResetForm({
       } else {
         toast("Invalid token or link. Please request a new password reset.");
       }
-    } catch (error: any) {
-      toast(error?.message);
-      console.error("Password reset error:", error);
+    } catch (error: unknown) {
+      if (typeof error === "object" && error !== null && "code" in error) {
+        const firebaseError = error as AuthError;
+
+        toast(firebaseError?.message);
+        console.error("Password reset error:", error);
+      } else {
+        toast("An unexpected error occurred.");
+      }
     }
   };
   return (
@@ -120,12 +130,4 @@ export default function ResetForm({
       </Card>
     </div>
   );
-}
-
-export async function getServerSideProps(context) {
-  return {
-    props: {
-      token: context.query.token,
-    },
-  };
 }

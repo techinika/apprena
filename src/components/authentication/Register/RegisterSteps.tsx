@@ -10,7 +10,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { signInWithPopup, createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  signInWithPopup,
+  createUserWithEmailAndPassword,
+  AuthError,
+} from "firebase/auth";
 import { auth, googleProvider } from "@/db/firebase";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -44,14 +48,19 @@ export function RegisterSteps({
     try {
       await createUserWithEmailAndPassword(auth, data.email, data.password);
       router.push("/login");
-    } catch (error: { message: string; code: number }) {
-      if (error.code === "auth/email-already-in-use") {
-        toast("Email already in use.");
-      } else if (error.code === "auth/weak-password") {
-        toast("Password is too weak.");
+    } catch (error: unknown) {
+      if (typeof error === "object" && error !== null && "code" in error) {
+        const firebaseError = error as AuthError;
+        if (firebaseError.message === "auth/email-already-in-use") {
+          toast("Email already in use.");
+        } else if (firebaseError.message === "auth/weak-password") {
+          toast("Password is too weak.");
+        } else {
+          toast("An error occurred. Please try again later.");
+          console.error("Registration error:", error);
+        }
       } else {
-        toast("An error occurred. Please try again later.");
-        console.error("Registration error:", error);
+        toast("An unexpected error occurred.");
       }
     }
   };

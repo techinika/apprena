@@ -10,7 +10,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
+import {
+  signInWithPopup,
+  signInWithEmailAndPassword,
+  AuthError,
+} from "firebase/auth";
 import { auth, googleProvider } from "@/db/firebase";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -43,14 +47,20 @@ export function UserAuthForm({
     try {
       await signInWithEmailAndPassword(auth, data.email, data.password);
       router.push("/home");
-    } catch (error: { message: string; code: number }) {
-      if (error.message === "auth/user-not-found") {
-        toast("User not found");
-      } else if (error.message === "INVALID_LOGIN_CREDENTIALS") {
-        toast("Incorrect credentials");
+    } catch (error: unknown) {
+      if (typeof error === "object" && error !== null && "code" in error) {
+        const firebaseError = error as AuthError;
+        
+        if (firebaseError.message === "auth/user-not-found") {
+          toast("User not found");
+        } else if (firebaseError.message === "INVALID_LOGIN_CREDENTIALS") {
+          toast("Incorrect credentials");
+        } else {
+          toast("An error occurred. Please try again later.");
+          console.error("Login error:", error);
+        }
       } else {
-        toast("An error occurred. Please try again later.");
-        console.error("Login error:", error);
+        toast("An unexpected error occurred.");
       }
     }
   };
