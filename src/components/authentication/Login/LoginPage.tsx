@@ -48,7 +48,7 @@ export default function AuthenticationPage() {
             >
               <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
             </svg>
-            The {APP?.NAME} by {APP?.OWNER}
+            {APP?.NAME} by {APP?.OWNER}
           </Link>
           <div className="relative z-20 mt-auto">
             <blockquote className="space-y-2">
