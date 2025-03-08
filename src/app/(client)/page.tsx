@@ -1,10 +1,10 @@
-import LandingPage from "@/components/client/landing-page/LandingPage";
+import ProfilePage from "@/components/client/profile/ProfilePage";
 import React from "react";
 
 function page() {
   return (
     <div>
-      <LandingPage />
+      <ProfilePage />
     </div>
   );
 }
