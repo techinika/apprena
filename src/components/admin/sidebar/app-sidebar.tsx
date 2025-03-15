@@ -5,6 +5,7 @@ import {
   AudioWaveform,
   Building2,
   Command,
+  Database,
   GalleryVerticalEnd,
   Library,
   Mail,
@@ -173,6 +174,22 @@ const data = {
         {
           title: "Add new Institution",
           url: "#",
+        },
+      ],
+    },
+    {
+      title: "General Data",
+      url: "#",
+      isActive: false,
+      icon: Database,
+      items: [
+        {
+          title: "Frequently Asked Questions",
+          url: "/admin/faqs",
+        },
+        {
+          title: "Subscription Plans",
+          url: "/admin/plans",
         },
       ],
     },

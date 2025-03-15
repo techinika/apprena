@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import Glow from "@/components/ui/glow";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { AuthError, createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/db/firebase";

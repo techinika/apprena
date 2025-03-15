@@ -1,4 +1,5 @@
 import { Institution } from "@/types/Institution";
+import { Faqs } from "../../../../types/General";
 
 export const institutions: Institution[] = [
   {
@@ -414,4 +415,79 @@ export const institutions: Institution[] = [
     updatedAt: "2023-01-01T00:00:00Z",
   },
   // Add more institutions as needed
+];
+
+export const FaqsData: Faqs[] = [
+  {
+    id: "faq001",
+    title: "What is APPRENA?",
+    description:
+      "APPRENA is a platform that helps you create, manage, and publish content for your institution.",
+    status: "published",
+    availability: "public",
+    createdAt: "2023-01-01T00:00:00Z",
+  },
+  {
+    id: "faq002",
+    title: "Who is APPRENA for?",
+    description:
+      "APPRENA is a platform that helps you create, manage, and publish content for your institution.",
+    status: "published",
+    availability: "public",
+    createdAt: "2023-01-01T00:00:00Z",
+  },
+  {
+    id: "faq003",
+    title: "How does APPRENA work for institutions?",
+    description:
+      "APPRENA is a platform that helps you create, manage, and publish content for your institution.",
+    status: "published",
+    availability: "public",
+    createdAt: "2023-01-01T00:00:00Z",
+  },
+  {
+    id: "faq004",
+    title: "How is APPRENA used by learners?",
+    description:
+      "APPRENA is a platform that helps you create, manage, and publish content for your institution.",
+    status: "published",
+    availability: "public",
+    createdAt: "2023-01-01T00:00:00Z",
+  },
+  {
+    id: "faq005",
+    title: "Is APPRENA free?",
+    description:
+      "APPRENA is a platform that helps you create, manage, and publish content for your institution.",
+    status: "published",
+    availability: "public",
+    createdAt: "2023-01-01T00:00:00Z",
+  },
+  {
+    id: "faq006",
+    title: "Is APPRENA available on mobile?",
+    description:
+      "APPRENA is a platform that helps you create, manage, and publish content for your institution.",
+    status: "published",
+    availability: "public",
+    createdAt: "2023-01-01T00:00:00Z",
+  },
+  {
+    id: "faq007",
+    title: "How can I contact support?",
+    description:
+      "APPRENA is a platform that helps you create, manage, and publish content for your institution.",
+    status: "published",
+    availability: "public",
+    createdAt: "2023-01-01T00:00:00Z",
+  },
+  {
+    id: "faq008",
+    title: "Can I use APPRENA offline?",
+    description:
+      "APPRENA is a platform that helps you create, manage, and publish content for your institution.",
+    status: "published",
+    availability: "public",
+    createdAt: "2023-01-01T00:00:00Z",
+  },
 ];
