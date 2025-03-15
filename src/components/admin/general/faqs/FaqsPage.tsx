@@ -10,18 +10,8 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 
-interface MailProps {
-  accounts: {
-    label: string;
-    email: string;
-    icon: React.ReactNode;
-  }[];
-  defaultLayout: number[] | undefined;
-  defaultCollapsed?: boolean;
-  navCollapsedSize: number;
-}
-
-function FaqsPage({ defaultLayout = [70, 30] }: MailProps) {
+function FaqsPage() {
+  const defaultLayout = [70, 30];
   return (
     <div className="w-full space-y-4 p-8 pt-6">
       <PageHeader

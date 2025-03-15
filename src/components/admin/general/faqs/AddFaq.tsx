@@ -12,10 +12,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { db } from "@/db/firebase";
 import { APP } from "@/variables/globals";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import React from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 const profileFormSchema = z.object({
@@ -30,14 +33,30 @@ const defaultValues: Partial<ProfileFormValues> = {
 };
 
 function AddFaq() {
+  const faqCollection = collection(db, "faqs");
+
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues,
     mode: "onChange",
   });
 
-  function onSubmit(data: ProfileFormValues) {
+  async function onSubmit(data: ProfileFormValues) {
     console.log(data);
+    const { title, description } = data;
+    try {
+      await addDoc(faqCollection, {
+        title,
+        description,
+        status: "published",
+        availability: "public",
+        createdAt: serverTimestamp(),
+      });
+      toast("Item added successfully!");
+      form.reset();
+    } catch (error) {
+      console.error("Error adding item:", error);
+    }
   }
 
   return (
