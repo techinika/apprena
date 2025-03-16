@@ -1,10 +1,12 @@
-import DashboardPage from "@/components/admin/home/Dashboard";
+import MainPage from "@/components/admin/MainPage";
 import React from "react";
 
-export default function page() {
+function page() {
   return (
     <div>
-      <DashboardPage />
+      <MainPage />
     </div>
   );
 }
+
+export default page;

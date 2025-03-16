@@ -37,7 +37,7 @@ const sidebarNavItems = [
     href: "/profile/billing",
   },
   {
-    title: "Securitu Settings",
+    title: "Security Settings",
     href: "/profile/security",
   },
 ];
