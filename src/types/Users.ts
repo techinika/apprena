@@ -8,6 +8,7 @@ export type User = {
   isActive: boolean;
   phoneNumber: string;
   dateOfBirth: string;
+  gender: string;
   lastLogin: Date;
   photoURL: string;
   subscriptionPlan: SubscriptionPlan;

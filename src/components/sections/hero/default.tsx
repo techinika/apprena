@@ -8,8 +8,10 @@ import { MockupFrame } from "../../ui/mockup";
 import Glow from "../../ui/glow";
 import Link from "next/link";
 import { HeroVideoDialog } from "@/components/ui/hero-video";
+import { useAuth } from "@/lib/AuthContext";
 
 export default function Hero() {
+  const { user } = useAuth();
   return (
     <Section className="fade-bottom pb-0 sm:pb-0 md:pb-0 size">
       <div className="mx-auto flex max-w-container flex-col gap-12 sm:gap-24">
@@ -31,7 +33,7 @@ export default function Hero() {
           <div className="relative flex animate-appear justify-center gap-4 opacity-100 delay-300">
             <div className="relative flex animate-appear justify-center gap-4 opacity-100 delay-300">
               <Button variant="default" size="lg" asChild>
-                <Link href="/register">Get Started</Link>
+                <Link href={!user ? "/register" : "/home"}>Get Started</Link>
               </Button>
               <Button variant="glow" size="lg" asChild>
                 <Link href="https://calendly.com/techinika" target="_blank">

@@ -2,6 +2,7 @@ import AuthNav from "@/components/client/navigation/AuthNav";
 import { SidebarNav } from "@/components/client/profile/sidebar-nav";
 import FooterSection from "@/components/sections/footer/default";
 import { Separator } from "@/components/ui/separator";
+import ProtectedRoute from "@/lib/ProtectedRoute";
 import { Metadata } from "next";
 import Image from "next/image";
 
@@ -47,7 +48,7 @@ interface SettingsLayoutProps {
 
 export default function SettingsLayout({ children }: SettingsLayoutProps) {
   return (
-    <>
+    <ProtectedRoute>
       <div className="md:hidden">
         <Image
           src="/examples/forms-light.png"
@@ -81,6 +82,6 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
         </div>
         <FooterSection />
       </div>
-    </>
+    </ProtectedRoute>
   );
 }

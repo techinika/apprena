@@ -33,6 +33,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
+import { useAuth } from "@/lib/AuthContext";
 
 const profileFormSchema = z.object({
   name: z
@@ -65,17 +66,25 @@ const profileFormSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
-const defaultValues: Partial<ProfileFormValues> = {
-  bio: "I own a computer.",
-  urls: [
-    { value: "https://example.com", name: "Website" },
-    { value: "http://x.com/...", name: "X (Twitter)" },
-    { value: "http://linkedin.com/in/...", name: "LinkedIn" },
-    { value: "http://github.com/...", name: "GitHub" },
-  ],
-};
-
 export function ProfileForm() {
+  const { user } = useAuth();
+
+  const defaultValues: Partial<ProfileFormValues> = {
+    name: user?.displayName || "",
+    email: user?.email || "",
+    bio: user?.bio || "",
+    phone: user?.phoneNumber || "",
+    dob: user?.dateOfBirth || "",
+    language: user?.preferredLanguage || "",
+    gender: user?.gender || "",
+    urls: [
+      { value: user?.socialLinks?.website || "", name: "Website" },
+      { value: user?.socialLinks?.twitter || "", name: "X (Twitter)" },
+      { value: user?.socialLinks?.linkedin || "", name: "LinkedIn" },
+      { value: user?.socialLinks?.github || "", name: "GitHub" },
+    ],
+  };
+
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues,
@@ -126,7 +135,7 @@ export function ProfileForm() {
             <FormItem>
               <FormLabel>Email Address</FormLabel>
               <FormControl>
-                <Input placeholder="example@email.com" {...field} />
+                <Input placeholder="example@email.com" {...field} disabled />
               </FormControl>
               <FormDescription>
                 This is your email address, and you use it to log in. It can not

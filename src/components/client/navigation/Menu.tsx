@@ -13,6 +13,7 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import { useAuth } from "@/lib/AuthContext";
 
 const components: { title: string; href: string; description: string }[] = [
   {
@@ -36,11 +37,13 @@ const components: { title: string; href: string; description: string }[] = [
 ];
 
 export function Menu() {
+  const { user } = useAuth();
+
   return (
     <NavigationMenu>
       <NavigationMenuList>
         <NavigationMenuItem>
-          <Link href="/" legacyBehavior passHref>
+          <Link href={user ? "/home" : "/"} legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
               Home
             </NavigationMenuLink>
