@@ -14,6 +14,21 @@ export type Plans = {
   status: "draft" | "published" | "deleted";
   availability: "public" | "private";
   price: number;
-  features: string[];
+  features: Feature[];
   perks: string;
+  createdAt: string;
+};
+
+export type Feature = {
+  id: string;
+  label: string;
+  name: string;
+  permissions: Permission[];
+  createdAt: string;
+};
+
+export type Permission = {
+  id: string;
+  name: string;
+  createdAt: string;
 };

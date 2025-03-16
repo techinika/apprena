@@ -43,14 +43,13 @@ import {
   query,
 } from "firebase/firestore";
 import { db } from "@/db/firebase";
-import { Plans } from "@/types/General";
 import { formatDistanceToNow } from "date-fns";
 import { enUS } from "date-fns/locale";
 import ConfirmDelete from "../ConfirmDelete";
-import EditPlan from "./EditPlan";
+import { Permission } from "@/types/General";
 
-export function ListPlans() {
-  const planCollection = collection(db, "sub-plans");
+export function ListPermissions() {
+  const permissionCollection = collection(db, "permissions");
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -59,15 +58,15 @@ export function ListPlans() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
-  const [plansData, setPlansData] = React.useState<Plans[]>([]);
+  const [plansData, setPlansData] = React.useState<Permission[]>([]);
   const [openDelete, setOpenDelete] = React.useState(false);
   const [idToDelete, setIdToDelete] = React.useState("");
-  const [openEdit, setOpenEdit] = React.useState(false);
-  const [idToEdit, setIdToEdit] = React.useState("");
+  //   const [openEdit, setOpenEdit] = React.useState(false);
+  //   const [idToEdit, setIdToEdit] = React.useState("");
 
   React.useEffect(() => {
     const getData = async () => {
-      const q = query(planCollection);
+      const q = query(permissionCollection);
       onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map((doc) => {
           const docData = doc.data();
@@ -80,7 +79,7 @@ export function ListPlans() {
                 })
               : "Unknown",
             ...docData,
-          } as Plans;
+          } as Permission;
         });
         setPlansData(data);
       });
@@ -118,20 +117,10 @@ export function ListPlans() {
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Plan Name
+          Permission Name
           <ArrowUpDown />
         </Button>
       ),
-    },
-    {
-      accessorKey: "description",
-      header: "Description",
-      cell: ({ row }) => <div>{row.getValue("description")}</div>,
-    },
-    {
-      accessorKey: "price",
-      header: "Price",
-      cell: ({ row }) => <div>{row.getValue("price")}</div>,
     },
     {
       accessorKey: "createdAt",
@@ -156,14 +145,14 @@ export function ListPlans() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem
+              {/* <DropdownMenuItem
                 onClick={() => {
                   setIdToEdit(item?.id);
                   setOpenEdit(true);
                 }}
               >
-                Edit Plan
-              </DropdownMenuItem>
+                Edit Permission
+              </DropdownMenuItem> */}
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 color="danger"
@@ -172,7 +161,7 @@ export function ListPlans() {
                   setOpenDelete(true);
                 }}
               >
-                Delete Plan
+                Delete Permission
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -201,7 +190,7 @@ export function ListPlans() {
   });
 
   const handleDeleteItem = () => {
-    deleteDoc(doc(db, "sub-plans", idToDelete))
+    deleteDoc(doc(db, "permissions", idToDelete))
       .then((res) => {
         setIdToDelete("");
         setOpenDelete(false);
@@ -222,18 +211,9 @@ export function ListPlans() {
         }}
         open={openDelete}
       ></ConfirmDelete>
-      <EditPlan
-        open={openEdit}
-        cancel={() => {
-          setIdToEdit("");
-          setOpenEdit(false);
-        }}
-        setOpen={setOpenEdit}
-        id={idToEdit}
-      ></EditPlan>
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter Plans..."
+          placeholder="Filter Permissions..."
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn("name")?.setFilterValue(event.target.value)

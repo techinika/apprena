@@ -191,6 +191,14 @@ const data = {
           title: "Subscription Plans",
           url: "/admin/plans",
         },
+        {
+          title: "System Features",
+          url: "/admin/features",
+        },
+        {
+          title: "Permissions",
+          url: "/admin/permissions",
+        },
       ],
     },
     {

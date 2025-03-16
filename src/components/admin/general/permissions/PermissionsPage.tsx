@@ -7,15 +7,15 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import AddPlan from "./AddPlan";
-import { ListPlans } from "./ListPlans";
+import AddPermission from "./AddPermission";
+import { ListPermissions } from "./ListPermissions";
 
-function PlansPage() {
+function PermissionsPage() {
   const defaultLayout = [70, 30];
   return (
     <div className="w-full space-y-4 p-8 pt-6">
       <PageHeader
-        title="Subscription Plans"
+        title="System Permissions"
         newItem={false}
         onExport={() => null}
         onPublish={() => null}
@@ -32,15 +32,15 @@ function PlansPage() {
       >
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={defaultLayout[1]} minSize={30}>
-          <AddPlan />
+          <AddPermission />
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={defaultLayout[2]} minSize={30}>
-          <ListPlans />
+          <ListPermissions />
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>
   );
 }
 
-export default PlansPage;
+export default PermissionsPage;

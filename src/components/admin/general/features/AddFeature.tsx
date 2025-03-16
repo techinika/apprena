@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
 import { db } from "@/db/firebase";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
@@ -22,14 +21,12 @@ import { z } from "zod";
 
 const profileFormSchema = z.object({
   name: z.string(),
-  description: z.string().max(160).min(4),
-  price: z.string(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
-function AddPlan() {
-  const planCollection = collection(db, "sub-plans");
+function AddFeature() {
+  const featureCollection = collection(db, "features");
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -38,16 +35,11 @@ function AddPlan() {
 
   async function onSubmit(data: ProfileFormValues) {
     console.log(data);
-    const { name, description, price } = data;
+    const { name } = data;
     try {
-      await addDoc(planCollection, {
+      await addDoc(featureCollection, {
         name,
-        description,
-        price,
-        status: "published",
-        availability: "public",
-        features: [],
-        perks: "Access to Education",
+        permissions: [],
         createdAt: serverTimestamp(),
       });
       toast("Item added successfully!");
@@ -60,7 +52,7 @@ function AddPlan() {
   return (
     <div className="p-4">
       <Form {...form}>
-        <h2 className="font-bold text-xl">Add a New Plan</h2>
+        <h2 className="font-bold text-xl">Add a New Feature</h2>
         <Separator />
         <form className="space-y-3 mt-3" onSubmit={form.handleSubmit(onSubmit)}>
           <FormField
@@ -68,24 +60,10 @@ function AddPlan() {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Plan Name</FormLabel>
+                <FormLabel>Feature Name</FormLabel>
                 <FormControl>
-                  <Input placeholder={`e.g. Premium`} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Description</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="e.g. Provides free access to all paid materials"
-                    className="resize-none"
+                  <Input
+                    placeholder={`e.g. Access to all contents`}
                     {...field}
                   />
                 </FormControl>
@@ -93,24 +71,11 @@ function AddPlan() {
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="price"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Plan Price in USD per Month</FormLabel>
-                <FormControl>
-                  <Input placeholder={`e.g. 10`} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type="submit">Add Plan</Button>
+          <Button type="submit">Add Feature</Button>
         </form>
       </Form>
     </div>
   );
 }
 
-export default AddPlan;
+export default AddFeature;

@@ -43,14 +43,14 @@ import {
   query,
 } from "firebase/firestore";
 import { db } from "@/db/firebase";
-import { Plans } from "@/types/General";
 import { formatDistanceToNow } from "date-fns";
 import { enUS } from "date-fns/locale";
 import ConfirmDelete from "../ConfirmDelete";
-import EditPlan from "./EditPlan";
+import EditFeature from "./EditFeature";
+import { Feature } from "@/types/General";
 
-export function ListPlans() {
-  const planCollection = collection(db, "sub-plans");
+export function ListFeatures() {
+  const featureCollection = collection(db, "features");
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -59,7 +59,7 @@ export function ListPlans() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
-  const [plansData, setPlansData] = React.useState<Plans[]>([]);
+  const [plansData, setPlansData] = React.useState<Feature[]>([]);
   const [openDelete, setOpenDelete] = React.useState(false);
   const [idToDelete, setIdToDelete] = React.useState("");
   const [openEdit, setOpenEdit] = React.useState(false);
@@ -67,7 +67,7 @@ export function ListPlans() {
 
   React.useEffect(() => {
     const getData = async () => {
-      const q = query(planCollection);
+      const q = query(featureCollection);
       onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map((doc) => {
           const docData = doc.data();
@@ -80,7 +80,7 @@ export function ListPlans() {
                 })
               : "Unknown",
             ...docData,
-          } as Plans;
+          } as Feature;
         });
         setPlansData(data);
       });
@@ -118,20 +118,10 @@ export function ListPlans() {
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Plan Name
+          Feature Name
           <ArrowUpDown />
         </Button>
       ),
-    },
-    {
-      accessorKey: "description",
-      header: "Description",
-      cell: ({ row }) => <div>{row.getValue("description")}</div>,
-    },
-    {
-      accessorKey: "price",
-      header: "Price",
-      cell: ({ row }) => <div>{row.getValue("price")}</div>,
     },
     {
       accessorKey: "createdAt",
@@ -162,7 +152,7 @@ export function ListPlans() {
                   setOpenEdit(true);
                 }}
               >
-                Edit Plan
+                Edit Feature
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -172,7 +162,7 @@ export function ListPlans() {
                   setOpenDelete(true);
                 }}
               >
-                Delete Plan
+                Delete Feature
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -201,7 +191,7 @@ export function ListPlans() {
   });
 
   const handleDeleteItem = () => {
-    deleteDoc(doc(db, "sub-plans", idToDelete))
+    deleteDoc(doc(db, "features", idToDelete))
       .then((res) => {
         setIdToDelete("");
         setOpenDelete(false);
@@ -222,7 +212,7 @@ export function ListPlans() {
         }}
         open={openDelete}
       ></ConfirmDelete>
-      <EditPlan
+      <EditFeature
         open={openEdit}
         cancel={() => {
           setIdToEdit("");
@@ -230,10 +220,10 @@ export function ListPlans() {
         }}
         setOpen={setOpenEdit}
         id={idToEdit}
-      ></EditPlan>
+      ></EditFeature>
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter Plans..."
+          placeholder="Filter Features..."
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn("name")?.setFilterValue(event.target.value)

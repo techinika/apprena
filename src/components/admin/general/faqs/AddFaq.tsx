@@ -70,7 +70,7 @@ function AddFaq() {
             name="title"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>FQ Title</FormLabel>
+                <FormLabel>FAQ Title</FormLabel>
                 <FormControl>
                   <Input
                     placeholder={`e.g, What is ${APP?.NAME}?`}
