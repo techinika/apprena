@@ -1,38 +1,64 @@
 export type User = {
-  id: string; // Unique identifier for the user
-  name: string; // Full name of the user
-  email: string; // Email address for communication and authentication
-  role: ROLES; // User's role in the system, for access control
-  avatarUrl?: string; // Optional avatar/profile picture URL
-  bio?: string; // Optional bio or description of the user
-  isActive: boolean; // Whether the user is active in the platform
-  lastLogin: Date; // Date when the user last logged in
-  subscriptionStatus: SubscriptionStatus; // Whether the user has an active subscription
-  coursesEnrolled: string[]; // List of course IDs that the user is enrolled in
-  preferences: UserPreferences; // User's learning preferences, such as language or notification settings
-  createdAt: Date; // Date when the user account was created
-  updatedAt: Date; // Date when the user account was last updated
+  id: string;
+  displayName: string;
+  email: string;
+  role: ROLES;
+  avatarUrl?: string;
+  bio?: string;
+  isActive: boolean;
+  phoneNumber: string;
+  dateOfBirth: string;
+  lastLogin: Date;
+  photoURL: string;
+  subscriptionPlan: SubscriptionPlan;
+  // coursesEnrolled: string[];
+  // preferences: UserPreferences;
+  preferredLanguage: string;
+  createdAt: string;
+  updatedAt: string;
+  preferredNotificationMethod: string;
+  status: string;
+  socialLinks: {
+    linkedin: string;
+    github: string;
+    twitter: string;
+    website: string;
+  };
+  address: {
+    country: string;
+    city: string;
+  };
+  interests: [];
+  twoFactorAuthEnabled: boolean;
+  nationality: string;
 };
 
 export enum ROLES {
-  SUPER_ADMIN = "super_admin", // Highest level admin
-  ORG_ADMIN = "org_admin", // Organization-level admin
-  USER = "user", // Regular user (can access most content), registered but using only free stuff
-  CONTRIBUTOR = "contributor", // User who can add or contribute content
-  SUBSCRIBER = "subscriber", // Free subscriber with access to only the newsletter
-  PREMIUM_USER = "premium_user", // Paid subscriber with access to all public content on the platform, free and paid
+  SUPER_ADMIN = "super_admin",
+  ORG_ADMIN = "org_admin",
+  USER = "user",
+  CONTRIBUTOR = "contributor",
+  SUBSCRIBER = "subscriber",
+  PREMIUM_USER = "premium_user",
 }
 
-export enum SubscriptionStatus {
-  ACTIVE = "active", // The user has an active subscription
-  EXPIRED = "expired", // The user’s subscription has expired
-  TRIAL = "trial", // The user is on a trial period
+export type Role = {
+  id: string;
+  name: string;
+  description: string;
+  createdAt: string;
+};
+
+export enum SubscriptionPlan {
+  ACTIVE = "active",
+  EXPIRED = "expired",
+  TRIAL = "trial",
 }
 
 export type UserPreferences = {
-  language: string; // Preferred language of the user
-  receiveEmailNotifications: boolean; // Whether the user wants to receive email notifications
-  darkModeEnabled: boolean; // Whether the user prefers dark mode for the platform
-  learningGoals: string[]; // List of learning goals or topics the user is interested in
-  courseCompletionNotifications: boolean; // Whether the user wants notifications when a course is completed
+  language: string;
+  receiveEmailNotifications: boolean;
+  darkModeEnabled: boolean;
+  learningGoals: string[];
+  courseCompletionNotifications: boolean;
 };

@@ -1,10 +1,10 @@
-import OneUserPage from "@/components/admin/people/OneUserPage";
+import RolesPage from "@/components/admin/people/roles/RolesPage";
 import React from "react";
 
 function page() {
   return (
     <div>
-      <OneUserPage />
+      <RolesPage />
     </div>
   );
 }

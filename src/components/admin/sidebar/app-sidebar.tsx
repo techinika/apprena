@@ -235,6 +235,10 @@ const data = {
           title: "Add New User",
           url: "#",
         },
+        {
+          title: "User Roles",
+          url: "/admin/users/roles",
+        },
       ],
     },
   ],

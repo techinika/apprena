@@ -65,6 +65,7 @@ export function UserAuthForm({
                   phoneNumber: user.phoneNumber || "",
                   dateOfBirth: null,
                   gender: null,
+                  bio: "",
                   nationality: "",
                   preferredLanguage: "English",
 
@@ -161,6 +162,7 @@ export function UserAuthForm({
                   phoneNumber: user.phoneNumber || "",
                   dateOfBirth: null,
                   gender: null,
+                  bio: "",
                   nationality: "",
                   preferredLanguage: "English",
 

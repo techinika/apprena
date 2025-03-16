@@ -35,9 +35,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "../../ui/badge";
-import { User } from "@/types/Users";
-import PageHeader from "../main/PageHeader";
 import {
   collection,
   deleteDoc,
@@ -48,12 +45,12 @@ import {
 import { db } from "@/db/firebase";
 import { formatDistanceToNow } from "date-fns";
 import { enUS } from "date-fns/locale";
-import ConfirmDelete from "../general/ConfirmDelete";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import ConfirmDelete from "../../general/ConfirmDelete";
+import { Role } from "@/types/Users";
 
-export function AllUsersList() {
-  const userCollection = collection(db, "profile");
+export function ListRoles() {
+  const roleCollection = collection(db, "roles");
+
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -61,14 +58,13 @@ export function AllUsersList() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
-  const [usersData, setUsersData] = React.useState<User[]>([]);
+  const [rolesData, setrolesData] = React.useState<Role[]>([]);
   const [openDelete, setOpenDelete] = React.useState(false);
   const [idToDelete, setIdToDelete] = React.useState("");
-  const router = useRouter();
 
   React.useEffect(() => {
     const getData = async () => {
-      const q = query(userCollection);
+      const q = query(roleCollection);
       onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map((doc) => {
           const docData = doc.data();
@@ -81,15 +77,15 @@ export function AllUsersList() {
                 })
               : "Unknown",
             ...docData,
-          } as User;
+          } as Role;
         });
-        setUsersData(data);
+        setrolesData(data);
       });
     };
     getData();
   }, []);
 
-  const columns: ColumnDef<User>[] = [
+  const columns: ColumnDef<(typeof rolesData)[0]>[] = [
     {
       id: "select",
       header: ({ table }) => (
@@ -113,55 +109,39 @@ export function AllUsersList() {
       enableHiding: false,
     },
     {
-      accessorKey: "displayName",
+      accessorKey: "id",
+      header: "Role ID",
+      cell: ({ row }) => <div>{row.getValue("id")}</div>,
+    },
+    {
+      accessorKey: "name",
       header: ({ column }) => (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Display Name
+          Role Name
           <ArrowUpDown />
         </Button>
       ),
-      cell: ({ row }) => (
-        <Link href={`/admin/users/${row?.original?.id}`}>
-          {row.getValue("displayName")}
-        </Link>
-      ),
     },
     {
-      accessorKey: "email",
-      header: "Email",
-      cell: ({ row }) => <div>{row.getValue("email")}</div>,
+      accessorKey: "description",
+      header: "Description",
+      cell: ({ row }) => <div>{row.getValue("description")}</div>,
     },
     {
-      accessorKey: "role",
-      header: "Role",
+      accessorKey: "createdAt",
+      header: "Date Created",
       cell: ({ row }) => (
-        <Link href={`/admin/users/roles`} className="capitalize">
-          {row.getValue("role")}
-        </Link>
-      ),
-    },
-    {
-      accessorKey: "subscriptionPlan",
-      header: "Subscription Status",
-      cell: ({ row }) => (
-        <Badge className="capitalize">{row.getValue("subscriptionPlan")}</Badge>
-      ),
-    },
-    {
-      accessorKey: "lastLogin",
-      header: "Last Login",
-      cell: ({ row }) => (
-        <div>{row.getValue("lastLogin")?.toLocaleString()}</div>
+        <div>{row.getValue("createdAt")?.toLocaleString()}</div>
       ),
     },
     {
       id: "actions",
       enableHiding: false,
       cell: ({ row }) => {
-        const subscriber = row.original;
+        const item = row.original;
 
         return (
           <DropdownMenu>
@@ -173,33 +153,20 @@ export function AllUsersList() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem
-                onClick={() => navigator.clipboard.writeText(subscriber.id)}
+              {/* <DropdownMenuItem
+                onClick={() => navigator.clipboard.writeText(item.id)}
               >
-                Edit User
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => navigator.clipboard.writeText(subscriber.id)}
-              >
-                Change User Role
-              </DropdownMenuItem>
+                Edit Role
+              </DropdownMenuItem> */}
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => router.push(`/admin/users/${subscriber?.id}`)}
-              >
-                Preview User
-              </DropdownMenuItem>
               <DropdownMenuItem
                 color="danger"
                 onClick={() => {
+                  setIdToDelete(item?.id);
                   setOpenDelete(true);
-                  setIdToDelete(subscriber?.id);
                 }}
               >
-                Delete User
-              </DropdownMenuItem>
-              <DropdownMenuItem color="danger">
-                Deactivate User Account
+                Delete Faq
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -209,7 +176,7 @@ export function AllUsersList() {
   ];
 
   const table = useReactTable({
-    data: usersData,
+    data: rolesData,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -228,7 +195,8 @@ export function AllUsersList() {
   });
 
   const handleDeleteItem = () => {
-    deleteDoc(doc(db, "profile", idToDelete))
+    console.log(idToDelete);
+    deleteDoc(doc(db, "roles", idToDelete))
       .then((res) => {
         setIdToDelete("");
         setOpenDelete(false);
@@ -240,14 +208,7 @@ export function AllUsersList() {
   };
 
   return (
-    <div className="w-full space-y-4 p-8 pt-6">
-      <PageHeader
-        title="Users List"
-        newItem={false}
-        onExport={() => null}
-        onPublish={() => null}
-        saveDraft={() => null}
-      />
+    <div className="pl-4">
       <ConfirmDelete
         action={() => handleDeleteItem()}
         cancel={() => {
@@ -256,14 +217,13 @@ export function AllUsersList() {
         }}
         open={openDelete}
       ></ConfirmDelete>
+
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter users..."
-          value={
-            (table.getColumn("displayName")?.getFilterValue() as string) ?? ""
-          }
+          placeholder="Filter Roles..."
+          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("displayName")?.setFilterValue(event.target.value)
+            table.getColumn("name")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />
