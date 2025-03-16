@@ -66,6 +66,7 @@ const NewInstitution = ({
         institutionType: type,
         organizationCreator: user?.uid,
         organizationAdmins: [user?.uid],
+        accessLevel: "normal",
         createdAt: serverTimestamp(),
       });
       toast("Item added successfully!");
