@@ -83,7 +83,7 @@ export function ListFaqs() {
       });
     };
     getData();
-  }, []);
+  }, [faqCollection]);
 
   const columns: ColumnDef<(typeof faqsData)[0]>[] = [
     {

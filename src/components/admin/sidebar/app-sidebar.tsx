@@ -2,11 +2,8 @@
 
 import * as React from "react";
 import {
-  AudioWaveform,
   Building2,
-  Command,
   Database,
-  GalleryVerticalEnd,
   Library,
   Mail,
   MessageCircle,
@@ -30,28 +27,6 @@ import {
 import { NavCommunication } from "./app-communication";
 
 const data = {
-  user: {
-    name: "Achille Songa",
-    email: "achille@techinika.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  teams: [
-    {
-      name: "Techinika",
-      logo: GalleryVerticalEnd,
-      plan: "Startup",
-    },
-    {
-      name: "Teknowledge",
-      logo: AudioWaveform,
-      plan: "Enterprise",
-    },
-    {
-      name: "Achille Songa Lab",
-      logo: Command,
-      plan: "Free",
-    },
-  ],
   navMain: [
     {
       title: "Blog",
@@ -248,7 +223,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        <TeamSwitcher />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />

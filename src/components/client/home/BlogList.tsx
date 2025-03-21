@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Clock, User, Vote } from "lucide-react";
+import Image from "next/image";
 import React from "react";
 
 const blogs = [
@@ -67,7 +68,7 @@ function BlogList() {
           return (
             <div key={index + 1} className="min-w-[400px]">
               <Card className="max-w-md mx-auto h-full cursor-pointer shadow-lg rounded-lg">
-                <img
+                <Image
                   className="w-full h-64 object-cover object-center"
                   src={"https://i.ytimg.com/vi/6P1E-i4wGwc/maxresdefault.jpg"}
                   alt={item?.blogTitle}

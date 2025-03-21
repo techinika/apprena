@@ -85,7 +85,7 @@ export function ListPermissions() {
       });
     };
     getData();
-  }, []);
+  }, [permissionCollection]);
 
   const columns: ColumnDef<(typeof plansData)[0]>[] = [
     {

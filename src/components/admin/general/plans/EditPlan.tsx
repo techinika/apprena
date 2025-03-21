@@ -115,7 +115,7 @@ const EditPlan = ({
     };
 
     fetchPlanDetails();
-  }, [id, open]);
+  }, [id, open, planCollection, featuresCollection, form]);
 
   const handleEdit = async () => {
     try {

@@ -86,7 +86,7 @@ export function ListPlans() {
       });
     };
     getData();
-  }, []);
+  }, [planCollection]);
 
   const columns: ColumnDef<(typeof plansData)[0]>[] = [
     {

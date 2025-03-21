@@ -19,13 +19,12 @@ function MainPage() {
   const { user } = useAuth();
   const router = useRouter();
   const [openNew, setOpenNew] = useState(false);
-  const [institutions, setInstitutions] = useState([]);
+  const [institutions, setInstitutions] = useState<Institution[]>([]);
 
   useEffect(() => {
     const getData = async () => {
       const q = query(
         collection(db, "institutions"),
-        where("organizationCreator", "==", user?.uid),
         where("organizationAdmins", "array-contains", user?.uid)
       );
       onSnapshot(q, (snapshot) => {
@@ -46,7 +45,7 @@ function MainPage() {
       });
     };
     getData();
-  }, []);
+  }, [user]);
 
   const handleOpenNew = () => {
     setOpenNew(!openNew);

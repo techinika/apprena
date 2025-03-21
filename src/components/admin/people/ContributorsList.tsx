@@ -37,7 +37,6 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "../../ui/badge";
 import { ROLES, User } from "@/types/Users";
-import { data } from "./data";
 import PageHeader from "../main/PageHeader";
 
 export const columns: ColumnDef<User>[] = [
@@ -138,9 +137,14 @@ export function ContributorsList() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+  const [userData, setUserData] = React.useState<User[]>([]);
+
+  React.useEffect(() => {
+    setUserData([]);
+  }, []);
 
   const table = useReactTable({
-    data: data.filter((user) => user.role === ROLES?.CONTRIBUTOR),
+    data: userData.filter((user) => user.role === ROLES?.CONTRIBUTOR),
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,

@@ -36,95 +36,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { institutions } from "./data";
 import PageHeader from "@/components/admin/main/PageHeader";
+import { Institution } from "@/types/Institution";
 
-export const columns: ColumnDef<(typeof institutions)[0]>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "name",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Name
-        <ArrowUpDown />
-      </Button>
-    ),
-  },
-  {
-    accessorKey: "registrationNumber",
-    header: "Registration Number",
-    cell: ({ row }) => <div>{row.getValue("registrationNumber")}</div>,
-  },
-  {
-    accessorKey: "legalType",
-    header: "Legal Type",
-    cell: ({ row }) => (
-      <Badge className="capitalize">{row.getValue("legalType")}</Badge>
-    ),
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Date Joined",
-    cell: ({ row }) => <div>{row.getValue("createdAt")?.toLocaleString()}</div>,
-  },
-  {
-    id: "actions",
-    enableHiding: false,
-    cell: ({ row }) => {
-      const institution = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(institution.id)}
-            >
-              Edit Institution
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Preview Institution</DropdownMenuItem>
-            <DropdownMenuItem color="danger">
-              Delete Institution
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
-  },
-];
-
-// The component displaying the institution list
 export function InstitutionList() {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -133,9 +47,103 @@ export function InstitutionList() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+  const [institutionData, setInstitutionData] = React.useState<Institution[]>(
+    []
+  );
+
+  React.useEffect(() => {
+    setInstitutionData([]);
+  }, []);
+
+  const columns: ColumnDef<(typeof institutionData)[0]>[] = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: "name",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Name
+          <ArrowUpDown />
+        </Button>
+      ),
+    },
+    {
+      accessorKey: "registrationNumber",
+      header: "Registration Number",
+      cell: ({ row }) => <div>{row.getValue("registrationNumber")}</div>,
+    },
+    {
+      accessorKey: "legalType",
+      header: "Legal Type",
+      cell: ({ row }) => (
+        <Badge className="capitalize">{row.getValue("legalType")}</Badge>
+      ),
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Date Joined",
+      cell: ({ row }) => (
+        <div>{row.getValue("createdAt")?.toLocaleString()}</div>
+      ),
+    },
+    {
+      id: "actions",
+      enableHiding: false,
+      cell: ({ row }) => {
+        const institution = row.original;
+
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem
+                onClick={() => navigator.clipboard.writeText(institution.id)}
+              >
+                Edit Institution
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>Preview Institution</DropdownMenuItem>
+              <DropdownMenuItem color="danger">
+                Delete Institution
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
 
   const table = useReactTable({
-    data: institutions, // Use the institutions array here
+    data: institutionData,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,

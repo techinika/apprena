@@ -87,7 +87,7 @@ export function AllUsersList() {
       });
     };
     getData();
-  }, []);
+  }, [userCollection]);
 
   const columns: ColumnDef<User>[] = [
     {

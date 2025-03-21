@@ -28,7 +28,7 @@ export default function Pricing() {
       });
     };
     getData();
-  }, []);
+  }, [planCollection]);
 
   return (
     <Section>

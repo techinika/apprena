@@ -34,7 +34,7 @@ function OneUserPage() {
     };
     fetchUserProfile();
     console.log(user);
-  }, [username]);
+  }, [username, userCollection, user]);
 
   return (
     <div className="w-full space-y-6 p-8 pt-6 bg-gray-50">

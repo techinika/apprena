@@ -1,11 +1,12 @@
 "use client"; // Ensure this is a client component
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { User, onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/db/firebase";
+import { User as userType } from "@/types/Users";
 
 interface AuthContextType {
-  user: User | null;
+  user: User | userType | null;
   loading: boolean;
 }
 

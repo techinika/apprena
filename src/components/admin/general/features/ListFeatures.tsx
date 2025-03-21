@@ -86,7 +86,7 @@ export function ListFeatures() {
       });
     };
     getData();
-  }, []);
+  }, [featureCollection]);
 
   const columns: ColumnDef<(typeof plansData)[0]>[] = [
     {

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import React from "react";
 
 export default function ProfilePage() {
@@ -11,7 +12,7 @@ export default function ProfilePage() {
       <div className="mt-8">
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="flex items-center space-x-6">
-            <img
+            <Image
               src="https://via.placeholder.com/150"
               alt="Profile"
               className="w-24 h-24 rounded-full"

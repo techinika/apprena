@@ -30,7 +30,7 @@ export default function FAQ() {
     };
     getData();
     console.log(faqsData);
-  }, []);
+  }, [faqCollection, faqsData]);
 
   return (
     <Section>

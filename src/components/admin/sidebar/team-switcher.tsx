@@ -18,18 +18,50 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useAuth } from "@/lib/AuthContext";
+import { formatDistanceToNow } from "date-fns";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
+import { db } from "@/db/firebase";
+import { Institution } from "@/types/Institution";
+import { enUS } from "date-fns/locale";
+import { useParams } from "next/navigation";
 
-export function TeamSwitcher({
-  teams,
-}: {
-  teams: {
-    name: string;
-    logo: React.ElementType;
-    plan: string;
-  }[];
-}) {
+export function TeamSwitcher() {
+  const { user } = useAuth();
+  const { institutionId } = useParams();
   const { isMobile } = useSidebar();
-  const [activeTeam, setActiveTeam] = React.useState(teams[0]);
+  const [activeTeam, setActiveTeam] = React.useState<Institution>();
+  const [institutions, setInstitutions] = React.useState<Institution[]>([]);
+
+  React.useEffect(() => {
+    const getData = async () => {
+      if (!user) return;
+
+      const q = query(
+        collection(db, "institutions"),
+        where("organizationAdmins", "array-contains", user?.uid)
+      );
+      onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map((doc) => {
+          const docData = doc.data();
+          return {
+            id: doc.id,
+            createdAt: docData.createdAt
+              ? formatDistanceToNow(docData.createdAt.toDate(), {
+                  addSuffix: true,
+                  locale: enUS,
+                })
+              : "Unknown",
+            ...docData,
+          } as Institution;
+        });
+        const activeInst = data.find((inst) => inst.id === institutionId);
+        setActiveTeam(activeInst || data[0] || null);
+        setInstitutions(data);
+      });
+    };
+    getData();
+  }, [institutionId, user]);
 
   return (
     <SidebarMenu>
@@ -41,13 +73,13 @@ export function TeamSwitcher({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                <activeTeam.logo className="size-4" />
+                {/* <activeTeam.logo className="size-4" /> */}
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
-                  {activeTeam.name}
+                  {activeTeam?.name || "Select Institution"}
                 </span>
-                <span className="truncate text-xs">{activeTeam.plan}</span>
+                <span className="truncate text-xs">Enterprise</span>
               </div>
               <ChevronsUpDown className="ml-auto" />
             </SidebarMenuButton>
@@ -61,19 +93,21 @@ export function TeamSwitcher({
             <DropdownMenuLabel className="text-xs text-muted-foreground">
               Institutions
             </DropdownMenuLabel>
-            {teams.map((team, index) => (
-              <DropdownMenuItem
-                key={team.name}
-                onClick={() => setActiveTeam(team)}
-                className="gap-2 p-2"
-              >
-                <div className="flex size-6 items-center justify-center rounded-sm border">
-                  <team.logo className="size-4 shrink-0" />
-                </div>
-                {team.name}
-                <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
-              </DropdownMenuItem>
-            ))}
+            {institutions
+              ? institutions.map((team, index) => (
+                  <DropdownMenuItem
+                    key={team?.id}
+                    onClick={() => setActiveTeam(team)}
+                    className="gap-2 p-2"
+                  >
+                    <div className="flex size-6 items-center justify-center rounded-sm border">
+                      {/* <team.logo className="size-4 shrink-0" /> */}
+                    </div>
+                    {team?.name}
+                    <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
+                  </DropdownMenuItem>
+                ))
+              : null}
             <DropdownMenuSeparator />
             <DropdownMenuItem className="gap-2 p-2">
               <div className="flex size-6 items-center justify-center rounded-md border bg-background">

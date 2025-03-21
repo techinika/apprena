@@ -34,6 +34,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { useAuth } from "@/lib/AuthContext";
+import { User as userType } from "@/types/Users";
+import { User } from "firebase/auth";
 
 const profileFormSchema = z.object({
   name: z
@@ -67,7 +69,7 @@ const profileFormSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 export function ProfileForm() {
-  const { user } = useAuth();
+  const { user }: { user: userType | User | null } = useAuth();
 
   const defaultValues: Partial<ProfileFormValues> = {
     name: user?.displayName || "",

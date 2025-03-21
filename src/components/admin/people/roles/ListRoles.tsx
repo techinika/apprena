@@ -83,7 +83,7 @@ export function ListRoles() {
       });
     };
     getData();
-  }, []);
+  }, [roleCollection]);
 
   const columns: ColumnDef<(typeof rolesData)[0]>[] = [
     {
