@@ -190,12 +190,10 @@ export function ListFaqs() {
   });
 
   const handleDeleteItem = () => {
-    console.log(idToDelete);
     deleteDoc(doc(db, "faqs", idToDelete))
-      .then((res) => {
+      .then(() => {
         setIdToDelete("");
         setOpenDelete(false);
-        console.log(res);
       })
       .catch((err) => {
         console.log(err);

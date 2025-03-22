@@ -202,10 +202,9 @@ export function ListPlans() {
 
   const handleDeleteItem = () => {
     deleteDoc(doc(db, "sub-plans", idToDelete))
-      .then((res) => {
+      .then(() => {
         setIdToDelete("");
         setOpenDelete(false);
-        console.log(res);
       })
       .catch((err) => {
         console.log(err);

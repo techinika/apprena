@@ -42,7 +42,6 @@ function AddFaq() {
   });
 
   async function onSubmit(data: ProfileFormValues) {
-    console.log(data);
     const { title, description } = data;
     try {
       await addDoc(faqCollection, {

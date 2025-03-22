@@ -12,11 +12,15 @@ import { db } from "@/db/firebase";
 import { formatDistanceToNow } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { Institution } from "@/types/Institution";
-import { useParams } from "next/navigation";
 
-export default function Page({ children }: { children: React.ReactNode }) {
+export default function Page({
+  institutionId,
+  children,
+}: {
+  children: React.ReactNode;
+  institutionId: string;
+}) {
   const { user } = useAuth();
-  const { institutionId } = useParams<{ institutionId: string }>();
   const [activeTeam, setActiveTeam] = React.useState<Institution | undefined>();
   const [institutions, setInstitutions] = React.useState<Institution[]>([]);
 
@@ -57,6 +61,7 @@ export default function Page({ children }: { children: React.ReactNode }) {
           institutions={institutions}
           activeInstitution={activeTeam}
           setActiveInstitution={setActiveTeam}
+          institutionId={institutionId}
         />
         <SidebarInset>
           <DashboardHeader activeInstitution={activeTeam} />

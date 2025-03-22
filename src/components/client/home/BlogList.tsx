@@ -1,3 +1,5 @@
+"use client";
+
 import { Card } from "@/components/ui/card";
 import { Clock, User, Vote } from "lucide-react";
 import Image from "next/image";

@@ -1,10 +1,15 @@
 import DashboardPage from "@/components/admin/home/Dashboard";
 import React from "react";
 
-export default function page() {
+export default async function page({
+  params,
+}: {
+  params: Promise<{ institutionId: string }>;
+}) {
+  const { institutionId } = await params;
   return (
     <div>
-      <DashboardPage />
+      <DashboardPage institutionId={institutionId} />
     </div>
   );
 }

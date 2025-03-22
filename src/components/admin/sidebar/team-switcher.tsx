@@ -19,7 +19,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Institution } from "@/types/Institution";
-import { useParams, usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export function TeamSwitcher({
   activeInstitution,
@@ -31,24 +31,16 @@ export function TeamSwitcher({
   institutions: Institution[];
 }) {
   const pathname = usePathname();
-  const { institutionId } = useParams<{ institutionId: string }>();
-  const router = useRouter();
   const { isMobile } = useSidebar();
-
-  console.log(institutionId);
 
   const handleTeamSwitch = (team: Institution) => {
     setActiveInstitution(team);
     const oldPathArray = pathname.split("/");
     oldPathArray[2] = team?.id;
     const newPath = oldPathArray.join("/");
+    console.log(newPath);
 
-    // Debugging Logs
-    console.log("Current Pathname:", pathname);
-    console.log("Old Institution ID:", institutionId);
-    console.log("New Institution ID:", team?.id);
-    console.log("New Path:", newPath);
-    router.push(newPath);
+    globalThis.location.href = newPath;
   };
 
   return (

@@ -1,3 +1,5 @@
+"use client"
+
 import { BentoGrid, BentoGridItem } from "@/components/ui/bento-grid";
 import { Section } from "@/components/ui/section";
 import { APP } from "@/variables/globals";

@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -79,26 +81,22 @@ const EditPlan = ({
         if (planSnapshot.exists()) {
           const planData = planSnapshot.data();
 
-          // Fetch all available features
           const featureSnapshots = await getDocs(featuresCollection);
           const allFeatures = featureSnapshots.docs.map((doc) => ({
             id: doc.id,
             label: doc.data().name,
           }));
 
-          // Extract selected features from the plan
           const assignedFeatures = planData.features || [];
           const selected = assignedFeatures.map((feat: Feature) => ({
             id: feat.id,
             label: feat.name,
           }));
 
-          // Filter out assigned features from available features
           const available = allFeatures.filter(
             (feat) => !selected.some((sel: Feature) => sel.id === feat.id)
           );
 
-          // Set form values and transfer list data
           form.reset({
             name: planData.name || "",
             description: planData.description || "",

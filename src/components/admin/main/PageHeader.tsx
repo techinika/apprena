@@ -1,3 +1,5 @@
+"use client"
+
 import React from "react";
 import { CalendarDateRangePicker } from "../home/range-picker";
 import { Button } from "../../ui/button";

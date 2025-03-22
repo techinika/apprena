@@ -195,12 +195,10 @@ export function ListRoles() {
   });
 
   const handleDeleteItem = () => {
-    console.log(idToDelete);
     deleteDoc(doc(db, "roles", idToDelete))
-      .then((res) => {
+      .then(() => {
         setIdToDelete("");
         setOpenDelete(false);
-        console.log(res);
       })
       .catch((err) => {
         console.log(err);

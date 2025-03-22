@@ -1,3 +1,5 @@
+"use client"
+
 import { ModeToggle } from "../../ui/mode-toggle";
 import {
   Footer,

@@ -37,7 +37,6 @@ function AddPlan() {
   });
 
   async function onSubmit(data: ProfileFormValues) {
-    console.log(data);
     const { name, description, price } = data;
     try {
       await addDoc(planCollection, {

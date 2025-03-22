@@ -5,10 +5,8 @@ import AuthNav from "../navigation/AuthNav";
 import FooterSection from "@/components/sections/footer/default";
 import Stats from "./stats";
 import SectionHeader from "./SectionHeader";
-import CourseList from "./CourseList";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Leaderboard } from "./Leaderboard";
-import BlogList from "./BlogList";
 import ProtectedRoute from "@/lib/ProtectedRoute";
 
 function AuthHome() {
@@ -22,13 +20,13 @@ function AuthHome() {
             title="Recommended Courses"
             buttonText="Explore More"
           />
-          <CourseList />
+          {/* <CourseList /> */}
           <div className="p-3"></div>
           <SectionHeader
             title="Recommended Articles"
             buttonText="Explore More"
           />
-          <BlogList />
+          {/* <BlogList /> */}
         </div>
         <Card className="col-span-2">
           <CardHeader>

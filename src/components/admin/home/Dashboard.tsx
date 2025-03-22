@@ -14,13 +14,61 @@ import {
 import { Overview } from "./overview";
 import { RecentSales } from "./recent-sales";
 import PageHeader from "../main/PageHeader";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Institution } from "@/types/Institution";
+import { collection, doc, DocumentData, getDoc } from "firebase/firestore";
+import { useAuth } from "@/lib/AuthContext";
+import Loading from "@/app/loading";
+import { db } from "@/db/firebase";
 
 export const metadata: Metadata = {
   title: "Dashboard",
   description: "Example dashboard app built using the components.",
 };
 
-export default function DashboardPage() {
+export default function DashboardPage({
+  institutionId,
+}: {
+  institutionId: string;
+}) {
+  const { user } = useAuth();
+  const router = useRouter();
+  const [institution, setInstitution] = useState<
+    Institution | DocumentData | null
+  >(null);
+  const inCollection = collection(db, "institutions");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const getInstitution = async () => {
+      setLoading(true);
+      if (!institutionId) return;
+      try {
+        const inRef = doc(inCollection, institutionId);
+        const inSnap = await getDoc(inRef);
+
+        if (
+          inSnap.exists() &&
+          inSnap.data().organizationAdmins.includes(user?.uid)
+        ) {
+          const inData = inSnap.data();
+          setInstitution(inData);
+          setLoading(false);
+        } else {
+          router.push("/admin");
+        }
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    };
+    getInstitution();
+  }, [institutionId, user, inCollection, router]);
+
+  if (loading) return <Loading />;
+
+  console.log(institution);
+
   return (
     <>
       <div className="md:hidden">

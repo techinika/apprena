@@ -1,3 +1,5 @@
+"use client";
+
 import Loading from "@/app/loading";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -77,7 +79,6 @@ export function UserNav() {
 export async function logout() {
   try {
     await signOut(auth);
-    console.log("User signed out successfully!");
     return true;
   } catch (error) {
     console.error("Error signing out:", error);

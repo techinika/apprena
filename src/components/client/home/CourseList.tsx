@@ -1,6 +1,7 @@
+"use client"
+
 import { Card } from "@/components/ui/card";
 import { Clock, File, User, Video } from "lucide-react";
-import Image from "next/image";
 import React from "react";
 
 const courses = [
@@ -62,7 +63,7 @@ function CourseList() {
           return (
             <div key={index + 1} className="min-w-[400px]">
               <Card className="max-w-md mx-auto h-full cursor-pointer shadow-lg rounded-lg">
-                <Image
+                <img
                   className="w-full h-64 object-cover object-center"
                   src={
                     // course.image ||

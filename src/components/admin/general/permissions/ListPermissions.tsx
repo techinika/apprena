@@ -191,10 +191,9 @@ export function ListPermissions() {
 
   const handleDeleteItem = () => {
     deleteDoc(doc(db, "permissions", idToDelete))
-      .then((res) => {
+      .then(() => {
         setIdToDelete("");
         setOpenDelete(false);
-        console.log(res);
       })
       .catch((err) => {
         console.log(err);

@@ -1,3 +1,5 @@
+"use client"
+
 import { Archive, MoreVertical, Reply, Trash2 } from "lucide-react";
 import { Mail } from "./data";
 import {

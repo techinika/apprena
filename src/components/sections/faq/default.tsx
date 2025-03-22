@@ -1,3 +1,5 @@
+"use client"
+
 import { Section } from "../../ui/section";
 import {
   Accordion,
@@ -29,7 +31,6 @@ export default function FAQ() {
       });
     };
     getData();
-    console.log(faqsData);
   }, [faqCollection, faqsData]);
 
   return (

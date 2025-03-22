@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -66,6 +68,21 @@ export function UserAuthForm({
                   dateOfBirth: null,
                   gender: null,
                   bio: "",
+                  score: 0,
+                  scoreInLastHour: 0,
+                  referrals: 0,
+                  referralsInLastMonth: 0,
+                  badges: 0,
+                  badgesInLastMonth: 0,
+                  communityContributions: 0,
+                  communityContributionsInLastMonth: 0,
+                  institutionMemberships: 0,
+                  institutionMembershipsInLastMonth: 0,
+                  coursesTaken: 0,
+                  coursesTakenInLastMonth: 0,
+                  blogsRead: 0,
+                  blogsReadInLastMonth: 0,
+                  mostActiveTimes: "NA",
                   nationality: "",
                   preferredLanguage: "English",
 
@@ -143,8 +160,7 @@ export function UserAuthForm({
 
   const signInWithGoogle = async () => {
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const userData = result.user;
+      await signInWithPopup(auth, googleProvider);
       onAuthStateChanged(auth, (user) => {
         if (user) {
           const uid = user.uid;
@@ -164,6 +180,21 @@ export function UserAuthForm({
                   gender: null,
                   bio: "",
                   nationality: "",
+                  score: 0,
+                  scoreInLastHour: 0,
+                  referrals: 0,
+                  referralsInLastMonth: 0,
+                  badges: 0,
+                  badgesInLastMonth: 0,
+                  communityContributions: 0,
+                  communityContributionsInLastMonth: 0,
+                  institutionMemberships: 0,
+                  institutionMembershipsInLastMonth: 0,
+                  coursesTaken: 0,
+                  coursesTakenInLastMonth: 0,
+                  blogsRead: 0,
+                  blogsReadInLastMonth: 0,
+                  mostActiveTimes: "NA",
                   preferredLanguage: "English",
 
                   // Account Details
@@ -219,7 +250,6 @@ export function UserAuthForm({
             });
         }
       });
-      console.log("User signed in:", userData);
       router.push("/home");
     } catch (error) {
       console.error("Error signing in with Google:", error);
@@ -291,7 +321,6 @@ export function UserAuthForm({
                 variant="outline"
                 onClick={(e) => {
                   e.preventDefault();
-                  console.log(process.env);
                   signInWithGoogle();
                 }}
                 className="w-full"

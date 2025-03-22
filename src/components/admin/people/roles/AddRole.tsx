@@ -47,7 +47,6 @@ function AddRole() {
   });
 
   async function onSubmit(data: formValues) {
-    console.log(data);
     const { id, name, description } = data;
     try {
       await setDoc(doc(roleCollection, id), {

@@ -34,7 +34,6 @@ function AddPermission() {
   });
 
   async function onSubmit(data: ProfileFormValues) {
-    console.log(data);
     const { name } = data;
     try {
       await addDoc(permissionCollection, {

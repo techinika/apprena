@@ -25,7 +25,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { NavCommunication } from "./app-communication";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
 import { Institution } from "@/types/Institution";
 
@@ -33,13 +33,14 @@ export function AppSidebar({
   activeInstitution,
   setActiveInstitution,
   institutions,
+  institutionId,
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
   activeInstitution: Institution | undefined;
   setActiveInstitution: (activeInstitution: Institution) => void;
   institutions: Institution[];
+  institutionId: string;
 }) {
-  const { institutionId } = useParams();
   const { user } = useAuth();
   const router = useRouter();
 

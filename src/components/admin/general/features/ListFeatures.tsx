@@ -192,10 +192,9 @@ export function ListFeatures() {
 
   const handleDeleteItem = () => {
     deleteDoc(doc(db, "features", idToDelete))
-      .then((res) => {
+      .then(() => {
         setIdToDelete("");
         setOpenDelete(false);
-        console.log(res);
       })
       .catch((err) => {
         console.log(err);

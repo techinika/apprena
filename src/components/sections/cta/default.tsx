@@ -1,3 +1,5 @@
+"use client"
+
 import { Section } from "@/components/ui/section";
 import { Button } from "@/components/ui/button";
 import Glow from "@/components/ui/glow";

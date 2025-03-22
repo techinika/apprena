@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -90,6 +92,21 @@ export function RegisterSteps({
                   gender: null,
                   bio: "",
                   nationality: "",
+                  score: 0,
+                  scoreInLastHour: 0,
+                  referrals: 0,
+                  referralsInLastMonth: 0,
+                  badges: 0,
+                  badgesInLastMonth: 0,
+                  communityContributions: 0,
+                  communityContributionsInLastMonth: 0,
+                  institutionMemberships: 0,
+                  institutionMembershipsInLastMonth: 0,
+                  coursesTaken: 0,
+                  coursesTakenInLastMonth: 0,
+                  blogsRead: 0,
+                  blogsReadInLastMonth: 0,
+                  mostActiveTimes: "NA",
                   preferredLanguage: "English",
 
                   role: "user",

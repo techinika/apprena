@@ -34,7 +34,6 @@ function AddFeature() {
   });
 
   async function onSubmit(data: ProfileFormValues) {
-    console.log(data);
     const { name } = data;
     try {
       await addDoc(featureCollection, {
