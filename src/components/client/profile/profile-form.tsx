@@ -30,7 +30,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { useAuth } from "@/lib/AuthContext";
@@ -53,9 +52,7 @@ const profileFormSchema = z.object({
   language: z.string().default("english"),
   gender: z.string().default("male"),
   phone: z.string().optional(),
-  dob: z.date({
-    required_error: "A date of birth is required.",
-  }),
+  dob: z.string().optional(),
   urls: z
     .array(
       z.object({
@@ -74,17 +71,36 @@ export function ProfileForm() {
   const defaultValues: Partial<ProfileFormValues> = {
     name: user?.displayName || "",
     email: user?.email || "",
-    bio: user?.bio || "",
+    bio: user && "bio" in user ? (user as userType).bio || "" : "",
     phone: user?.phoneNumber || "",
-    dob: user?.dateOfBirth || "",
-    language: user?.preferredLanguage || "",
-    gender: user?.gender || "",
-    urls: [
-      { value: user?.socialLinks?.website || "", name: "Website" },
-      { value: user?.socialLinks?.twitter || "", name: "X (Twitter)" },
-      { value: user?.socialLinks?.linkedin || "", name: "LinkedIn" },
-      { value: user?.socialLinks?.github || "", name: "GitHub" },
-    ],
+    dob:
+      user && "dateOfBirth" in user ? (user as userType).dateOfBirth || "" : "",
+    language:
+      user && "preferredLanguage" in user
+        ? (user as userType).preferredLanguage || ""
+        : "",
+    gender: user && "gender" in user ? (user as userType).gender || "" : "",
+    urls:
+      user && "socialLinks" in user
+        ? [
+            {
+              value: (user as userType).socialLinks?.website || "",
+              name: "Website",
+            },
+            {
+              value: (user as userType).socialLinks?.twitter || "",
+              name: "X (Twitter)",
+            },
+            {
+              value: (user as userType).socialLinks?.linkedin || "",
+              name: "LinkedIn",
+            },
+            {
+              value: (user as userType).socialLinks?.github || "",
+              name: "GitHub",
+            },
+          ]
+        : [],
   };
 
   const form = useForm<ProfileFormValues>({
@@ -100,14 +116,6 @@ export function ProfileForm() {
 
   function onSubmit(data: ProfileFormValues) {
     console.log(data);
-    // toast({
-    // //   title: "You submitted the following values:",
-    //   description: (
-    //     <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-    //       <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-    //     </pre>
-    //   ),
-    // });
   }
 
   return (
@@ -206,7 +214,7 @@ export function ProfileForm() {
                   </FormControl>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
+                  {/* <Calendar
                     mode="single"
                     toYear={new Date().getFullYear()}
                     selected={field.value}
@@ -215,7 +223,7 @@ export function ProfileForm() {
                       date > new Date() || date < new Date("1900-01-01")
                     }
                     initialFocus
-                  />
+                  /> */}
                 </PopoverContent>
               </Popover>
               <FormMessage />

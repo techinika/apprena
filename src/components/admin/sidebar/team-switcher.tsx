@@ -18,50 +18,38 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useAuth } from "@/lib/AuthContext";
-import { formatDistanceToNow } from "date-fns";
-import { collection, onSnapshot, query, where } from "firebase/firestore";
-import { db } from "@/db/firebase";
 import { Institution } from "@/types/Institution";
-import { enUS } from "date-fns/locale";
-import { useParams } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 
-export function TeamSwitcher() {
-  const { user } = useAuth();
-  const { institutionId } = useParams();
+export function TeamSwitcher({
+  activeInstitution,
+  setActiveInstitution,
+  institutions,
+}: {
+  activeInstitution: Institution | undefined;
+  setActiveInstitution: (institution: Institution) => void;
+  institutions: Institution[];
+}) {
+  const pathname = usePathname();
+  const { institutionId } = useParams<{ institutionId: string }>();
+  const router = useRouter();
   const { isMobile } = useSidebar();
-  const [activeTeam, setActiveTeam] = React.useState<Institution>();
-  const [institutions, setInstitutions] = React.useState<Institution[]>([]);
 
-  React.useEffect(() => {
-    const getData = async () => {
-      if (!user) return;
+  console.log(institutionId);
 
-      const q = query(
-        collection(db, "institutions"),
-        where("organizationAdmins", "array-contains", user?.uid)
-      );
-      onSnapshot(q, (snapshot) => {
-        const data = snapshot.docs.map((doc) => {
-          const docData = doc.data();
-          return {
-            id: doc.id,
-            createdAt: docData.createdAt
-              ? formatDistanceToNow(docData.createdAt.toDate(), {
-                  addSuffix: true,
-                  locale: enUS,
-                })
-              : "Unknown",
-            ...docData,
-          } as Institution;
-        });
-        const activeInst = data.find((inst) => inst.id === institutionId);
-        setActiveTeam(activeInst || data[0] || null);
-        setInstitutions(data);
-      });
-    };
-    getData();
-  }, [institutionId, user]);
+  const handleTeamSwitch = (team: Institution) => {
+    setActiveInstitution(team);
+    const oldPathArray = pathname.split("/");
+    oldPathArray[2] = team?.id;
+    const newPath = oldPathArray.join("/");
+
+    // Debugging Logs
+    console.log("Current Pathname:", pathname);
+    console.log("Old Institution ID:", institutionId);
+    console.log("New Institution ID:", team?.id);
+    console.log("New Path:", newPath);
+    router.push(newPath);
+  };
 
   return (
     <SidebarMenu>
@@ -77,7 +65,7 @@ export function TeamSwitcher() {
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
-                  {activeTeam?.name || "Select Institution"}
+                  {activeInstitution?.name || "Select Institution"}
                 </span>
                 <span className="truncate text-xs">Enterprise</span>
               </div>
@@ -97,7 +85,7 @@ export function TeamSwitcher() {
               ? institutions.map((team, index) => (
                   <DropdownMenuItem
                     key={team?.id}
-                    onClick={() => setActiveTeam(team)}
+                    onClick={() => handleTeamSwitch(team)}
                     className="gap-2 p-2"
                   >
                     <div className="flex size-6 items-center justify-center rounded-sm border">
