@@ -17,10 +17,9 @@ import { auth } from "@/db/firebase";
 import { useAuth } from "@/lib/AuthContext";
 import { signOut } from "firebase/auth";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 
 export function UserNav() {
-  const router = useRouter();
   const { user, loading } = useAuth();
 
   if (loading) return <Loading />;
@@ -64,7 +63,7 @@ export function UserNav() {
           onClick={async () => {
             const out = await logout();
             if (out) {
-              router.push("/");
+              redirect("/");
             }
           }}
         >

@@ -14,7 +14,7 @@ import {
 import { Overview } from "./overview";
 import { RecentSales } from "./recent-sales";
 import PageHeader from "../main/PageHeader";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Institution } from "@/types/Institution";
 import { collection, doc, DocumentData, getDoc } from "firebase/firestore";
@@ -56,7 +56,7 @@ export default function DashboardPage({
           setInstitution(inData);
           setLoading(false);
         } else {
-          router.push("/admin");
+          redirect("/admin");
         }
       } catch (error) {
         console.error("Error fetching user profile:", error);

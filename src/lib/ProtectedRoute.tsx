@@ -2,7 +2,7 @@
 
 import Loading from "@/app/loading";
 import { useAuth } from "@/hooks/use-auth";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import { useEffect } from "react";
 
 export default function ProtectedRoute({
@@ -11,13 +11,12 @@ export default function ProtectedRoute({
   children: React.ReactNode;
 }) {
   const { user, loading } = useAuth();
-  const router = useRouter();
 
   useEffect(() => {
     if (!loading && !user) {
-      router.push("/login");
+      redirect("/login");
     }
-  }, [user, loading, router]);
+  }, [user, loading]);
 
   if (loading) return <Loading />;
 

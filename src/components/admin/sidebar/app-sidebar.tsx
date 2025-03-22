@@ -25,7 +25,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { NavCommunication } from "./app-communication";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
 import { Institution } from "@/types/Institution";
 
@@ -51,7 +51,7 @@ export function AppSidebar({
     const isCurrentTeam = activeInstitution?.id === institutionId;
 
     if (!isMember && !isCurrentTeam) {
-      router.push("/admin");
+      redirect("/admin");
     }
   }, [institutionId, user, router, activeInstitution, institutions]);
 

@@ -26,13 +26,12 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { logout } from "@/components/client/navigation/user-nav";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
 import Loading from "@/app/loading";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
-  const router = useRouter();
   const { user, loading } = useAuth();
 
   if (loading) return <Loading />;
@@ -112,7 +111,7 @@ export function NavUser() {
               onClick={async () => {
                 const out = await logout();
                 if (out) {
-                  router.push("/");
+                  redirect("/");
                 }
               }}
             >

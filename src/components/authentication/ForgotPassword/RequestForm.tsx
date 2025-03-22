@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -30,7 +30,6 @@ export function RequestForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -49,7 +48,7 @@ export function RequestForm({
       await sendPasswordResetEmail(auth, data.email, actionCodeSettings);
       toast("Password reset email sent. Check your inbox.");
       // Optionally, redirect to login after sending the email:
-      router.push("/login");
+      redirect("/login");
     } catch (error: unknown) {
       if (typeof error === "object" && error !== null && "code" in error) {
         const firebaseError = error as AuthError;

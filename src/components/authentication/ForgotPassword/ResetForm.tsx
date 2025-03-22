@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { auth } from "@/db/firebase";
@@ -39,8 +39,6 @@ export function ResetForm({
   className?: string;
   token: string;
 }) {
-  const router = useRouter();
-
   const {
     register,
     handleSubmit,
@@ -60,7 +58,7 @@ export function ResetForm({
 
       if (info.data.email) {
         await confirmPasswordReset(auth, token, data.newPassword);
-        router.push("/login");
+        redirect("/login");
       } else {
         toast("Invalid token or link. Please request a new password reset.");
       }
