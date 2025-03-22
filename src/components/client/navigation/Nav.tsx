@@ -12,9 +12,12 @@ import { useTheme } from "next-themes";
 import Link from "next/link";
 import React from "react";
 import { Menu } from "./Menu";
+import { useAuth } from "@/lib/AuthContext";
+import { UserNav } from "./user-nav";
 
 function Nav() {
   const { setTheme } = useTheme();
+  const { user } = useAuth();
   return (
     <div>
       <header className="size flex h-16 shrink-0 gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 justify-between items-center">
@@ -40,15 +43,27 @@ function Nav() {
         </div>
         <Menu />
         <div className="px-4 flex gap-3 items-center">
-          <Link href="/login">
-            <Button variant="glow">Sign In</Button>
-          </Link>
-          <Link href="/register">
-            <Button variant="default">
-              Create your Account
-              <ArrowRight className="h-3 w-3" />
-            </Button>
-          </Link>
+          {!user && (
+            <Link href="/login">
+              <Button variant="glow">Sign In</Button>
+            </Link>
+          )}
+          {!user && (
+            <Link href="/register">
+              <Button variant="default">
+                Create your Account
+                <ArrowRight className="h-3 w-3" />
+              </Button>
+            </Link>
+          )}
+          {user && (
+            <Link href="/admin">
+              <Button variant="default">
+                Manage Institution
+                <ArrowRight />
+              </Button>
+            </Link>
+          )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="icon">
@@ -69,6 +84,7 @@ function Nav() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          {user && <UserNav />}
         </div>
       </header>
       <Separator />

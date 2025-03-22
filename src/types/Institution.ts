@@ -49,25 +49,27 @@ export type SubscriptionDetails = {
 };
 
 export type Institution = {
-  id: string; // Unique identifier for the institution
-  name: string; // Name of the institution
-  registrationNumber: string; // Registration or tax number for the institution
-  legalType:
+  id: string;
+  name: string;
+  registrationNumber: string;
+  institutionType:
     | "corporation"
     | "non-profit"
     | "educational"
     | "government"
-    | "other"; // Legal type of the institution
-  industry: string; // Industry or sector of the institution (e.g., Education, Healthcare)
-  website: string; // URL to the institution's website
+    | "other";
+  industry: string;
+  website: string;
   contactInformation: {
-    primaryContact: ContactInformation; // Primary contact for the institution
-    address: Address; // Address of the institution
+    primaryContact: ContactInformation;
+    address: Address;
   };
-  billingInformation: BillingInformation; // Billing details for the institution
-  subscriptionDetails: SubscriptionDetails; // Subscription details for the institution
-  users: InstitutionUser[]; // List of users within the institution
-  roles?: InstitutionRole[]; // Optional roles within the institution
-  createdAt: string; // Date when the institution was created
-  updatedAt: string; // Last update timestamp
+  billingInformation: BillingInformation;
+  subscriptionDetails: SubscriptionDetails;
+  users: InstitutionUser[];
+  roles?: InstitutionRole[];
+  createdAt: string;
+  updatedAt: string;
+  organizationAdmins: string[];
+  organizationOwner: string;
 };

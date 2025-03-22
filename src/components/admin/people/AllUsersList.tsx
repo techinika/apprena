@@ -37,101 +37,23 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "../../ui/badge";
 import { User } from "@/types/Users";
-import { data } from "./data";
 import PageHeader from "../main/PageHeader";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  query,
+} from "firebase/firestore";
+import { db } from "@/db/firebase";
+import { formatDistanceToNow } from "date-fns";
+import { enUS } from "date-fns/locale";
+import ConfirmDelete from "../general/ConfirmDelete";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-export const columns: ColumnDef<User>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "name",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Name
-        <ArrowUpDown />
-      </Button>
-    ),
-  },
-  {
-    accessorKey: "email",
-    header: "Email",
-    cell: ({ row }) => <div>{row.getValue("email")}</div>,
-  },
-  {
-    accessorKey: "role",
-    header: "Role",
-    cell: ({ row }) => <div className="capitalize">{row.getValue("role")}</div>,
-  },
-  {
-    accessorKey: "subscriptionStatus",
-    header: "Subscription Status",
-    cell: ({ row }) => (
-      <Badge className="capitalize">{row.getValue("subscriptionStatus")}</Badge>
-    ),
-  },
-  {
-    accessorKey: "lastLogin",
-    header: "Last Login",
-    cell: ({ row }) => <div>{row.getValue("lastLogin")?.toLocaleString()}</div>,
-  },
-  {
-    id: "actions",
-    enableHiding: false,
-    cell: ({ row }) => {
-      const subscriber = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(subscriber.id)}
-            >
-              Edit Subscriber
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Preview Subscriber</DropdownMenuItem>
-            <DropdownMenuItem color="danger">
-              Delete Subscriber
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
-  },
-];
-
-// The component displaying the subscriber list
 export function AllUsersList() {
+  const userCollection = collection(db, "profile");
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -139,9 +61,155 @@ export function AllUsersList() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+  const [usersData, setUsersData] = React.useState<User[]>([]);
+  const [openDelete, setOpenDelete] = React.useState(false);
+  const [idToDelete, setIdToDelete] = React.useState("");
+  const router = useRouter();
+
+  React.useEffect(() => {
+    const getData = async () => {
+      const q = query(userCollection);
+      onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map((doc) => {
+          const docData = doc.data();
+          return {
+            id: doc.id,
+            createdAt: docData.createdAt
+              ? formatDistanceToNow(docData.createdAt.toDate(), {
+                  addSuffix: true,
+                  locale: enUS,
+                })
+              : "Unknown",
+            ...docData,
+          } as User;
+        });
+        setUsersData(data);
+      });
+    };
+    getData();
+  }, [userCollection]);
+
+  const columns: ColumnDef<User>[] = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: "displayName",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Display Name
+          <ArrowUpDown />
+        </Button>
+      ),
+      cell: ({ row }) => (
+        <Link href={`/admin/users/${row?.original?.id}`}>
+          {row.getValue("displayName")}
+        </Link>
+      ),
+    },
+    {
+      accessorKey: "email",
+      header: "Email",
+      cell: ({ row }) => <div>{row.getValue("email")}</div>,
+    },
+    {
+      accessorKey: "role",
+      header: "Role",
+      cell: ({ row }) => (
+        <Link href={`/admin/users/roles`} className="capitalize">
+          {row.getValue("role")}
+        </Link>
+      ),
+    },
+    {
+      accessorKey: "subscriptionPlan",
+      header: "Subscription Status",
+      cell: ({ row }) => (
+        <Badge className="capitalize">{row.getValue("subscriptionPlan")}</Badge>
+      ),
+    },
+    {
+      accessorKey: "lastLogin",
+      header: "Last Login",
+      cell: ({ row }) => (
+        <div>{row.getValue("lastLogin")?.toLocaleString()}</div>
+      ),
+    },
+    {
+      id: "actions",
+      enableHiding: false,
+      cell: ({ row }) => {
+        const subscriber = row.original;
+
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem
+                onClick={() => navigator.clipboard.writeText(subscriber.id)}
+              >
+                Edit User
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => navigator.clipboard.writeText(subscriber.id)}
+              >
+                Change User Role
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => router.push(`/admin/users/${subscriber?.id}`)}
+              >
+                Preview User
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                color="danger"
+                onClick={() => {
+                  setOpenDelete(true);
+                  setIdToDelete(subscriber?.id);
+                }}
+              >
+                Delete User
+              </DropdownMenuItem>
+              <DropdownMenuItem color="danger">
+                Deactivate User Account
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
 
   const table = useReactTable({
-    data,
+    data: usersData,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -159,21 +227,43 @@ export function AllUsersList() {
     },
   });
 
+  const handleDeleteItem = () => {
+    deleteDoc(doc(db, "profile", idToDelete))
+      .then((res) => {
+        setIdToDelete("");
+        setOpenDelete(false);
+        console.log(res);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
   return (
     <div className="w-full space-y-4 p-8 pt-6">
       <PageHeader
-        title="Users"
+        title="Users List"
         newItem={false}
         onExport={() => null}
         onPublish={() => null}
         saveDraft={() => null}
       />
+      <ConfirmDelete
+        action={() => handleDeleteItem()}
+        cancel={() => {
+          setIdToDelete("");
+          setOpenDelete(false);
+        }}
+        open={openDelete}
+      ></ConfirmDelete>
       <div className="flex items-center py-4">
         <Input
           placeholder="Filter users..."
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+          value={
+            (table.getColumn("displayName")?.getFilterValue() as string) ?? ""
+          }
           onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
+            table.getColumn("displayName")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />

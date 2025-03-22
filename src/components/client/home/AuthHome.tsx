@@ -9,10 +9,11 @@ import CourseList from "./CourseList";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Leaderboard } from "./Leaderboard";
 import BlogList from "./BlogList";
+import ProtectedRoute from "@/lib/ProtectedRoute";
 
 function AuthHome() {
   return (
-    <div>
+    <ProtectedRoute>
       <AuthNav />
       <Stats />
       <div className="size grid gap-4 md:grid-cols-2 lg:grid-cols-7 mb-4 items-start">
@@ -39,7 +40,7 @@ function AuthHome() {
         </Card>
       </div>
       <FooterSection />
-    </div>
+    </ProtectedRoute>
   );
 }
 

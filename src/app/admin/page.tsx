@@ -1,10 +1,13 @@
-import DashboardPage from "@/components/admin/home/Dashboard";
+import MainPage from "@/components/admin/MainPage";
+import ProtectedRoute from "@/lib/ProtectedRoute";
 import React from "react";
 
-export default function page() {
+function page() {
   return (
-    <div>
-      <DashboardPage />
-    </div>
+    <ProtectedRoute>
+      <MainPage />
+    </ProtectedRoute>
   );
 }
+
+export default page;

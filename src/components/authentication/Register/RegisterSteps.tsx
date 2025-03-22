@@ -14,14 +14,16 @@ import {
   signInWithPopup,
   createUserWithEmailAndPassword,
   AuthError,
+  onAuthStateChanged,
 } from "firebase/auth";
-import { auth, googleProvider } from "@/db/firebase";
+import { auth, db, googleProvider } from "@/db/firebase";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { APP } from "@/variables/globals";
+import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email format"),
@@ -68,8 +70,71 @@ export function RegisterSteps({
   const signInWithGoogle = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
-      console.log("User signed in:", user);
+      const userData = result.user;
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          const uid = user.uid;
+          const userRef = doc(db, "profile", uid);
+          getDoc(userRef)
+            .then((docSnap) => {
+              if (docSnap.exists()) {
+                console.log("User profile exists with ID: ", uid);
+              } else {
+                const userProfile = {
+                  uid,
+                  displayName: user.displayName || "Anonymous User",
+                  email: user.email,
+                  photoURL: user.photoURL || "",
+                  phoneNumber: user.phoneNumber || "",
+                  dateOfBirth: null,
+                  gender: null,
+                  bio: "",
+                  nationality: "",
+                  preferredLanguage: "English",
+
+                  role: "user",
+                  createdAt: serverTimestamp(),
+                  lastLogin: serverTimestamp(),
+                  status: "active",
+                  address: {
+                    country: "",
+                    city: "",
+                    state: "",
+                    zipCode: "",
+                    physicalAddress: "",
+                  },
+                  socialLinks: {
+                    linkedin: "",
+                    github: "",
+                    twitter: "",
+                    website: "",
+                  },
+                  interests: [],
+                  preferredNotificationMethod: "email",
+                  twoFactorAuthEnabled: false,
+                  subscriptionPlan: "free",
+                  billingInfo: {
+                    address: "",
+                    paymentMethod: "",
+                    transactionHistory: [],
+                  },
+                };
+
+                setDoc(userRef, userProfile)
+                  .then(() => {
+                    console.log("User profile created with ID: ", uid);
+                  })
+                  .catch((error) => {
+                    console.error("Error creating user profile:", error);
+                  });
+              }
+            })
+            .catch((err) => {
+              console.error("Error checking for user profile", err);
+            });
+        }
+      });
+      console.log("User signed in:", userData);
       router.push("/home");
     } catch (error) {
       console.error("Error signing in with Google:", error);

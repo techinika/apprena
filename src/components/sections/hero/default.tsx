@@ -8,15 +8,17 @@ import { MockupFrame } from "../../ui/mockup";
 import Glow from "../../ui/glow";
 import Link from "next/link";
 import { HeroVideoDialog } from "@/components/ui/hero-video";
+import { useAuth } from "@/lib/AuthContext";
 
 export default function Hero() {
+  const { user } = useAuth();
   return (
     <Section className="fade-bottom pb-0 sm:pb-0 md:pb-0 size">
       <div className="mx-auto flex max-w-container flex-col gap-12 sm:gap-24">
         <div className="flex flex-col items-center gap-6 text-center sm:gap-12">
           <Badge variant="outline" className="animate-appear">
             <span className="text-muted-foreground">We are launching soon</span>
-            <Link href="/" className="flex items-center gap-1">
+            <Link href="/register" className="flex items-center gap-1">
               Test Beta Version
               <ArrowRightIcon className="h-3 w-3" />
             </Link>
@@ -31,10 +33,10 @@ export default function Hero() {
           <div className="relative flex animate-appear justify-center gap-4 opacity-100 delay-300">
             <div className="relative flex animate-appear justify-center gap-4 opacity-100 delay-300">
               <Button variant="default" size="lg" asChild>
-                <Link href="/">Get Started</Link>
+                <Link href={!user ? "/register" : "/home"}>Get Started</Link>
               </Button>
               <Button variant="glow" size="lg" asChild>
-                <Link href="/">
+                <Link href="https://calendly.com/techinika" target="_blank">
                   <CalendarCheck className="mr-2 h-4 w-4" /> Book a Demo
                 </Link>
               </Button>
@@ -49,14 +51,14 @@ export default function Hero() {
                 <HeroVideoDialog
                   className="block dark:hidden"
                   animationStyle="from-center"
-                  videoSrc="https://www.youtube.com/embed/SP5OErxGQy4?si=4rb-zSdDkVK9qxxb"
+                  videoSrc="https://www.youtube.com/embed/TcOEt6TdoYQ?si=4rb-zSdDkVK9qxxb"
                   thumbnailSrc="https://cdn.mos.cms.futurecdn.net/WmpBUK2hFaccqf5TqJYwAe-1200-80.jpg"
                   thumbnailAlt="Hero Video"
                 />
                 <HeroVideoDialog
                   className="hidden dark:block"
                   animationStyle="from-center"
-                  videoSrc="https://www.youtube.com/embed/SP5OErxGQy4?si=4rb-zSdDkVK9qxxb"
+                  videoSrc="https://www.youtube.com/embed/TcOEt6TdoYQ?si=4rb-zSdDkVK9qxxb"
                   thumbnailSrc="https://cdn.mos.cms.futurecdn.net/WmpBUK2hFaccqf5TqJYwAe-1200-80.jpg"
                   thumbnailAlt="Hero Video"
                 />

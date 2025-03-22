@@ -13,8 +13,13 @@ import { Button } from "../../ui/button";
 import { Bell, CircleHelp, House, Moon, Search, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
+import { Institution } from "@/types/Institution";
 
-function DashboardHeader() {
+function DashboardHeader({
+  activeInstitution,
+}: {
+  activeInstitution: Institution | undefined;
+}) {
   const { setTheme } = useTheme();
   return (
     <div>
@@ -23,7 +28,7 @@ function DashboardHeader() {
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
           <Link href="/admin" className="font-semibold">
-            Techinika.
+            {activeInstitution?.name || "Select Institution"}
           </Link>
         </div>
         <div className="px-4 flex gap-3 items-center">

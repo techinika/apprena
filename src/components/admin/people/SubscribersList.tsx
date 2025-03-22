@@ -37,7 +37,6 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "../../ui/badge";
 import { ROLES, User } from "@/types/Users";
-import { data } from "./data";
 import PageHeader from "../main/PageHeader";
 
 export const columns: ColumnDef<User>[] = [
@@ -130,7 +129,6 @@ export const columns: ColumnDef<User>[] = [
   },
 ];
 
-// The component displaying the subscriber list
 export function SubscriberList() {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -139,9 +137,14 @@ export function SubscriberList() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+  const [userData, setUserData] = React.useState<User[]>([]);
+
+  React.useEffect(() => {
+    setUserData([]);
+  }, []);
 
   const table = useReactTable({
-    data: data.filter((user) => user.role === ROLES?.SUBSCRIBER),
+    data: userData.filter((user) => user.role === ROLES?.SUBSCRIBER),
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,

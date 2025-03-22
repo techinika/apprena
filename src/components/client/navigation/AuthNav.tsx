@@ -1,3 +1,5 @@
+"use client";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,7 +43,7 @@ function AuthNav() {
         <div className="px-4 flex gap-3 items-center">
           <Link href="/admin">
             <Button variant="default">
-              Institution Console
+              Manage Institution
               <ArrowRight />
             </Button>
           </Link>
