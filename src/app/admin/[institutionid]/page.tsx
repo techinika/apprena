@@ -4,12 +4,12 @@ import React from "react";
 export default async function page({
   params,
 }: {
-  params: Promise<{ institutionId: string }>;
+  params: Promise<{ institutionid: string }>;
 }) {
-  const { institutionId } = await params;
+  const { institutionid } = await params;
   return (
     <div>
-      <DashboardPage institutionId={institutionId} />
+      <DashboardPage institutionId={institutionid} />
     </div>
   );
 }

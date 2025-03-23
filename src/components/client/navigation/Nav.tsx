@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,14 +12,27 @@ import { APP } from "@/variables/globals";
 import { ArrowRight, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Menu } from "./Menu";
 import { useAuth } from "@/lib/AuthContext";
 import { UserNav } from "./user-nav";
+import Image from "next/image";
 
 function Nav() {
   const { setTheme } = useTheme();
   const { user } = useAuth();
+  const { theme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const logoSrc =
+    !mounted || theme === "light" || resolvedTheme === "light"
+      ? "/white-logo.png"
+      : "/black-logo.png";
+
   return (
     <div>
       <header className="size flex h-16 shrink-0 gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 justify-between items-center">
@@ -28,19 +41,13 @@ function Nav() {
             href="/"
             className="relative z-20 flex items-center text-lg font-medium"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="mr-2 h-6 w-6"
-            >
-              <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
-            </svg>
-            {APP?.NAME}.
+            <Image
+              src={logoSrc}
+              width={150}
+              height={300}
+              alt={APP?.DESCRIPTION}
+              className="object-cover"
+            />
           </Link>
         </div>
         <Menu />
@@ -58,7 +65,7 @@ function Nav() {
               </Button>
             </Link>
           )}
-          {user && (
+          {user && user?.email === "niguterwanda@gmail.com" && (
             <Link href="/admin">
               <Button variant="default">
                 Manage Institution

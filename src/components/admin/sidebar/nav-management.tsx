@@ -57,9 +57,7 @@ export function NavManagement({
                   {item.items?.map((subItem) => (
                     <SidebarMenuSubItem key={subItem.title}>
                       <SidebarMenuSubButton asChild>
-                        <Link href={subItem.url}>
-                          <span>{subItem.title}</span>
-                        </Link>
+                        <Link href={subItem.url}>{subItem.title}</Link>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   ))}

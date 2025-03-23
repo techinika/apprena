@@ -1,10 +1,16 @@
-import { BlogList } from "@/components/admin/blog/BlogList";
 import React from "react";
 
-function page() {
+import BlogList from "@/components/admin/blog/BlogList";
+
+async function page({
+  params,
+}: {
+  params: Promise<{ institutionid: string }>;
+}) {
+  const { institutionid } = await params;
   return (
     <div>
-      <BlogList />
+      <BlogList institutionId={institutionid} />
     </div>
   );
 }

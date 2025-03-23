@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { ModeToggle } from "../../ui/mode-toggle";
 import {
@@ -8,11 +8,25 @@ import {
   FooterContent,
 } from "../../ui/footer";
 import Link from "next/link";
-import Company from "@/components/logos/company";
 import { APP } from "@/variables/globals";
 import { Separator } from "@/components/ui/separator";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
+import Image from "next/image";
 
 export default function FooterSection() {
+  const { theme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const logoSrc =
+    !mounted || theme === "light" || resolvedTheme === "light"
+      ? "/white-logo.png"
+      : "/black-logo.png";
+
   return (
     <footer className="w-full bg-background size">
       <Separator />
@@ -20,7 +34,13 @@ export default function FooterSection() {
         <Footer>
           <FooterContent className="flex justify-between gap-3 flex-wrap">
             <FooterColumn className="col-span-2 sm:col-span-3 md:col-span-1">
-              <Company />
+              <Image
+                src={logoSrc}
+                width={200}
+                height={300}
+                alt={APP?.DESCRIPTION}
+                className="object-cover"
+              />
             </FooterColumn>
             <FooterColumn>
               <h3 className="text-md pt-1 font-semibold">Product</h3>

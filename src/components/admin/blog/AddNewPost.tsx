@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "../../ui/button";
 import { Label } from "../../ui/label";
 import {
@@ -12,14 +12,150 @@ import {
 } from "../../ui/select";
 import Editor from "./Editor";
 import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Paperclip } from "lucide-react";
 import { Calendar } from "../../ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import PageHeader from "../main/PageHeader";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  FileInput,
+  FileUploader,
+  FileUploaderContent,
+  FileUploaderItem,
+} from "@/components/ui/file-uploader";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Switch } from "@/components/ui/switch";
+import { useAuth } from "@/lib/AuthContext";
+import { collection, doc, setDoc } from "firebase/firestore";
+import { toast } from "sonner";
+import { db } from "@/db/firebase";
 
-const AddNewPost = () => {
+export const FileSvgDraw = () => {
+  return (
+    <>
+      <svg
+        className="w-8 h-8 mb-3 text-gray-500 dark:text-gray-400"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 20 16"
+      >
+        <path
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+        />
+      </svg>
+      <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
+        <span className="font-semibold">Click to upload</span>
+        &nbsp; or drag and drop
+      </p>
+      <p className="text-xs text-gray-500 dark:text-gray-400">
+        SVG, PNG, JPG or GIF
+      </p>
+    </>
+  );
+};
+
+const formSchema = z.object({
+  title: z.string(),
+  content: z.string(),
+  photoURL: z.string(),
+  isFeatured: z.string(),
+  publishedAt: z.string(),
+  visibility: z.string(),
+  status: z.string(),
+  writtenBy: z.string(),
+  summary: z.string().max(200).min(4),
+  tags: z.string(),
+  category: z.string(),
+  institutionOwning: z.string(),
+});
+
+type formValues = z.infer<typeof formSchema>;
+
+const AddNewPost = ({ institutionId }: { institutionId: string }) => {
+  const { user } = useAuth();
   const [date, setDate] = React.useState<Date>();
+  const [files, setFiles] = useState<File[] | null>(null);
+  const articleCollection = collection(db, "articles");
+
+  const dropZoneConfig = {
+    maxFiles: 1,
+    maxSize: 1024 * 1024 * 4,
+    multiple: false,
+  };
+
+  const form = useForm<formValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: "",
+      content: "",
+      photoURL: "",
+      isFeatured: "false",
+      publishedAt: "",
+      visibility: "private",
+      status: "draft",
+      summary: "",
+      tags: "",
+      category: "",
+      institutionOwning: institutionId,
+      writtenBy: user?.uid,
+    },
+    mode: "onChange",
+  });
+
+  const processArticleCreation = async (data: formValues) => {
+    try {
+      // if (!data.title || !data.content) {
+      //   toast("Title, and content are required.");
+      //   return;
+      // }
+      const photoURL =
+        "https://media.licdn.com/dms/image/v2/D5612AQFGrpxALY6I6g/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1677692208884?e=2147483647&v=beta&t=R8FVCwF2m3MIPmp1J0tLOxhAyPdsw-_Bhs7dIhwahYE";
+
+      const slug = data?.title
+        .toLowerCase()
+        .replace(/[^\w\s]/g, "")
+        .replace(/\s+/g, "-")
+        .trim();
+
+      await setDoc(doc(articleCollection, slug), {
+        title: data?.title,
+        content: data?.content || "",
+        photoURL: photoURL || "/placeholder.jpg",
+        isFeatured: data?.isFeatured || false,
+        publishedAt: data?.publishedAt || "",
+        visibility: data?.visibility || "private",
+        writtenBy: data?.writtenBy || user?.uid,
+        summary: data?.summary || "",
+        tags: data?.tags || "",
+        category: data?.category || "",
+        institutionOwning: institutionId || data?.institutionOwning,
+        status: data?.status === "draft" ? "draft" : "published",
+        createdAt: new Date().toISOString(),
+      });
+      toast("Article created successfully");
+      form.reset();
+    } catch (error) {
+      console.error("Error processing article creation:", error);
+    }
+  };
 
   const visibility = [
     {
@@ -43,89 +179,285 @@ const AddNewPost = () => {
     },
   ];
 
+  const handleSaveDraft = (data: formValues) => {
+    const newData = {
+      ...data,
+      visibility: "draft",
+      publishedAt: "",
+    };
+
+    processArticleCreation(newData);
+  };
+
+  const handlePublish = (data: formValues) => {
+    const newData = {
+      ...data,
+      visibility: "published",
+      publishedAt: new Date().toISOString(),
+    };
+
+    processArticleCreation(newData);
+  };
+
   return (
     <div className="space-y-4 p-8 pt-6">
       <PageHeader
         title="Add New Post"
         newItem={true}
-        onPublish={() => console.log("clicked")}
+        onPublish={() => {
+          console.log(form.getValues());
+          console.log(institutionId);
+          handlePublish(form.getValues());
+        }}
         onExport={() => console.log("clicked")}
-        saveDraft={() => console.log("draft")}
+        saveDraft={() => handleSaveDraft(form.getValues())}
       />
-      <div className="flex items-start justify-between gap-3">
-        <div className="w-[80%]">
-          <input
-            placeholder="Enter the post title here..."
-            className="text-2xl font-bold py-5 mb-1 w-full"
-          />
-          <Editor />
+      <Form {...form}>
+        <div className="flex items-start justify-between gap-3">
+          <div className="w-[80%]">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      placeholder="This is the title of the post"
+                      className="text-4xl font-bold py-5 mb-3 w-full"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="content"
+              render={() => (
+                <FormItem>
+                  <FormControl>
+                    <Editor />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="w-[20%] p-5 rounded border border-gray-100">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col space-y-1.5 gap-1">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="visibility" className="font-bold">
+                    Cover Image
+                  </Label>
+                  <Button size="xs">Upload</Button>
+                </div>
+                <FileUploader
+                  value={files}
+                  onValueChange={setFiles}
+                  dropzoneOptions={dropZoneConfig}
+                  className="relative bg-background rounded-lg p-2"
+                >
+                  <FileInput className="outline-dashed outline-1 outline-white">
+                    <div className="flex items-center justify-center flex-col pt-3 pb-4 w-full ">
+                      <FileSvgDraw />
+                    </div>
+                  </FileInput>
+                  <FileUploaderContent>
+                    {files &&
+                      files.length > 0 &&
+                      files.map((file, i) => (
+                        <FileUploaderItem key={i} index={i}>
+                          <Paperclip className="h-4 w-4 stroke-current" />
+                          <span>{file.name}</span>
+                        </FileUploaderItem>
+                      ))}
+                  </FileUploaderContent>
+                </FileUploader>
+              </div>
+              <FormField
+                control={form.control}
+                name="isFeatured"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <div className="flex items-center space-x-2">
+                        <Switch id="feature-article" {...field} />
+                        <Label htmlFor="feature-article">
+                          Feature the article
+                        </Label>
+                      </div>
+                    </FormControl>
+                    <FormDescription>
+                      Featured Article will appear on the top
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="publishedAt"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-bold">Publish Date</FormLabel>
+                    <FormControl>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full justify-start text-left font-normal",
+                              !date && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon />
+                            {date ? (
+                              format(date, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent {...field} className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            selected={date}
+                            onSelect={setDate}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="visibility"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-bold">Visibility</FormLabel>
+                    <FormControl>
+                      <Select>
+                        <SelectTrigger id="visibility">
+                          <SelectValue placeholder="Select visibility" />
+                        </SelectTrigger>
+                        <SelectContent position="popper">
+                          {visibility?.map((item) => (
+                            <SelectItem
+                              key={item?.value}
+                              {...field}
+                              value={item?.value}
+                            >
+                              {item?.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="writtenBy"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-bold">Author</FormLabel>
+                    <FormControl>
+                      <Select>
+                        <SelectTrigger id="visibility">
+                          <SelectValue placeholder="Select author" />
+                        </SelectTrigger>
+                        <SelectContent position="popper">
+                          {publishers?.map((item) => (
+                            <SelectItem
+                              {...field}
+                              key={item?.value}
+                              value={item?.value}
+                            >
+                              {item?.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="summary"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-bold">Summary</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder={`Summary of the article`}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Not more than 200 characters
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="tags"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-bold">Tags</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder={`knowledge, life, skills, etc`}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>Separate tags with comma</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-bold">Category</FormLabel>
+                    <FormControl>
+                      <Select>
+                        <SelectTrigger id="visibility">
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent position="popper">
+                          {publishers?.map((item) => (
+                            <SelectItem
+                              key={item?.value}
+                              {...field}
+                              value={item?.value}
+                            >
+                              {item?.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
         </div>
-        <div className="w-[20%] p-5 rounded border border-gray-100">
-          <form className="flex flex-col gap-4">
-            <div className="flex flex-col space-y-1.5 gap-1">
-              <Label htmlFor="visibility" className="font-bold">
-                Publishing Date
-              </Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !date && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon />
-                    {date ? format(date, "PPP") : <span>Pick a date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div className="flex flex-col space-y-1.5 gap-1">
-              <Label htmlFor="visibility" className="font-bold">
-                Visibility
-              </Label>
-              <Select>
-                <SelectTrigger id="visibility">
-                  <SelectValue placeholder="Select visibility" />
-                </SelectTrigger>
-                <SelectContent position="popper">
-                  {visibility?.map((item) => (
-                    <SelectItem key={item?.value} value={item?.value}>
-                      {item?.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex flex-col space-y-1.5 gap-1">
-              <Label htmlFor="visibility" className="font-bold">
-                Publishers
-              </Label>
-              <Select>
-                <SelectTrigger id="visibility">
-                  <SelectValue placeholder="Select publisher" />
-                </SelectTrigger>
-                <SelectContent position="popper">
-                  {publishers?.map((item) => (
-                    <SelectItem key={item?.value} value={item?.value}>
-                      {item?.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </form>
-        </div>
-      </div>
+      </Form>
     </div>
   );
 };
