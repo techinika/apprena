@@ -4,7 +4,6 @@ import { AppSidebar } from "@/components/admin/sidebar/app-sidebar";
 
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import DashboardHeader from "./DashboardHeader";
-import ProtectedRoute from "@/lib/ProtectedRoute";
 import React from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
@@ -12,6 +11,7 @@ import { db } from "@/db/firebase";
 import { formatDistanceToNow } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { Institution } from "@/types/Institution";
+import AdminRoute from "@/lib/AdminRoute";
 
 export default function Page({
   institutionId,
@@ -56,7 +56,7 @@ export default function Page({
 
   return (
     <SidebarProvider>
-      <ProtectedRoute>
+      <AdminRoute>
         <AppSidebar
           institutions={institutions}
           activeInstitution={activeTeam}
@@ -67,7 +67,7 @@ export default function Page({
           <DashboardHeader activeInstitution={activeTeam} />
           <div className="flex flex-1 flex-col gap-4 p-4 pt-0">{children}</div>
         </SidebarInset>
-      </ProtectedRoute>
+      </AdminRoute>
     </SidebarProvider>
   );
 }

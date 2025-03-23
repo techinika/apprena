@@ -1,12 +1,12 @@
 import MainPage from "@/components/admin/MainPage";
-import ProtectedRoute from "@/lib/ProtectedRoute";
+import AdminRoute from "@/lib/AdminRoute";
 import React from "react";
 
 function page() {
   return (
-    <ProtectedRoute>
+    <AdminRoute>
       <MainPage />
-    </ProtectedRoute>
+    </AdminRoute>
   );
 }
 
