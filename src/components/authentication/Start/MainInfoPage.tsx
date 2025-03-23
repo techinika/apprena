@@ -31,11 +31,20 @@ import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { Switch } from "@/components/ui/switch";
 import Loading from "@/app/loading";
-import { collection, doc, serverTimestamp, setDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "@/db/firebase";
 import ConfirmPayment from "./ConfirmPayment";
 import { useRouter } from "next/navigation";
+import { InvoiceData } from "@/types/Payment";
+import useIremboPay from "@/hooks/use-irembo-pay";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   name: z
@@ -58,11 +67,14 @@ type formValues = z.infer<typeof formSchema>;
 
 function MainInfoPage() {
   const router = useRouter();
+  const scriptLoaded = useIremboPay();
   const [selectedPlan, setSelectedPlan] = useState<Plans>();
   const [amount, setAmount] = useState(selectedPlan?.price);
   const [period, setPeriod] = useState("month");
   const [loading, setLoading] = useState(false);
   const [pendingPayment, setPendingPayment] = useState(false);
+  const [invoiceData, setInvoiceData] = useState<InvoiceData>();
+  const [newUser, setNewUser] = useState<string>("");
   const profileCollection = collection(db, "profile");
   const invoiceCollection = collection(db, "invoices");
   const subscriptionCollection = collection(db, "subscriptions");
@@ -153,11 +165,12 @@ function MainInfoPage() {
         dataValues?.email,
         `${process.env.NEXT_PUBLIC_TEMPORARY_PASS}`
       );
+      
       const userId = userCredential.user.uid;
 
-      console.log(userCredential);
+      setNewUser(userId);
 
-      const userCreate = await setDoc(doc(profileCollection, userId), {
+      await setDoc(doc(profileCollection, userId), {
         uid: userId,
         displayName: dataValues?.name || "Anonymous User",
         email: dataValues?.email,
@@ -220,8 +233,6 @@ function MainInfoPage() {
         },
       });
 
-      console.log(userCreate);
-
       await setDoc(doc(invoiceCollection, invoiceId), {
         invoiceId: invoiceResponse?.data?.invoiceNumber,
         transactionId: invoiceId,
@@ -245,6 +256,8 @@ function MainInfoPage() {
         plan: selectedPlan?.id,
       });
 
+      setInvoiceData(invoiceResponse?.data);
+
       setPendingPayment(true);
     } catch (error: any) {
       console.error("Error handling subscription:", error);
@@ -254,25 +267,46 @@ function MainInfoPage() {
     }
   }
 
-  const initiatePayment = async () => {
-    const response = await fetch("/api/pay", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        accountIdentifier: "0781110011",
-        paymentProvider: "MTN",
-        invoiceNumber: "880310977877",
-        transactionReference: "MTN_001",
-      }),
-    });
+  const makePayment = () => {
+    setLoading(true);
+    if (!scriptLoaded) {
+      alert("Payment script is still loading. Please wait...");
+      return;
+    }
 
-    const data = await response.json();
-    if (response.ok) {
-      console.log("Payment initiated successfully", data);
+    if (globalThis?.IremboPay) {
+      globalThis.IremboPay.initiate({
+        publicKey: process.env.NEXT_PUBLIC_PAYMENT_PUBLIC_KEY,
+        invoiceNumber: invoiceData?.invoiceNumber,
+        locale: globalThis.IremboPay.locale.EN,
+        callback: async (err: any) => {
+          if (!err) {
+            await updateDoc(
+              doc(invoiceCollection, invoiceData?.transactionId),
+              {
+                paymentStatus: "PAID",
+                paidAt: new Date(),
+              }
+            );
+
+            await updateDoc(doc(subscriptionCollection, newUser), {
+              status: "active",
+              paidAt: new Date(),
+            });
+
+            toast("Payment successful!");
+            setLoading(false);
+
+            globalThis.location.href = `/start/payment/${invoiceData?.invoiceNumber}`;
+          } else {
+            console.error("Payment error:", err);
+            alert("Payment failed. Please try again.");
+            setLoading(false);
+          }
+        },
+      });
     } else {
-      console.error("Error:", data.message);
+      alert("Payment service not loaded. Please try again.");
     }
   };
 
@@ -283,12 +317,12 @@ function MainInfoPage() {
       {pendingPayment && (
         <ConfirmPayment
           open={pendingPayment}
-          action={() => {
+          cancel={() => {
             setPendingPayment(false);
             router.push("/login");
           }}
-          cancel={() => {
-            initiatePayment();
+          action={() => {
+            makePayment();
           }}
         />
       )}

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { cn } from "@/lib/utils";
 import { Section } from "../../ui/section";
@@ -100,9 +100,7 @@ export default function Pricing() {
                       size="lg"
                       asChild
                     >
-                      <Link
-                        href={plan?.price == 0 ? "/register" : "/subscribe"}
-                      >
+                      <Link href={plan?.price == 0 ? "/register" : "/start"}>
                         {" "}
                         {plan?.price == 0
                           ? "Get Started For Free"
