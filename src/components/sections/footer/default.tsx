@@ -81,16 +81,32 @@ export default function FooterSection() {
             </FooterColumn>
             <FooterColumn>
               <h3 className="text-md pt-1 font-semibold">Contact Us</h3>
-              <Link href="/" className="text-sm text-muted-foreground">
+              <Link
+                href="https://linkedin.com/company/techinika"
+                target="_blank"
+                className="text-sm text-muted-foreground"
+              >
                 LinkedIn
               </Link>
-              <Link href="/" className="text-sm text-muted-foreground">
+              <Link
+                target="_blank"
+                href="https://x.com/techinika"
+                className="text-sm text-muted-foreground"
+              >
                 X (Twitter)
               </Link>
-              <Link href="/" className="text-sm text-muted-foreground">
+              <Link
+                href="https://instagram.com/techinika"
+                target="_blank"
+                className="text-sm text-muted-foreground"
+              >
                 Instagram
               </Link>
-              <Link href="/" className="text-sm text-muted-foreground">
+              <Link
+                href="https://facebook.com/techinika"
+                target="_blank"
+                className="text-sm text-muted-foreground"
+              >
                 Facebook
               </Link>
             </FooterColumn>
