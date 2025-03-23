@@ -65,7 +65,7 @@ function Nav() {
               </Button>
             </Link>
           )}
-          {user && user?.email === "niguterwanda@gmail.com" && (
+          {user && user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL && (
             <Link href="/admin">
               <Button variant="default">
                 Manage Institution
