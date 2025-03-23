@@ -16,8 +16,10 @@ import { UserNav } from "./user-nav";
 import { Button } from "@/components/ui/button";
 import AuthMenu from "./Auth.Menu";
 import Image from "next/image";
+import { useAuth } from "@/lib/AuthContext";
 
 function AuthNav() {
+  const { user } = useAuth();
   const { setTheme, theme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -48,12 +50,14 @@ function AuthNav() {
         </div>
         <AuthMenu />
         <div className="px-4 flex gap-3 items-center">
-          <Link href="/admin">
-            <Button variant="default">
-              Manage Institution
-              <ArrowRight />
-            </Button>
-          </Link>
+          {user && user?.email === "niguterwanda@gmail.com" && (
+            <Link href="/admin">
+              <Button variant="default">
+                Manage Institution
+                <ArrowRight />
+              </Button>
+            </Link>
+          )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="icon">

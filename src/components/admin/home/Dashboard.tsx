@@ -20,6 +20,7 @@ import { Institution } from "@/types/Institution";
 import { collection, doc, DocumentData, getDoc } from "firebase/firestore";
 import { useAuth } from "@/lib/AuthContext";
 import { db } from "@/db/firebase";
+import Loading from "@/app/loading";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -64,9 +65,11 @@ export default function DashboardPage({
     getInstitution();
   }, [institutionId, user, inCollection, router]);
 
-  // if (loading) return <Loading />;
+  if (loading) return <Loading />;
 
-  console.log(institution);
+  if (!loading) {
+    console.log(institution);
+  }
 
   return (
     <>

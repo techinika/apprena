@@ -32,6 +32,7 @@ function Nav() {
     !mounted || theme === "light" || resolvedTheme === "light"
       ? "/white-logo.png"
       : "/black-logo.png";
+
   return (
     <div>
       <header className="size flex h-16 shrink-0 gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 justify-between items-center">
@@ -64,7 +65,7 @@ function Nav() {
               </Button>
             </Link>
           )}
-          {user && (
+          {user && user?.email === "niguterwanda@gmail.com" && (
             <Link href="/admin">
               <Button variant="default">
                 Manage Institution
