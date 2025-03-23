@@ -19,7 +19,6 @@ import { useEffect, useState } from "react";
 import { Institution } from "@/types/Institution";
 import { collection, doc, DocumentData, getDoc } from "firebase/firestore";
 import { useAuth } from "@/lib/AuthContext";
-import Loading from "@/app/loading";
 import { db } from "@/db/firebase";
 
 export const metadata: Metadata = {
@@ -65,7 +64,7 @@ export default function DashboardPage({
     getInstitution();
   }, [institutionId, user, inCollection, router]);
 
-  if (loading) return <Loading />;
+  // if (loading) return <Loading />;
 
   console.log(institution);
 

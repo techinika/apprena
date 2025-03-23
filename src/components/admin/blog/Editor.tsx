@@ -14,14 +14,14 @@ function MenuBar() {
   }
 
   return (
-    <div className="flex flex-wrap gap-2 p-2 border-b border-gray-200 bg-gray-50">
+    <div className="flex flex-wrap gap-2 p-2 border-b border-gray-200">
       <button
         onClick={() => editor.chain().focus().toggleBold().run()}
         disabled={!editor.can().chain().focus().toggleBold().run()}
         className={`p-2 rounded ${
           editor.isActive("bold")
             ? "bg-blue-500 text-white"
-            : "bg-white"
+            : "bg-white dark:bg-gray-800"
         }`}
       >
         Bold
@@ -30,7 +30,9 @@ function MenuBar() {
         onClick={() => editor.chain().focus().toggleItalic().run()}
         disabled={!editor.can().chain().focus().toggleItalic().run()}
         className={`p-2 rounded ${
-          editor.isActive("italic") ? "bg-blue-500 text-white" : "bg-white"
+          editor.isActive("italic")
+            ? "bg-blue-500 text-white"
+            : "bg-white dark:bg-gray-800"
         }`}
       >
         Italic
@@ -39,7 +41,9 @@ function MenuBar() {
         onClick={() => editor.chain().focus().toggleStrike().run()}
         disabled={!editor.can().chain().focus().toggleStrike().run()}
         className={`p-2 rounded ${
-          editor.isActive("strike") ? "bg-blue-500 text-white" : "bg-white"
+          editor.isActive("strike")
+            ? "bg-blue-500 text-white"
+            : "bg-white dark:bg-gray-800"
         }`}
       >
         Strike
@@ -48,27 +52,31 @@ function MenuBar() {
         onClick={() => editor.chain().focus().toggleCode().run()}
         disabled={!editor.can().chain().focus().toggleCode().run()}
         className={`p-2 rounded ${
-          editor.isActive("code") ? "bg-blue-500 text-white" : "bg-white"
+          editor.isActive("code")
+            ? "bg-blue-500 text-white"
+            : "bg-white dark:bg-gray-800"
         }`}
       >
         Code
       </button>
       <button
         onClick={() => editor.chain().focus().unsetAllMarks().run()}
-        className="p-2 rounded bg-white"
+        className="p-2 rounded bg-white dark:bg-gray-800"
       >
         Clear marks
       </button>
       <button
         onClick={() => editor.chain().focus().clearNodes().run()}
-        className="p-2 rounded bg-white"
+        className="p-2 rounded bg-white dark:bg-gray-800"
       >
         Clear nodes
       </button>
       <button
         onClick={() => editor.chain().focus().setParagraph().run()}
         className={`p-2 rounded ${
-          editor.isActive("paragraph") ? "bg-blue-500 text-white" : "bg-white"
+          editor.isActive("paragraph")
+            ? "bg-blue-500 text-white"
+            : "bg-white dark:bg-gray-800"
         }`}
       >
         Paragraph
@@ -78,7 +86,7 @@ function MenuBar() {
         className={`p-2 rounded ${
           editor.isActive("heading", { level: 1 })
             ? "bg-blue-500 text-white"
-            : "bg-white"
+            : "bg-white dark:bg-gray-800"
         }`}
       >
         H1
@@ -88,7 +96,7 @@ function MenuBar() {
         className={`p-2 rounded ${
           editor.isActive("heading", { level: 2 })
             ? "bg-blue-500 text-white"
-            : "bg-white"
+            : "bg-white dark:bg-gray-800"
         }`}
       >
         H2
@@ -98,7 +106,7 @@ function MenuBar() {
         className={`p-2 rounded ${
           editor.isActive("heading", { level: 3 })
             ? "bg-blue-500 text-white"
-            : "bg-white"
+            : "bg-white dark:bg-gray-800"
         }`}
       >
         H3
@@ -108,7 +116,7 @@ function MenuBar() {
         className={`p-2 rounded ${
           editor.isActive("heading", { level: 4 })
             ? "bg-blue-500 text-white"
-            : "bg-white"
+            : "bg-white dark:bg-gray-800"
         }`}
       >
         H4
@@ -118,7 +126,7 @@ function MenuBar() {
         className={`p-2 rounded ${
           editor.isActive("heading", { level: 5 })
             ? "bg-blue-500 text-white"
-            : "bg-white"
+            : "bg-white dark:bg-gray-800"
         }`}
       >
         H5
@@ -128,7 +136,7 @@ function MenuBar() {
         className={`p-2 rounded ${
           editor.isActive("heading", { level: 6 })
             ? "bg-blue-500 text-white"
-            : "bg-white"
+            : "bg-white dark:bg-gray-800"
         }`}
       >
         H6
@@ -136,7 +144,9 @@ function MenuBar() {
       <button
         onClick={() => editor.chain().focus().toggleBulletList().run()}
         className={`p-2 rounded ${
-          editor.isActive("bulletList") ? "bg-blue-500 text-white" : "bg-white"
+          editor.isActive("bulletList")
+            ? "bg-blue-500 text-white"
+            : "bg-white dark:bg-gray-800"
         }`}
       >
         Bullet list
@@ -144,7 +154,9 @@ function MenuBar() {
       <button
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
         className={`p-2 rounded ${
-          editor.isActive("orderedList") ? "bg-blue-500 text-white" : "bg-white"
+          editor.isActive("orderedList")
+            ? "bg-blue-500 text-white"
+            : "bg-white dark:bg-gray-800"
         }`}
       >
         Ordered list
@@ -152,7 +164,9 @@ function MenuBar() {
       <button
         onClick={() => editor.chain().focus().toggleCodeBlock().run()}
         className={`p-2 rounded ${
-          editor.isActive("codeBlock") ? "bg-blue-500 text-white" : "bg-white"
+          editor.isActive("codeBlock")
+            ? "bg-blue-500 text-white"
+            : "bg-white dark:bg-gray-800"
         }`}
       >
         Code block
@@ -160,34 +174,36 @@ function MenuBar() {
       <button
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
         className={`p-2 rounded ${
-          editor.isActive("blockquote") ? "bg-blue-500 text-white" : "bg-white"
+          editor.isActive("blockquote")
+            ? "bg-blue-500 text-white"
+            : "bg-white dark:bg-gray-800"
         }`}
       >
         Blockquote
       </button>
       <button
         onClick={() => editor.chain().focus().setHorizontalRule().run()}
-        className="p-2 rounded bg-white"
+        className="p-2 rounded bg-white dark:bg-gray-800"
       >
         Horizontal rule
       </button>
       <button
         onClick={() => editor.chain().focus().setHardBreak().run()}
-        className="p-2 rounded bg-white"
+        className="p-2 rounded bg-white dark:bg-gray-800"
       >
         Hard break
       </button>
       <button
         onClick={() => editor.chain().focus().undo().run()}
         disabled={!editor.can().chain().focus().undo().run()}
-        className="p-2 rounded bg-white"
+        className="p-2 rounded bg-white dark:bg-gray-800"
       >
         Undo
       </button>
       <button
         onClick={() => editor.chain().focus().redo().run()}
         disabled={!editor.can().chain().focus().redo().run()}
-        className="p-2 rounded bg-white"
+        className="p-2 rounded bg-white dark:bg-gray-800"
       >
         Redo
       </button>
@@ -196,7 +212,7 @@ function MenuBar() {
         className={`p-2 rounded ${
           editor.isActive("textStyle", { color: "#958DF1" })
             ? "bg-blue-500 text-white"
-            : "bg-white"
+            : "bg-white dark:bg-gray-800"
         }`}
       >
         Purple

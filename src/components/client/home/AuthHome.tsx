@@ -21,8 +21,13 @@ function AuthHome() {
           <div className="p-3"></div>
           <SectionHeader title="Assigned Articles" buttonText="Explore More" />
           {/* <BlogList /> */}
+          <div className="p-3"></div>
           <SectionHeader title="Enrolled Training" buttonText="Explore More" />
           {/* <BlogList /> */}
+          <div className="p-3"></div>
+          <SectionHeader title="Challenges Participating" buttonText="Explore More" />
+          {/* <BlogList /> */}
+          <div className="p-3"></div>
         </div>
         <Card className="col-span-2">
           <CardHeader>

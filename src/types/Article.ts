@@ -1,10 +1,26 @@
 export type Article = {
   id: string;
   title: string;
-  status: "draft" | "published" | "deleted";
+  slug: string;
+  content: string;
+  summary?: string;
+  coverImage?: string;
   availability: "public" | "private";
-  author: string;
-  body: string;
+  status: "draft" | "published";
+  writtenBy: string;
+  institutionOwning: string;
+  tags?: string;
+  createdAt: Date;
+  updatedAt?: Date;
+  publishedAt?: Date;
+  views?: number;
+  likes?: number;
+  photoURL?: string;
+  commentsCount?: number;
+  readingTime?: string;
+  isFeatured?: boolean;
+  relatedArticles?: string[];
+  category: string;
 };
 
 export type Category = {

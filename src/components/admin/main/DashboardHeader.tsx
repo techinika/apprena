@@ -14,12 +14,14 @@ import { Bell, CircleHelp, House, Moon, Search, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { Institution } from "@/types/Institution";
+import { useRouter } from "next/navigation";
 
 function DashboardHeader({
   activeInstitution,
 }: {
   activeInstitution: Institution | undefined;
 }) {
+  const router = useRouter();
   const { setTheme } = useTheme();
   return (
     <div>
@@ -27,16 +29,21 @@ function DashboardHeader({
         <div className="flex items-center gap-2 px-4">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
-          <Link href="/admin" className="font-semibold">
+          <Link
+            href={`/admin/${activeInstitution?.id}`}
+            className="font-semibold"
+          >
             {activeInstitution?.name || "Select Institution"}
           </Link>
         </div>
         <div className="px-4 flex gap-3 items-center">
-          <Link href="/home">
-            <Button size="icon" variant="outline">
-              <House className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-0 dark:scale-100" />
-            </Button>
-          </Link>
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={() => router.push("/home")}
+          >
+            <House className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-0 dark:scale-100" />
+          </Button>
           <Button size="icon" variant="outline">
             <Bell className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-0 dark:scale-100" />
             <span className="sr-only">Notifications</span>
