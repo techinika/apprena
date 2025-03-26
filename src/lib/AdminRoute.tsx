@@ -1,9 +1,9 @@
 "use client";
 
 import Loading from "@/app/loading";
-import { useAuth } from "@/hooks/use-auth";
 import { redirect } from "next/navigation";
 import { useEffect } from "react";
+import { useAuth } from "./AuthContext";
 
 export default function AdminRoute({
   children,

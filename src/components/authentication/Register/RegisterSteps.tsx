@@ -19,7 +19,7 @@ import {
   onAuthStateChanged,
 } from "firebase/auth";
 import { auth, db, googleProvider } from "@/db/firebase";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -38,6 +38,7 @@ export function RegisterSteps({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -49,7 +50,7 @@ export function RegisterSteps({
   const handleRegister = async (data: LoginFormValues) => {
     try {
       await createUserWithEmailAndPassword(auth, data.email, data.password);
-      redirect("/login");
+      router.push("/login");
     } catch (error: unknown) {
       if (typeof error === "object" && error !== null && "code" in error) {
         const firebaseError = error as AuthError;
@@ -148,7 +149,7 @@ export function RegisterSteps({
             });
         }
       });
-      redirect("/home");
+      router.push("/home");
     } catch (error) {
       console.error("Error signing in with Google:", error);
     }

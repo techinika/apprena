@@ -19,7 +19,7 @@ import {
   onAuthStateChanged,
 } from "firebase/auth";
 import { auth, db, googleProvider } from "@/db/firebase";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -37,6 +37,7 @@ export function UserAuthForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -137,7 +138,7 @@ export function UserAuthForm({
             });
         }
       });
-      redirect("/home");
+      router.push("/home");
     } catch (error: unknown) {
       if (typeof error === "object" && error !== null && "code" in error) {
         const firebaseError = error as AuthError;
@@ -248,7 +249,7 @@ export function UserAuthForm({
             });
         }
       });
-      redirect("/home");
+      router.push("/home");
     } catch (error) {
       console.error("Error signing in with Google:", error);
     }
