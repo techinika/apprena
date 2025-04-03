@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Institution } from "@/types/Institution";
 import { usePathname } from "next/navigation";
+import { setCookies } from "@/lib/Cookies";
 
 export function TeamSwitcher({
   activeInstitution,
@@ -34,11 +35,15 @@ export function TeamSwitcher({
   const { isMobile } = useSidebar();
 
   const handleTeamSwitch = (team: Institution) => {
+    setCookies({
+      institution: {
+        ...team,
+      },
+    });
     setActiveInstitution(team);
     const oldPathArray = pathname.split("/");
     oldPathArray[2] = team?.id;
     const newPath = oldPathArray.join("/");
-    console.log(newPath);
 
     globalThis.location.href = newPath;
   };
@@ -59,7 +64,9 @@ export function TeamSwitcher({
                 <span className="truncate font-semibold">
                   {activeInstitution?.name || "Select Institution"}
                 </span>
-                <span className="truncate text-xs">Enterprise</span>
+                <span className="truncate text-xs">
+                  {activeInstitution?.institutionType || "Enterprise"}
+                </span>
               </div>
               <ChevronsUpDown className="ml-auto" />
             </SidebarMenuButton>

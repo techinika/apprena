@@ -4,6 +4,7 @@
 
 * {
   outline: none;
+  box-sizing: border-box;
 }
 
 body {
@@ -106,4 +107,111 @@ body {
 
 .size {
   @apply w-2/3 mx-auto;
+}
+
+.article-content {
+  line-height: 1.75;
+  font-size: 1.125rem;
+}
+
+/* Headings */
+.article-content h1 {
+  @apply text-3xl font-bold my-5;
+}
+
+.article-content h2 {
+  @apply text-2xl font-bold my-2;
+}
+
+.article-content h3 {
+  @apply text-xl font-bold;
+}
+
+.article-content h4 {
+  font-size: 1.125rem;
+  font-weight: bold;
+  margin-top: 1rem;
+}
+
+/* Paragraphs */
+.article-content p {
+  @apply text-base;
+}
+
+/* Blockquotes */
+.article-content blockquote {
+  border-left: 4px solid currentColor;
+  padding-left: 1rem;
+  font-style: italic;
+  opacity: 0.8;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 1rem;
+  margin: 1.5rem 0;
+}
+
+/* Lists */
+.article-content ul {
+  list-style-type: disc;
+  margin-left: 1.5rem;
+}
+
+.article-content ol {
+  list-style-type: decimal;
+  margin-left: 1.5rem;
+}
+
+/* Code & Preformatted Text */
+.article-content code {
+  background: rgba(0, 0, 0, 0.1);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.95rem;
+}
+
+.article-content pre {
+  background: rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  border-radius: 6px;
+  font-family: monospace;
+  overflow-x: auto;
+}
+
+/* Horizontal Rule */
+.article-content hr {
+  border: none;
+  border-top: 1px solid currentColor;
+  margin: 1.5rem 0;
+  opacity: 0.3;
+}
+
+/* Images */
+.article-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+/* Tables */
+.article-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+}
+
+.article-content th,
+.article-content td {
+  padding: 0.75rem;
+  border: 1px solid currentColor;
+}
+
+.article-content th {
+  font-weight: bold;
+  text-align: left;
+}
+
+/* Links */
+.article-content a {
+  text-decoration: underline;
 }

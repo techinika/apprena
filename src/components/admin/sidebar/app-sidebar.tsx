@@ -25,7 +25,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { NavCommunication } from "./app-communication";
-import { redirect, useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
 import { Institution } from "@/types/Institution";
 
@@ -42,18 +42,17 @@ export function AppSidebar({
   institutionId: string;
 }) {
   const { user } = useAuth();
-  const router = useRouter();
 
   React.useEffect(() => {
-    if (!institutionId || !user) return;
+    if (!institutionId || !user || !activeInstitution) return;
 
-    const isMember = institutions.some((inst) => inst.id === institutionId);
-    const isCurrentTeam = activeInstitution?.id === institutionId;
+    const isCurrentTeam = activeInstitution.id === institutionId;
+    const isMember = activeInstitution?.organizationAdmins?.includes(user?.uid);
 
-    if (!isMember && !isCurrentTeam) {
+    if (!isCurrentTeam || !isMember) {
       redirect("/admin");
     }
-  }, [institutionId, user, router, activeInstitution, institutions]);
+  }, [institutionId, user, activeInstitution]);
 
   const data = {
     navMain: [
