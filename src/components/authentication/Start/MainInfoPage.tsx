@@ -165,7 +165,7 @@ function MainInfoPage() {
         dataValues?.email,
         `${process.env.NEXT_PUBLIC_TEMPORARY_PASS}`
       );
-      
+
       const userId = userCredential.user.uid;
 
       setNewUser(userId);
@@ -274,11 +274,11 @@ function MainInfoPage() {
       return;
     }
 
-    if (globalThis?.IremboPay) {
-      globalThis.IremboPay.initiate({
+    if ((globalThis as any)?.IremboPay) {
+      (globalThis as any).IremboPay.initiate({
         publicKey: process.env.NEXT_PUBLIC_PAYMENT_PUBLIC_KEY,
         invoiceNumber: invoiceData?.invoiceNumber,
-        locale: globalThis.IremboPay.locale.EN,
+        locale: (globalThis as any).IremboPay.locale.EN,
         callback: async (err: any) => {
           if (!err) {
             await updateDoc(
