@@ -122,10 +122,6 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
 
   const processArticleCreation = async (data: formValues) => {
     try {
-      // if (!data.title || !data.content) {
-      //   toast("Title, and content are required.");
-      //   return;
-      // }
       const photoURL =
         "https://media.licdn.com/dms/image/v2/D5612AQFGrpxALY6I6g/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1677692208884?e=2147483647&v=beta&t=R8FVCwF2m3MIPmp1J0tLOxhAyPdsw-_Bhs7dIhwahYE";
 
