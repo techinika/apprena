@@ -12,6 +12,7 @@ import { formatDistanceToNow } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { Institution } from "@/types/Institution";
 import AdminRoute from "@/lib/AdminRoute";
+import { getCookies, setCookies } from "@/lib/Cookies";
 
 export default function Page({
   institutionId,
@@ -27,6 +28,9 @@ export default function Page({
   React.useEffect(() => {
     const getData = async () => {
       if (!user) return;
+
+      const cookieData = await getCookies();
+      const cookieInstitution = cookieData?.activeInstitution;
 
       const q = query(
         collection(db, "institutions"),
@@ -46,8 +50,20 @@ export default function Page({
             ...docData,
           } as Institution;
         });
-        const activeInst = data.find((inst) => inst.id === institutionId);
+        const activeInst =
+          cookieInstitution && cookieInstitution.id === institutionId
+            ? cookieInstitution
+            : data.find((inst) => inst.id === institutionId);
         setActiveTeam(activeInst || data[0] || null);
+        setCookies({
+          institution: {
+            ...activeInst,
+            createdAt: activeInst?.createdAt?.seconds
+              ? new Date(activeInst.createdAt.seconds * 1000).toISOString()
+              : activeInst?.createdAt || null,
+          },
+        });
+
         setInstitutions(data);
       });
     };

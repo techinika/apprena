@@ -16,16 +16,25 @@ function AuthHome() {
       <Stats />
       <div className="size grid gap-4 md:grid-cols-2 lg:grid-cols-7 mb-4 items-start">
         <div className="col-span-5">
-          <SectionHeader title="Assigned Courses" buttonText="Explore More" />
+          <SectionHeader
+            title="Courses Enrolled In"
+            buttonText="Explore More"
+          />
           {/* <CourseList /> */}
           <div className="p-3"></div>
-          <SectionHeader title="Assigned Articles" buttonText="Explore More" />
+          <SectionHeader title="Articles Read" buttonText="Explore More" />
           {/* <BlogList /> */}
           <div className="p-3"></div>
-          <SectionHeader title="Enrolled Training" buttonText="Explore More" />
+          <SectionHeader
+            title="Training Enrolled In"
+            buttonText="Explore More"
+          />
           {/* <BlogList /> */}
           <div className="p-3"></div>
-          <SectionHeader title="Challenges Participating" buttonText="Explore More" />
+          <SectionHeader
+            title="Challenges Participating In"
+            buttonText="Explore More"
+          />
           {/* <BlogList /> */}
           <div className="p-3"></div>
         </div>

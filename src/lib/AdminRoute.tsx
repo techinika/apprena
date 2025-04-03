@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { useEffect } from "react";
 import { useAuth } from "./AuthContext";
 
+const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+
 export default function AdminRoute({
   children,
 }: {
@@ -13,9 +15,11 @@ export default function AdminRoute({
   const { user, loading } = useAuth();
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (loading) return;
+
+    if (!user) {
       redirect("/login");
-    } else if (user?.email !== process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
+    } else if (user?.email !== ADMIN_EMAIL) {
       redirect("/home");
     }
   }, [user, loading]);

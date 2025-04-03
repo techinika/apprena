@@ -205,8 +205,6 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
         title="Add New Post"
         newItem={true}
         onPublish={() => {
-          console.log(form.getValues());
-          console.log(institutionId);
           handlePublish(form.getValues());
         }}
         onExport={() => console.log("clicked")}

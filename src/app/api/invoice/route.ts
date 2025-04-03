@@ -2,7 +2,6 @@
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    console.log(body);
 
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_PAYMENT_BASE_URL}/invoices`,
@@ -18,8 +17,6 @@ export async function POST(req: Request) {
     );
 
     const data = await response.json();
-
-    console.log(data);
 
     return new Response(JSON.stringify(data), { status: 200 });
   } catch (error: any) {
