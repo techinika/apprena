@@ -12,12 +12,6 @@ export default function RootLayout({
 }) {
   const { institutionid } = use(params);
   return (
-    <html lang="en">
-      <body>
-        <DashboardLayout institutionId={institutionid}>
-          {children}
-        </DashboardLayout>
-      </body>
-    </html>
+    <DashboardLayout institutionId={institutionid}>{children}</DashboardLayout>
   );
 }

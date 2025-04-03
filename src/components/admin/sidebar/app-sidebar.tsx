@@ -47,13 +47,15 @@ export function AppSidebar({
   React.useEffect(() => {
     if (!institutionId || !user) return;
 
-    const isMember = institutions.some((inst) => inst.id === institutionId);
     const isCurrentTeam = activeInstitution?.id === institutionId;
+    const isMember =
+      isCurrentTeam && activeInstitution.organizationAdmins.includes(user?.uid);
+    console.log("active", activeInstitution, "ID", institutionId);
 
-    if (!isMember && !isCurrentTeam) {
+    if (!isCurrentTeam || !isMember) {
       redirect("/admin");
     }
-  }, [institutionId, user, router, activeInstitution, institutions]);
+  }, [institutionId, user, router, activeInstitution]);
 
   const data = {
     navMain: [
