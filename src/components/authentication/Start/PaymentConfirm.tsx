@@ -19,7 +19,7 @@ function PaymentConfirm() {
         <CircleCheckBig className="h-28 w-28" />
         <h2 className="font-bold text-4xl">Payment Successful.</h2>
         <p>
-          Your payment has been successful, and your subscription is now active.
+          Your payment has been successful and your subscription is now active.
           Login to start using your benefits.
         </p>
         <Button onClick={() => router.push("/login")}>Go to Login</Button>

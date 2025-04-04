@@ -106,7 +106,7 @@ body {
 }
 
 .size {
-  @apply w-2/3 mx-auto;
+  @apply md:w-2/3 sm:w-[95%] mx-auto lg:w-3/4 xs:w-[90%];
 }
 
 .article-content {

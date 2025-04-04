@@ -215,7 +215,6 @@ export function RegisterSteps({
                 variant="outline"
                 onClick={(e) => {
                   e.preventDefault();
-                  console.log(process.env);
                   signInWithGoogle();
                 }}
                 className="w-full"
