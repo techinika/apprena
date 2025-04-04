@@ -50,14 +50,17 @@ export default function FooterSection() {
               <Link href="/" className="text-sm text-muted-foreground">
                 Documentation
               </Link>
-              <Link href="/" className="text-sm text-muted-foreground">
-                Benefits for Institutions
+              <Link
+                href="/discussions"
+                className="text-sm text-muted-foreground"
+              >
+                Community Discussions
               </Link>
-              <Link href="/" className="text-sm text-muted-foreground">
-                Benefits for Learners
+              <Link href="/start" className="text-sm text-muted-foreground">
+                Subscribe to a paid plan
               </Link>
-              <Link href="/" className="text-sm text-muted-foreground">
-                Request for a Demo
+              <Link href="/history" className="text-sm text-muted-foreground">
+                Today in history
               </Link>
             </FooterColumn>
 
