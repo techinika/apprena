@@ -43,13 +43,16 @@ export default function MainPage() {
       setLoading(true);
       try {
         const q = query(eventsRef);
+
         const today = new Date();
-        const startOfWeek = new Date(
-          today.setDate(today.getDate() - today.getDay())
-        );
-        const endOfWeek = new Date(
-          today.setDate(today.getDate() - today.getDay() + 6)
-        );
+        const todayMonth = today.getMonth();
+        const todayDate = today.getDate();
+        const startOfWeek = new Date();
+        startOfWeek.setHours(0, 0, 0, 0);
+        startOfWeek.setDate(today.getDate() - today.getDay());
+
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
 
         const unsubscribe = onSnapshot(
           q,
@@ -63,10 +66,10 @@ export default function MainPage() {
               if (!event.occuringDate) {
                 return false;
               }
-              const eventDate = new Date(event?.occuringDate);
+              const eventDate = new Date(event.occuringDate);
               return (
-                eventDate.toLocaleDateString() ===
-                new Date().toLocaleDateString()
+                eventDate.getMonth() === todayMonth &&
+                eventDate.getDate() === todayDate
               );
             });
 
@@ -74,10 +77,15 @@ export default function MainPage() {
               if (!event.occuringDate) {
                 return false;
               }
-              const eventDate = new Date(event?.occuringDate);
-              return eventDate >= startOfWeek && eventDate <= endOfWeek;
-            });
+              const eventDate = new Date(event.occuringDate);
+              const eventMonthDay = `${eventDate.getMonth()}-${eventDate.getDate()}`;
+              const startMonthDay = `${startOfWeek.getMonth()}-${startOfWeek.getDate()}`;
+              const endMonthDay = `${endOfWeek.getMonth()}-${endOfWeek.getDate()}`;
 
+              return (
+                eventMonthDay >= startMonthDay && eventMonthDay <= endMonthDay
+              );
+            });
             setTodayEvents(todayEvents);
             setWeekEvents(weekEvents);
           },
@@ -228,12 +236,9 @@ export default function MainPage() {
                                   )}
                                 />
                               </div>
-                              <div
-                                className="py-2"
-                                dangerouslySetInnerHTML={{
-                                  __html: album?.description || "",
-                                }}
-                              ></div>
+                              <p className="py-2 leading-normal">
+                                {album.description}
+                              </p>
                               <p className="font-bold text-xs">{`Happened on ${album?.occuringDate}`}</p>
                               <div className="flex items-center justify-between mt-4">
                                 <Button

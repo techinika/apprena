@@ -1,27 +1,54 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import cloudinary from '@/lib/cloudinary';
+import cloudinary from "@/lib/cloudinary";
+import { UploadApiResponse } from "cloudinary";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  if (req.method === 'POST') {
-    try {
-      const { data: fileStr } = req.body;
-      if (!fileStr) {
-        return res.status(400).json({ error: 'No file data provided.' });
-      }
+export async function POST(req: Request) {
+  try {
+    const formData = await req.formData();
+    const file = formData.get("file") as File | null;
 
-      const uploadResponse = await cloudinary.uploader.upload(fileStr, {
-        upload_preset: 'your_upload_preset',
+    if (!file) {
+      return new Response(JSON.stringify({ error: "No file data provided." }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
       });
-
-      return res.status(200).json({ url: uploadResponse.secure_url });
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      return res.status(500).json({ error: 'Image upload failed' });
     }
-  } else {
-    return res.status(405).json({ error: 'Method not allowed' });
+
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const uploadPromise = new Promise<UploadApiResponse>((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          upload_preset: "apprena",
+          resource_type: "auto",
+          public_id: `app/${file.name}`,
+          overwrite: true,
+          use_filename: true,
+          unique_filename: false,
+        },
+        (error, result) => {
+          if (error) {
+            reject(new Error("Something went wrong"));
+          } else {
+            resolve(result as UploadApiResponse);
+          }
+        }
+      );
+
+      uploadStream.end(buffer);
+    });
+
+    const uploadResponse = await uploadPromise;
+
+    return new Response(JSON.stringify({ url: uploadResponse.secure_url }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    return new Response(JSON.stringify({ error: "Image upload failed." }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }

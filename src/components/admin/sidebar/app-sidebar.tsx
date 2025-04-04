@@ -3,6 +3,7 @@
 import * as React from "react";
 import {
   Building2,
+  CalendarDays,
   Database,
   Library,
   Mail,
@@ -77,6 +78,22 @@ export function AppSidebar({
           {
             title: "Drafts",
             url: `/admin/${institutionId}/blog/drafts`,
+          },
+        ],
+      },
+      {
+        title: "History Events",
+        url: "#",
+        icon: CalendarDays,
+        isActive: false,
+        items: [
+          {
+            title: "All Events",
+            url: `/admin/${institutionId}/events`,
+          },
+          {
+            title: "Add New Event",
+            url: `/admin/${institutionId}/events/new`,
           },
         ],
       },

@@ -4,6 +4,7 @@ export interface History {
   cover: string;
   description?: string;
   occuringDate?: string;
+  institutionOwning: string;
   likes: {
     userId: string;
     date: string;
