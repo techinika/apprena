@@ -7,15 +7,17 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { playlists } from "./data/playlists";
 import { useAuth } from "@/lib/AuthContext";
 import AuthNav from "@/components/client/navigation/AuthNav";
 import Nav from "@/components/client/navigation/Nav";
 import { Sidebar } from "./sidebar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DiscussionCard from "./DiscussionCard";
-import { Discussion } from "@/types/Discussion";
+import { Discussion, Topic } from "@/types/Discussion";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { collection, onSnapshot, query } from "firebase/firestore";
+import { db } from "@/db/firebase";
+import { useRouter } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Community Discussions",
@@ -25,13 +27,34 @@ export const metadata: Metadata = {
 export default function MainPage() {
   const { user } = useAuth();
   const [questions] = useState<Discussion[]>([]);
+  const [topics, setTopics] = useState<Topic[]>([]);
+  const topicCollection = collection(db, "topics");
+  const router = useRouter();
+
+  useEffect(() => {
+    const getData = async () => {
+      const q = query(topicCollection);
+      onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map((doc) => {
+          const docData = doc.data();
+          return {
+            id: doc.id,
+            ...docData,
+          } as Topic;
+        });
+        setTopics(data);
+      });
+    };
+    getData();
+  }, [topicCollection]);
+
   return (
     <div className="md:block">
       {user ? <AuthNav /> : <Nav />}
       <div className="size border-t">
         <div className="bg-background">
           <div className="grid lg:grid-cols-5">
-            <Sidebar playlists={playlists} className="hidden lg:block" />
+            <Sidebar topics={topics} className="hidden lg:block" />
             <div className="col-span-3 lg:col-span-4 lg:border-l">
               <div className="h-full px-4 py-6 lg:px-8">
                 <Tabs defaultValue="recent" className="h-full space-y-6">
@@ -44,7 +67,13 @@ export default function MainPage() {
                       <TabsTrigger value="oldest">Oldest</TabsTrigger>
                     </TabsList>
                     <div className="ml-auto mr-4">
-                      <Button className="flex gap-2">
+                      <Button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          router.push("/discussions/ask");
+                        }}
+                        className={`flex gap-2`}
+                      >
                         <PlusCircle className="h-4 w-4" />
                         Start Discussion
                       </Button>

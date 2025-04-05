@@ -3,13 +3,13 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Playlist } from "./data/playlists";
+import { Topic } from "@/types/Discussion";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
-  playlists: Playlist[];
+  topics: Topic[];
 }
 
-export function Sidebar({ className, playlists }: SidebarProps) {
+export function Sidebar({ className, topics }: SidebarProps) {
   return (
     <div className={cn("pb-12", className)}>
       <div className="space-y-4 py-4">
@@ -95,9 +95,9 @@ export function Sidebar({ className, playlists }: SidebarProps) {
                 </svg>
                 All Topics
               </Button>
-              {playlists?.map((playlist, i) => (
+              {topics?.map((topic, i) => (
                 <Button
-                  key={`${playlist}-${i}`}
+                  key={`${topic}-${i}`}
                   variant="ghost"
                   className="w-full justify-start font-normal"
                 >
@@ -115,7 +115,7 @@ export function Sidebar({ className, playlists }: SidebarProps) {
                     <path d="M8 8h8M12 8v8" />
                   </svg>
 
-                  {playlist}
+                  {topic?.name}
                 </Button>
               ))}
             </div>

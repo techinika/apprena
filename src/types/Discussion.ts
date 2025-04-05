@@ -2,11 +2,11 @@ export interface Discussion {
   id: string;
   upvotes: Upvote[];
   status: "published" | "pending_approval" | "draft";
-  answers: Reply[];
+  replyCount: number;
   views: View[];
   title: string;
   description: string;
-  topics: string[];
+  topic: Topic;
   createdBy: string;
   createdAt: string;
 }
