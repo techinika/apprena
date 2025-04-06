@@ -38,7 +38,7 @@ function DiscussionCard({ item }: { item: Discussion | null }) {
           <div className="text-xs">
             Created by{" "}
             <Link href={`/u/${item?.createdBy?.id}`}>
-              {item?.createdBy?.name?.displayName}
+              {item?.createdBy?.displayName}
             </Link>{" "}
             in{" "}
             {item?.createdAt

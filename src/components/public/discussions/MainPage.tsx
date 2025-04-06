@@ -74,7 +74,7 @@ export default function MainPage() {
                   if (userSnapshot.exists()) {
                     userData = {
                       id: userSnapshot?.id,
-                      name: userSnapshot.data(),
+                      displayName: userSnapshot.data().displayName,
                     };
                   }
                 }

@@ -9,8 +9,8 @@ export interface Discussion {
   title: string;
   content: string;
   description: string;
-  topic: Topic;
-  createdBy: { id: string; name: User };
+  topic: Topic | null;
+  createdBy: User | null;
   createdAt: string;
 }
 

@@ -69,7 +69,8 @@ export default function MainPage({ discussionId }: { discussionId: string }) {
             if (userSnapshot.exists()) {
               userData = {
                 id: userSnapshot?.id,
-                name: userSnapshot.data(),
+                displayName: userSnapshot.data().displayName,
+                photoURL: userSnapshot.data().photoURL,
               };
             }
           }
@@ -176,23 +177,21 @@ export default function MainPage({ discussionId }: { discussionId: string }) {
                         <Avatar className="h-8 w-8">
                           <AvatarImage
                             src={
-                              discussion?.createdBy?.name?.photoURL
-                                ? discussion?.createdBy?.name?.photoURL
+                              discussion?.createdBy?.photoURL
+                                ? discussion?.createdBy?.photoURL
                                 : "/placeholder.jpg"
                             }
                             alt={
-                              discussion?.createdBy?.name?.displayName ||
-                              "No Name"
+                              discussion?.createdBy?.displayName || "No Name"
                             }
                           />
                           <AvatarFallback>
-                            {discussion?.createdBy?.name?.displayName[0]}
+                            {discussion?.createdBy?.displayName[0]}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col space-y-1">
                           <p className="text-sm font-medium leading-none">
-                            {discussion?.createdBy?.name?.displayName ||
-                              "No Name"}
+                            {discussion?.createdBy?.displayName || "No Name"}
                           </p>
                         </div>
                       </div>

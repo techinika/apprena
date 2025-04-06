@@ -189,9 +189,7 @@ function Discussions({ institutionId }: { institutionId: string }) {
     {
       accessorKey: "createdBy",
       header: "Discussion Creator",
-      cell: ({ row }) => (
-        <div>{row.original?.createdBy?.name?.displayName}</div>
-      ),
+      cell: ({ row }) => <div>{row.original?.createdBy?.displayName}</div>,
     },
     {
       accessorKey: "createdAt",
