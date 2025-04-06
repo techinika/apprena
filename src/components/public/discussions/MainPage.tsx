@@ -15,9 +15,19 @@ import { useEffect, useState } from "react";
 import DiscussionCard from "./DiscussionCard";
 import { Discussion, Topic } from "@/types/Discussion";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { collection, onSnapshot, query } from "firebase/firestore";
+import {
+  collection,
+  DocumentData,
+  DocumentReference,
+  getDoc,
+  onSnapshot,
+  query,
+} from "firebase/firestore";
 import { db } from "@/db/firebase";
 import { useRouter } from "next/navigation";
+import { formatDistance } from "date-fns";
+import Loading from "@/app/loading";
+import FooterSection from "@/components/sections/footer/default";
 
 export const metadata: Metadata = {
   title: "Community Discussions",
@@ -26,14 +36,18 @@ export const metadata: Metadata = {
 
 export default function MainPage() {
   const { user } = useAuth();
-  const [questions] = useState<Discussion[]>([]);
+  const [questions, setQuestions] = useState<(Discussion | null)[]>([]);
+  const [loading, setLoading] = useState(false);
   const [topics, setTopics] = useState<Topic[]>([]);
-  const topicCollection = collection(db, "topics");
   const router = useRouter();
 
   useEffect(() => {
     const getData = async () => {
+      setLoading(true);
+      const topicCollection = collection(db, "topics");
+      const discussionCollection = collection(db, "discussions");
       const q = query(topicCollection);
+      const qd = query(discussionCollection);
       onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map((doc) => {
           const docData = doc.data();
@@ -42,11 +56,74 @@ export default function MainPage() {
             ...docData,
           } as Topic;
         });
+        onSnapshot(qd, async (snapshot) => {
+          const discussionsData = await Promise.all(
+            snapshot.docs.map(async (doc) => {
+              const docData = doc.data();
+              const userRef =
+                docData?.createdBy as DocumentReference<DocumentData>;
+              const topicRef =
+                docData?.topic as DocumentReference<DocumentData>;
+
+              let userData: DocumentData | null = null;
+              let topicData: DocumentData | null = null;
+
+              try {
+                if (userRef) {
+                  const userSnapshot = await getDoc(userRef);
+                  if (userSnapshot.exists()) {
+                    userData = {
+                      id: userSnapshot?.id,
+                      name: userSnapshot.data(),
+                    };
+                  }
+                }
+
+                if (topicRef) {
+                  const topicSnapshot = await getDoc(topicRef);
+                  if (topicSnapshot.exists()) {
+                    topicData = {
+                      id: topicSnapshot?.id,
+                      name: topicSnapshot.data().name,
+                    };
+                  }
+                }
+              } catch (error) {
+                console.error("Error fetching referenced document:", error);
+                return null;
+              }
+
+              return {
+                id: doc.id,
+                topic: topicData ? topicData : null,
+                createdAt: formatDistance(
+                  docData.createdAt.toDate(),
+                  new Date(),
+                  {
+                    includeSeconds: true,
+                  }
+                ),
+                createdBy: userData ? userData : null,
+                title: doc.data().title,
+                description: doc.data().description,
+                upvotes: doc.data().upvotes,
+                replyCount: doc.data().replyCount,
+                views: doc.data().views,
+              } as Discussion;
+            })
+          );
+
+          setQuestions(discussionsData);
+        });
         setTopics(data);
       });
     };
     getData();
-  }, [topicCollection]);
+    console.log(questions);
+    setLoading(false);
+  }, []);
+
+  if (loading) return <Loading />;
 
   return (
     <div className="md:block">
@@ -191,6 +268,7 @@ export default function MainPage() {
           </div>
         </div>
       </div>
+      <FooterSection />
     </div>
   );
 }

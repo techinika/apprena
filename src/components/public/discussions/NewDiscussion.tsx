@@ -46,7 +46,7 @@ import { redirect } from "next/navigation";
 
 const formSchema = z.object({
   title: z.string(),
-  description: z.string().max(160).min(4),
+  description: z.string().max(300).min(4),
   content: z.string(),
   tags: z.string(),
   topic: z.string(),
@@ -60,7 +60,6 @@ function NewDiscussion() {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = React.useState(false);
   const discussionCollection = collection(db, "discussions");
-  const topicCollection = collection(db, "topics");
   const userRef = doc(db, "profile", String(user?.uid));
 
   const form = useForm<formValues>({
@@ -77,6 +76,8 @@ function NewDiscussion() {
 
   useEffect(() => {
     const getData = async () => {
+      const topicCollection = collection(db, "topics");
+
       const q = query(topicCollection);
       onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map((doc) => {
@@ -90,7 +91,7 @@ function NewDiscussion() {
       });
     };
     getData();
-  }, [topicCollection]);
+  }, []);
 
   async function onSubmit() {
     const data = form.getValues();
@@ -250,7 +251,7 @@ function NewDiscussion() {
                                         (item) =>
                                           item?.id === form.getValues("topic")
                                       )?.name
-                                    : "Select framework..."}
+                                    : "Select topic..."}
                                   <ChevronsUpDown className="opacity-50" />
                                 </Button>
                               </PopoverTrigger>

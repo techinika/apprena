@@ -36,10 +36,10 @@ export default function MainPage() {
   const [todayEvents, setTodayEvents] = React.useState<History[]>([]);
   const [weekEvents, setWeekEvents] = React.useState<History[]>([]);
   const [loading, setLoading] = React.useState(false);
-  const eventsRef = collection(db, "historyEvents");
 
   useEffect(() => {
     const fetchHistoryEvents = async () => {
+      const eventsRef = collection(db, "historyEvents");
       setLoading(true);
       try {
         const q = query(eventsRef);

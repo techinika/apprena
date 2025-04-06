@@ -1,3 +1,5 @@
+import { User } from "./Users";
+
 export interface Discussion {
   id: string;
   upvotes: Upvote[];
@@ -7,7 +9,7 @@ export interface Discussion {
   title: string;
   description: string;
   topic: Topic;
-  createdBy: string;
+  createdBy: { id: string; name: User };
   createdAt: string;
 }
 
@@ -32,5 +34,5 @@ export interface Reply {
 export interface Topic {
   id: string;
   name: string;
-  discussions: string[];
+  createdAt: string;
 }
