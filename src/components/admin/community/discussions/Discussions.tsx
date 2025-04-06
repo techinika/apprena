@@ -214,16 +214,7 @@ function Discussions({ institutionId }: { institutionId: string }) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              {item?.status !== "approved" ? (
-                <DropdownMenuItem
-                  onClick={() => {
-                    setIdToApprove(item?.id || "");
-                    setOpenApprove(true);
-                  }}
-                >
-                  Approve
-                </DropdownMenuItem>
-              ) : (
+              {item?.status === "approved" ? (
                 <DropdownMenuItem
                   onClick={() => {
                     setIdToUnapprove(item?.id);
@@ -232,17 +223,24 @@ function Discussions({ institutionId }: { institutionId: string }) {
                 >
                   Unapprove
                 </DropdownMenuItem>
-              )}
-              {item?.status !== "rejected" && (
+              ) : (
                 <DropdownMenuItem
                   onClick={() => {
-                    setIdToReject(item?.id || "");
-                    setOpenReject(true);
+                    setIdToApprove(item?.id || "");
+                    setOpenApprove(true);
                   }}
                 >
-                  Reject
+                  Approve
                 </DropdownMenuItem>
               )}
+              <DropdownMenuItem
+                onClick={() => {
+                  setIdToReject(item?.id || "");
+                  setOpenReject(true);
+                }}
+              >
+                Reject
+              </DropdownMenuItem>
               {item?.status !== "hidden" ? (
                 <DropdownMenuItem
                   onClick={() => {

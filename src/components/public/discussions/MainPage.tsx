@@ -22,6 +22,7 @@ import {
   getDoc,
   onSnapshot,
   query,
+  where,
 } from "firebase/firestore";
 import { db } from "@/db/firebase";
 import { useRouter } from "next/navigation";
@@ -46,7 +47,7 @@ export default function MainPage() {
       const topicCollection = collection(db, "topics");
       const discussionCollection = collection(db, "discussions");
       const q = query(topicCollection);
-      const qd = query(discussionCollection);
+      const qd = query(discussionCollection, where("status", "==", "approved"));
       onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map((doc) => {
           const docData = doc.data();
