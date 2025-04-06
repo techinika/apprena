@@ -7,6 +7,7 @@ export interface Discussion {
   replyCount: number;
   views: View[];
   title: string;
+  content: string;
   description: string;
   topic: Topic;
   createdBy: { id: string; name: User };
