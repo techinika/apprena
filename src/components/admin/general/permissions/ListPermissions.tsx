@@ -49,8 +49,6 @@ import ConfirmDelete from "../ConfirmDelete";
 import { Permission } from "@/types/General";
 
 export function ListPermissions() {
-  const permissionCollection = collection(db, "permissions");
-
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -61,11 +59,11 @@ export function ListPermissions() {
   const [plansData, setPlansData] = React.useState<Permission[]>([]);
   const [openDelete, setOpenDelete] = React.useState(false);
   const [idToDelete, setIdToDelete] = React.useState("");
-  //   const [openEdit, setOpenEdit] = React.useState(false);
-  //   const [idToEdit, setIdToEdit] = React.useState("");
 
   React.useEffect(() => {
     const getData = async () => {
+      const permissionCollection = collection(db, "permissions");
+
       const q = query(permissionCollection);
       onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map((doc) => {
@@ -85,7 +83,7 @@ export function ListPermissions() {
       });
     };
     getData();
-  }, [permissionCollection]);
+  }, []);
 
   const columns: ColumnDef<(typeof plansData)[0]>[] = [
     {

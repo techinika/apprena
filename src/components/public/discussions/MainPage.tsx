@@ -25,7 +25,6 @@ import {
 } from "firebase/firestore";
 import { db } from "@/db/firebase";
 import { useRouter } from "next/navigation";
-import { formatDistance } from "date-fns";
 import Loading from "@/app/loading";
 import FooterSection from "@/components/sections/footer/default";
 
@@ -96,13 +95,7 @@ export default function MainPage() {
               return {
                 id: doc.id,
                 topic: topicData ? topicData : null,
-                createdAt: formatDistance(
-                  docData.createdAt.toDate(),
-                  new Date(),
-                  {
-                    includeSeconds: true,
-                  }
-                ),
+                createdAt: docData.createdAt.toDate(),
                 createdBy: userData ? userData : null,
                 title: doc.data().title,
                 description: doc.data().description,
@@ -174,11 +167,17 @@ export default function MainPage() {
                     <ScrollArea className="relative h-[70vh]">
                       {questions.length > 0 ? (
                         questions
-                          .toSorted((a, b) => {
-                            const dateA = new Date(a?.createdAt).getTime();
-                            const dateB = new Date(b?.createdAt).getTime();
-                            return dateB - dateA;
-                          })
+                          .toSorted(
+                            (a: Discussion | null, b: Discussion | null) => {
+                              const dateA = a?.createdAt
+                                ? new Date(a?.createdAt).getTime()
+                                : new Date().getTime();
+                              const dateB = b?.createdAt
+                                ? new Date(b?.createdAt).getTime()
+                                : new Date().getTime();
+                              return dateB - dateA;
+                            }
+                          )
                           .map((item) => {
                             return (
                               <div key={item?.id}>
@@ -210,8 +209,10 @@ export default function MainPage() {
                     <ScrollArea className="relative h-[70vh]">
                       {questions.length > 0 ? (
                         questions
-                          .sort(
-                            (a, b) => b?.upvotes.length - a?.upvotes?.length
+                          .toSorted(
+                            (a, b) =>
+                              (b ? b.upvotes?.length : 0) -
+                              (a ? a.upvotes?.length : 0)
                           )
                           .map((item) => {
                             return (
@@ -245,8 +246,12 @@ export default function MainPage() {
                       {questions.length > 0 ? (
                         questions
                           .toSorted((a, b) => {
-                            const dateA = new Date(a?.createdAt).getTime();
-                            const dateB = new Date(b?.createdAt).getTime();
+                            const dateA = a?.createdAt
+                              ? new Date(a?.createdAt).getTime()
+                              : new Date().getTime();
+                            const dateB = b?.createdAt
+                              ? new Date(b?.createdAt).getTime()
+                              : new Date().getTime();
                             return dateA - dateB;
                           })
                           .map((item) => {

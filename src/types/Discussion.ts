@@ -3,7 +3,7 @@ import { User } from "./Users";
 export interface Discussion {
   id: string;
   upvotes: Upvote[];
-  status: "published" | "pending_approval" | "draft";
+  status: "approved" | "pending_approval" | "rejected" | "hidden";
   replyCount: number;
   views: View[];
   title: string;

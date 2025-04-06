@@ -45,10 +45,9 @@ import {
 import { db } from "@/db/firebase";
 import ConfirmDelete from "../../general/ConfirmDelete";
 import { Topic } from "@/types/Discussion";
+import { formatDistance } from "date-fns";
 
 export function ListTopics() {
-  const topicCollection = collection(db, "topics");
-
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -62,20 +61,26 @@ export function ListTopics() {
 
   React.useEffect(() => {
     const getData = async () => {
+      const topicCollection = collection(db, "topics");
+
       const q = query(topicCollection);
       onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map((doc) => {
           const docData = doc.data();
           return {
             id: doc.id,
-            ...docData,
+            createdAt: formatDistance(docData.createdAt.toDate(), new Date(), {
+              includeSeconds: true,
+            }),
+            name: docData?.name,
+            description: docData?.description,
           } as Topic;
         });
         setTopicsData(data);
       });
     };
     getData();
-  }, [topicCollection]);
+  }, []);
 
   const columns: ColumnDef<(typeof topicsData)[0]>[] = [
     {

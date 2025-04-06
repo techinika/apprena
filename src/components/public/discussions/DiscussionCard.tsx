@@ -3,10 +3,11 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Discussion } from "@/types/Discussion";
+import { formatDistance } from "date-fns";
 import Link from "next/link";
 import React from "react";
 
-function DiscussionCard({ item }: { item: Discussion }) {
+function DiscussionCard({ item }: { item: Discussion | null }) {
   return (
     <div className="flex items-start gap-2">
       <div className="w-[15%] text-xs text-end font-light flex flex-col gap-3">
@@ -39,7 +40,12 @@ function DiscussionCard({ item }: { item: Discussion }) {
             <Link href={`/u/${item?.createdBy?.id}`}>
               {item?.createdBy?.name?.displayName}
             </Link>{" "}
-            in {item?.createdAt}
+            in{" "}
+            {item?.createdAt
+              ? formatDistance(item?.createdAt, new Date(), {
+                  includeSeconds: true,
+                })
+              : ""}
           </div>
         </div>
       </div>

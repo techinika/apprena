@@ -108,7 +108,7 @@ const EditFeature = ({
     };
 
     fetchPlanDetails();
-  }, [id, open, featureCollection, permissionCollection, form]);
+  }, [id, open, form]);
 
   const handleEdit = async () => {
     try {

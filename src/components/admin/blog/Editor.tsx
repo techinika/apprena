@@ -5,6 +5,25 @@ import StarterKit from "@tiptap/starter-kit";
 import { Color } from "@tiptap/extension-color";
 import ListItem from "@tiptap/extension-list-item";
 import TextStyle from "@tiptap/extension-text-style";
+import {
+  FieldPath,
+  FieldPathValue,
+  FieldValues,
+  Noop,
+  RefCallBack,
+} from "react-hook-form";
+
+type ControllerRenderProps<
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
+> = {
+  onChange: (...event: string[]) => void;
+  onBlur: Noop;
+  value: FieldPathValue<TFieldValues, TName>;
+  disabled?: boolean;
+  name: TName;
+  ref: RefCallBack;
+};
 
 function MenuBar() {
   const { editor } = useCurrentEditor();
@@ -221,7 +240,7 @@ function MenuBar() {
   );
 }
 
-const Editor = ({ field }) => {
+const Editor = ({ field }: { field: ControllerRenderProps }) => {
   const extensions = [
     Color.configure({ types: [TextStyle.name, ListItem.name] }),
     TextStyle,
