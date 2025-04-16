@@ -38,6 +38,7 @@ export default function CoursePage({ id }: { id: string }) {
 
   useEffect(() => {
     const getData = async () => {
+      console.log(id);
       setLoading(true);
       setCourse({
         id: "sgsshhdhdh",
@@ -62,6 +63,9 @@ export default function CoursePage({ id }: { id: string }) {
         discountePrice: 200,
         discount: true,
         discountPercentage: 10,
+        levels: "beginner",
+        courseLanguage: "English",
+        updatedAt: String(new Date()),
       });
     };
     getData();

@@ -1,4 +1,4 @@
-import { User } from "./Users";
+import { CustomUser } from "@/components/public/discussions/OneDiscussionPage";
 
 export interface Discussion {
   id: string;
@@ -10,7 +10,7 @@ export interface Discussion {
   content: string;
   description: string;
   topic: Topic | null;
-  createdBy: User | null;
+  createdBy: CustomUser | null;
   createdAt: string;
 }
 

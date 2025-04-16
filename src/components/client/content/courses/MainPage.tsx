@@ -49,6 +49,13 @@ export default function MainPage() {
             name: "Technology",
             createdAt: String(new Date()),
           },
+          realPrice: 1200,
+          discountePrice: 200,
+          discount: true,
+          discountPercentage: 10,
+          levels: "beginner",
+          courseLanguage: "English",
+          updatedAt: String(new Date()),
         },
       ]);
     };

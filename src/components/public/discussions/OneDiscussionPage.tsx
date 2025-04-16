@@ -26,11 +26,17 @@ import { redirect, useRouter } from "next/navigation";
 import Loading from "@/app/loading";
 import FooterSection from "@/components/sections/footer/default";
 import { formatDistance } from "date-fns";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export const metadata: Metadata = {
   title: "Community Discussions",
   description: "Example music app using the components.",
+};
+
+export type CustomUser = {
+  id: string;
+  displayName: string;
+  email: string;
+  uid: string;
 };
 
 export default function MainPage({ discussionId }: { discussionId: string }) {
@@ -60,7 +66,7 @@ export default function MainPage({ discussionId }: { discussionId: string }) {
         const userRef = docData?.createdBy as DocumentReference<DocumentData>;
         const topicRef = docData?.topic as DocumentReference<DocumentData>;
 
-        let userData: DocumentData | null = null;
+        let userData: CustomUser | null = null;
         let topicData: DocumentData | null = null;
 
         try {
@@ -69,8 +75,9 @@ export default function MainPage({ discussionId }: { discussionId: string }) {
             if (userSnapshot.exists()) {
               userData = {
                 id: userSnapshot?.id,
-                displayName: userSnapshot.data().displayName,
-                photoURL: userSnapshot.data().photoURL,
+                uid: userSnapshot?.id,
+                displayName: userSnapshot.data()?.displayName,
+                email: userSnapshot.data().email || "",
               };
             }
           }
@@ -91,11 +98,28 @@ export default function MainPage({ discussionId }: { discussionId: string }) {
 
         setDiscussion({
           id: discussionSnap.id,
-          topic: topicData ? topicData : null,
+          topic: topicData
+            ? {
+                id: topicData.id,
+                name: topicData.name,
+                createdAt: formatDistance(
+                  topicData.createdAt.toDate(),
+                  new Date(),
+                  { includeSeconds: true }
+                ),
+              }
+            : null,
           createdAt: formatDistance(docData.createdAt.toDate(), new Date(), {
             includeSeconds: true,
           }),
-          createdBy: userData ? userData : null,
+          createdBy: userData
+            ? {
+                displayName: userData?.displayName,
+                id: userData?.id,
+                uid: userData?.uid,
+                email: userData?.email,
+              }
+            : null,
           content: docData?.content,
           title: docData.title,
           status: docData?.status,
@@ -176,7 +200,7 @@ export default function MainPage({ discussionId }: { discussionId: string }) {
                     </p>
                     <div className="text-xs flex items-center justify-between pt-3">
                       <div className="flex items-center gap-2">
-                        <Avatar className="h-8 w-8">
+                        {/* <Avatar className="h-8 w-8">
                           <AvatarImage
                             src={
                               discussion?.createdBy?.photoURL
@@ -190,7 +214,7 @@ export default function MainPage({ discussionId }: { discussionId: string }) {
                           <AvatarFallback>
                             {discussion?.createdBy?.displayName[0]}
                           </AvatarFallback>
-                        </Avatar>
+                        </Avatar> */}
                         <div className="flex flex-col space-y-1">
                           <p className="text-sm font-medium leading-none">
                             {discussion?.createdBy?.displayName || "No Name"}
