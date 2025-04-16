@@ -138,16 +138,18 @@ export default function MainPage() {
                       <TabsTrigger value="oldest">Oldest</TabsTrigger>
                     </TabsList>
                     <div className="ml-auto mr-4">
-                      <Button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          router.push("/discussions/ask");
-                        }}
-                        className={`flex gap-2`}
-                      >
-                        <PlusCircle className="h-4 w-4" />
-                        Start Discussion
-                      </Button>
+                      {user && (
+                        <Button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            router.push("/discussions/ask");
+                          }}
+                          className={`flex gap-2`}
+                        >
+                          <PlusCircle className="h-4 w-4" />
+                          Start Discussion
+                        </Button>
+                      )}
                     </div>
                   </div>
                   <TabsContent
