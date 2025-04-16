@@ -6,7 +6,9 @@ import {
   CalendarDays,
   Database,
   Library,
+  Lightbulb,
   Mail,
+  MailQuestion,
   MessageCircle,
   Paperclip,
   Rss,
@@ -29,6 +31,7 @@ import { NavCommunication } from "./app-communication";
 import { redirect } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
 import { Institution } from "@/types/Institution";
+import { NavCommunity } from "./app-community";
 
 export function AppSidebar({
   activeInstitution,
@@ -180,6 +183,18 @@ export function AppSidebar({
         icon: Mail,
       },
     ],
+    community: [
+      {
+        name: "Topics",
+        url: `/admin/${institutionId}/topics`,
+        icon: Lightbulb,
+      },
+      {
+        name: "Discussions",
+        url: `/admin/${institutionId}/discussions`,
+        icon: MailQuestion,
+      },
+    ],
     management: [
       {
         title: "Institutions",
@@ -204,7 +219,7 @@ export function AppSidebar({
         icon: Database,
         items: [
           {
-            title: "Frequently Asked Questions",
+            title: "FAQs",
             url: `/admin/${institutionId}/faqs`,
           },
           {
@@ -276,6 +291,7 @@ export function AppSidebar({
       <SidebarContent>
         <NavMain items={data.navMain} />
         <NavCommunication communication={data.communication} />
+        <NavCommunity communication={data.community} />
         <NavManagement items={data.management} />
       </SidebarContent>
       <SidebarFooter>

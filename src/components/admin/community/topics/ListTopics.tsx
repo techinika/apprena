@@ -43,12 +43,11 @@ import {
   query,
 } from "firebase/firestore";
 import { db } from "@/db/firebase";
-import { formatDistanceToNow } from "date-fns";
-import { enUS } from "date-fns/locale";
-import ConfirmDelete from "../ConfirmDelete";
-import { Permission } from "@/types/General";
+import ConfirmDelete from "../../general/ConfirmDelete";
+import { Topic } from "@/types/Discussion";
+import { formatDistance } from "date-fns";
 
-export function ListPermissions() {
+export function ListTopics() {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -56,36 +55,34 @@ export function ListPermissions() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
-  const [plansData, setPlansData] = React.useState<Permission[]>([]);
+  const [topicsData, setTopicsData] = React.useState<Topic[]>([]);
   const [openDelete, setOpenDelete] = React.useState(false);
   const [idToDelete, setIdToDelete] = React.useState("");
 
   React.useEffect(() => {
     const getData = async () => {
-      const permissionCollection = collection(db, "permissions");
+      const topicCollection = collection(db, "topics");
 
-      const q = query(permissionCollection);
+      const q = query(topicCollection);
       onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map((doc) => {
           const docData = doc.data();
           return {
             id: doc.id,
-            createdAt: docData.createdAt
-              ? formatDistanceToNow(docData.createdAt.toDate(), {
-                  addSuffix: true,
-                  locale: enUS,
-                })
-              : "Unknown",
-            ...docData,
-          } as Permission;
+            createdAt: formatDistance(docData.createdAt.toDate(), new Date(), {
+              includeSeconds: true,
+            }),
+            name: docData?.name,
+            description: docData?.description,
+          } as Topic;
         });
-        setPlansData(data);
+        setTopicsData(data);
       });
     };
     getData();
   }, []);
 
-  const columns: ColumnDef<(typeof plansData)[0]>[] = [
+  const columns: ColumnDef<(typeof topicsData)[0]>[] = [
     {
       id: "select",
       header: ({ table }) => (
@@ -115,10 +112,15 @@ export function ListPermissions() {
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Permission Name
+          Topic Name
           <ArrowUpDown />
         </Button>
       ),
+    },
+    {
+      accessorKey: "description",
+      header: "Description",
+      cell: ({ row }) => <div>{row.getValue("description")}</div>,
     },
     {
       accessorKey: "createdAt",
@@ -143,14 +145,11 @@ export function ListPermissions() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              {/* <DropdownMenuItem
-                onClick={() => {
-                  setIdToEdit(item?.id);
-                  setOpenEdit(true);
-                }}
+              <DropdownMenuItem
+                onClick={() => navigator.clipboard.writeText(item.id)}
               >
-                Edit Permission
-              </DropdownMenuItem> */}
+                Edit topic
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 color="danger"
@@ -159,7 +158,7 @@ export function ListPermissions() {
                   setOpenDelete(true);
                 }}
               >
-                Delete Permission
+                Delete Topic
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -169,7 +168,7 @@ export function ListPermissions() {
   ];
 
   const table = useReactTable({
-    data: plansData,
+    data: topicsData,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -188,7 +187,7 @@ export function ListPermissions() {
   });
 
   const handleDeleteItem = () => {
-    deleteDoc(doc(db, "permissions", idToDelete))
+    deleteDoc(doc(db, "topics", idToDelete))
       .then(() => {
         setIdToDelete("");
         setOpenDelete(false);
@@ -208,9 +207,10 @@ export function ListPermissions() {
         }}
         open={openDelete}
       ></ConfirmDelete>
+
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter Permissions..."
+          placeholder="Filter topics..."
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn("name")?.setFilterValue(event.target.value)

@@ -228,10 +228,10 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
             <FormField
               control={form.control}
               name="content"
-              render={() => (
+              render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Editor />
+                    <Editor field={field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

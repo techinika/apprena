@@ -50,8 +50,6 @@ import EditFeature from "./EditFeature";
 import { Feature } from "@/types/General";
 
 export function ListFeatures() {
-  const featureCollection = collection(db, "features");
-
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -67,6 +65,8 @@ export function ListFeatures() {
 
   React.useEffect(() => {
     const getData = async () => {
+      const featureCollection = collection(db, "features");
+
       const q = query(featureCollection);
       onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map((doc) => {
@@ -86,7 +86,7 @@ export function ListFeatures() {
       });
     };
     getData();
-  }, [featureCollection]);
+  }, []);
 
   const columns: ColumnDef<(typeof plansData)[0]>[] = [
     {

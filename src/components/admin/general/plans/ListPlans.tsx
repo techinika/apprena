@@ -50,8 +50,6 @@ import ConfirmDelete from "../ConfirmDelete";
 import EditPlan from "./EditPlan";
 
 export function ListPlans() {
-  const planCollection = collection(db, "sub-plans");
-
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -67,6 +65,8 @@ export function ListPlans() {
 
   React.useEffect(() => {
     const getData = async () => {
+      const planCollection = collection(db, "sub-plans");
+
       const q = query(planCollection);
       onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map((doc) => {
@@ -86,7 +86,7 @@ export function ListPlans() {
       });
     };
     getData();
-  }, [planCollection]);
+  }, []);
 
   const columns: ColumnDef<(typeof plansData)[0]>[] = [
     {

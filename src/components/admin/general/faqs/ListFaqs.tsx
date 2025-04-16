@@ -49,8 +49,6 @@ import { enUS } from "date-fns/locale";
 import ConfirmDelete from "../ConfirmDelete";
 
 export function ListFaqs() {
-  const faqCollection = collection(db, "faqs");
-
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -64,6 +62,8 @@ export function ListFaqs() {
 
   React.useEffect(() => {
     const getData = async () => {
+      const faqCollection = collection(db, "faqs");
+
       const q = query(faqCollection);
       onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map((doc) => {
@@ -83,7 +83,7 @@ export function ListFaqs() {
       });
     };
     getData();
-  }, [faqCollection]);
+  }, []);
 
   const columns: ColumnDef<(typeof faqsData)[0]>[] = [
     {

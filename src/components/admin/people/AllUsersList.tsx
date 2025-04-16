@@ -46,8 +46,7 @@ import {
   query,
 } from "firebase/firestore";
 import { db } from "@/db/firebase";
-import { formatDistanceToNow } from "date-fns";
-import { enUS } from "date-fns/locale";
+import { formatDistance } from "date-fns";
 import ConfirmDelete from "../general/ConfirmDelete";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -74,20 +73,20 @@ export function AllUsersList() {
           const docData = doc.data();
           return {
             id: doc.id,
-            createdAt: docData.createdAt
-              ? formatDistanceToNow(docData.createdAt.toDate(), {
-                  addSuffix: true,
-                  locale: enUS,
-                })
-              : "Unknown",
-            ...docData,
+            createdAt: formatDistance(docData.createdAt.toDate(), new Date(), {
+              includeSeconds: true,
+            }),
+            email: docData?.email,
+            displayName: docData?.displayName,
+            subscriptionPlan: docData?.subscriptionPlan,
+            role: docData?.role,
           } as User;
         });
         setUsersData(data);
       });
     };
     getData();
-  }, [userCollection]);
+  }, []);
 
   const columns: ColumnDef<User>[] = [
     {

@@ -38,6 +38,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import PageHeader from "@/components/admin/main/PageHeader";
 import { Institution } from "@/types/Institution";
+import { collection, onSnapshot, query } from "firebase/firestore";
+import { db } from "@/db/firebase";
+import { formatDistance } from "date-fns";
 
 export function InstitutionList() {
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -52,7 +55,28 @@ export function InstitutionList() {
   );
 
   React.useEffect(() => {
-    setInstitutionData([]);
+    const getData = async () => {
+      const institutionCollection = collection(db, "institutions");
+
+      const q = query(institutionCollection);
+
+      onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map((doc) => {
+          const docData = doc.data();
+          return {
+            id: doc.id,
+            createdAt: formatDistance(docData.createdAt.toDate(), new Date(), {
+              includeSeconds: true,
+            }),
+            name: docData?.name,
+            registrationNumber: docData?.registrationNumber,
+            institutionType: docData?.institutionType,
+          } as Institution;
+        });
+        setInstitutionData(data);
+      });
+    };
+    getData();
   }, []);
 
   const columns: ColumnDef<(typeof institutionData)[0]>[] = [
@@ -91,15 +115,15 @@ export function InstitutionList() {
       ),
     },
     {
-      accessorKey: "registrationNumber",
-      header: "Registration Number",
-      cell: ({ row }) => <div>{row.getValue("registrationNumber")}</div>,
+      accessorKey: "id",
+      header: "Unique Identifier (UI)",
+      cell: ({ row }) => <div>{row.getValue("id")}</div>,
     },
     {
-      accessorKey: "legalType",
-      header: "Legal Type",
+      accessorKey: "institutionType",
+      header: "Institution Type",
       cell: ({ row }) => (
-        <Badge className="capitalize">{row.getValue("legalType")}</Badge>
+        <Badge className="capitalize">{row.getValue("institutionType")}</Badge>
       ),
     },
     {

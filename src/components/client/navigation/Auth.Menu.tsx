@@ -55,7 +55,7 @@ function AuthMenu() {
           </Link>
         </NavigationMenuItem>
         <NavigationMenuItem>
-          <Link href="/community" legacyBehavior passHref>
+          <Link href="/discussions" legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
               Community
             </NavigationMenuLink>
