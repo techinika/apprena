@@ -19,7 +19,7 @@ export default function Hero() {
           <Badge variant="outline" className="animate-appear">
             <span className="text-muted-foreground">We are launching soon</span>
             <Link href="/register" className="flex items-center gap-1">
-              Test Beta Version
+              Learn More
               <ArrowRightIcon className="h-3 w-3" />
             </Link>
           </Badge>

@@ -44,6 +44,9 @@ export type User = {
   address: {
     country: string;
     city: string;
+    state: string;
+    zipCode: string;
+    physicalAddress: string;
   };
   interests: [];
   twoFactorAuthEnabled: boolean;

@@ -1,3 +1,4 @@
+import { CustomUser } from "@/components/public/discussions/OneDiscussionPage";
 import { Topic } from "./Discussion";
 
 export interface Course {
@@ -24,4 +25,52 @@ export interface Course {
   levels: "beginner" | "intermediate" | "expert";
   courseLanguage: string;
   updatedAt: string;
+  rating: number;
+  ratingDistribution: { stars: number; percentage: number }[];
+  instructors: {
+    id: string;
+    photoURL: string;
+    displayName: string;
+    title: string;
+    courseRatings: number;
+    students: number;
+    coursesMade: number;
+    bio: string;
+  }[];
+  detailedSummary: string;
+  keyLessons: string[];
+  courseRequirements: string[];
+  targetAudience: string[];
+  curriculum: Curriculum | undefined;
+}
+
+export interface Review {
+  id: string;
+  comment: string;
+  rating: number;
+  createdAt: string;
+  createdBy: CustomUser;
+}
+
+export type LessonType = "video" | "file";
+
+export interface Lesson {
+  type: LessonType;
+  title: string;
+  duration?: string;
+  size?: string;
+}
+
+export interface Module {
+  moduleTitle: string;
+  lectures: number;
+  duration: string;
+  lessons: Lesson[];
+}
+
+export interface Curriculum {
+  sections: number;
+  totalLectures: number;
+  totalDuration: string;
+  modules: Module[];
 }
