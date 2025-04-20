@@ -27,7 +27,7 @@ import {
   Users,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatDistance } from "date-fns";
+import { format, intervalToDuration } from "date-fns";
 import StarRating from "@/components/ui/star-rating";
 import { RatingDistribution } from "@/components/ui/rating-distribution";
 import {
@@ -38,16 +38,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import ReviewCard from "./ReviewCard";
-import InstructorCard from "./InstructorCard";
-import { CurriculumAccordion } from "./CurriculumView";
 
 export const metadata: Metadata = {
   title: "APPRENA Courses",
   description: "Example music app using the components.",
 };
 
-export default function CoursePage({ id }: { id: string }) {
+export default function SessionPage({ id }: { id: string }) {
   const { user } = useAuth();
   const [course, setCourse] = useState<Course | null>(null);
   const [reviews, setReviews] = useState<(Review | null)[]>([]);
@@ -395,6 +392,14 @@ export default function CoursePage({ id }: { id: string }) {
 
   if (loading) return <Loading />;
 
+  const startDate = new Date();
+  const endDate = new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+  const formattedStart = format(startDate, "dd/MM/yyyy HH:mm");
+  const formattedEnd = format(endDate, "dd/MM/yyyy HH:mm");
+
+  const duration = intervalToDuration({ start: startDate, end: endDate });
+
   return (
     <div className="md:block">
       {user ? <AuthNav /> : <Nav />}
@@ -407,16 +412,12 @@ export default function CoursePage({ id }: { id: string }) {
               <p className="text-muted-foreground ">{course?.description}</p>
               <div className="text-xs flex items-center gap-3 py-3">
                 <p className="flex gap-2 items-center">
-                  <Users className="h-4 w-4" /> {course?.learners} Learners
+                  <Users className="h-4 w-4" /> {course?.learners} registered
+                  Learners
                 </p>
                 <p className="flex gap-2 items-center">
-                  <Clock className="h-4 w-4" /> {course?.duration} Hours
-                </p>
-                <p className="flex gap-2 items-center">
-                  <Calendar className="h-4 w-4" /> Last Updated{" "}
-                  {formatDistance(course?.updatedAt ?? new Date(), new Date(), {
-                    includeSeconds: true,
-                  })}
+                  <Calendar className="h-4 w-4" />{" "}
+                  {`${formattedStart} - ${formattedEnd}`}
                 </p>
               </div>
               <Button size="lg">Enroll Now</Button>
@@ -453,7 +454,7 @@ export default function CoursePage({ id }: { id: string }) {
                   {course?.keyLessons && (
                     <Card className="bg-gray-100 dark:bg-gray-900 my-4 p-5">
                       <h2 className="text-2xl font-bold">
-                        What you will learn in this course
+                        What you will learn in this training
                       </h2>
                       <div className="grid grid-cols-2 gap-4 my-3">
                         {course?.keyLessons.map((item) => (
@@ -468,7 +469,7 @@ export default function CoursePage({ id }: { id: string }) {
                   {course?.targetAudience && (
                     <div className="my-7">
                       <h2 className="text-2xl font-bold">
-                        Who is this course for?
+                        Who is this training for?
                       </h2>
                       <div className="grid grid-cols-2 gap-4 my-3">
                         {course?.targetAudience.map((item) => (
@@ -483,7 +484,7 @@ export default function CoursePage({ id }: { id: string }) {
                   {course?.courseRequirements && (
                     <div className="my-7">
                       <h2 className="text-2xl font-bold">
-                        Course Requirements
+                        Training Requirements
                       </h2>
                       <div className="grid grid-cols-2 gap-4 my-3">
                         {course?.courseRequirements.map((item) => (
@@ -500,9 +501,6 @@ export default function CoursePage({ id }: { id: string }) {
               <TabsContent value="curriculum">
                 <div className="py-4">
                   <h2 className="text-2xl font-bold py-2">Curriculum</h2>
-                  <CurriculumAccordion
-                    curriculum={course?.curriculum ?? undefined}
-                  />
                 </div>
               </TabsContent>
               <TabsContent value="instructor">
@@ -511,15 +509,7 @@ export default function CoursePage({ id }: { id: string }) {
                     Course Instructors
                   </h2>
                   <div className="flex flex-col gap-4">
-                    {course?.instructors && course?.instructors.length > 0 ? (
-                      course?.instructors.map((item) => (
-                        <InstructorCard key={item?.id} item={item} />
-                      ))
-                    ) : (
-                      <p className="p-5 text-center">
-                        No reviews yet! Be the first to review this course
-                      </p>
-                    )}
+                    {/* <InstructorCard /> */}
                   </div>
                 </div>
               </TabsContent>
@@ -562,7 +552,6 @@ export default function CoursePage({ id }: { id: string }) {
                         return (
                           <div key={item?.id}>
                             {index !== 0 && <Separator />}
-                            <ReviewCard item={item} key={item?.id} />
                           </div>
                         );
                       })
@@ -608,7 +597,9 @@ export default function CoursePage({ id }: { id: string }) {
                 <p className="flex gap-2 items-center">
                   <Clock className="h-4 w-4" /> Course Duration
                 </p>
-                <p>{`${course?.duration} Hours`}</p>
+                <p>{`${duration?.days ?? 0}d ${duration?.hours ?? 0}h ${
+                  duration?.minutes ?? 0
+                }m`}</p>
               </div>
               <div className="flex justify-between items-center py-3 text-sm">
                 <p className="flex gap-2 items-center">
@@ -645,14 +636,14 @@ export default function CoursePage({ id }: { id: string }) {
                   </Button>
                 </div>
                 <p className="text-muted-foreground text-xs text-center w-full mb-0 pb-0">
-                  <b>Note:</b> all courses have 30-days money-back guarantee
+                  <b>Note:</b> all sessions have 30-days money-back guarantee
                 </p>
               </div>
             </CardContent>
             <Separator />
             <CardContent>
               <div className="py-3">
-                <h2 className="font-bold text-xl">This course includes:</h2>
+                <h2 className="font-bold text-xl">This training includes:</h2>
                 <p className="flex gap-2 items-center py-2 text-sm">
                   <Clock className="h-4 w-4 text-orange-500" /> Lifetime access
                 </p>

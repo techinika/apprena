@@ -8,7 +8,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React from "react";
 
-function ArticleCard({ item }: { item: Article }) {
+function ArticleCard({ item }: { item: Article | null }) {
   const { user } = useAuth();
   const router = useRouter();
 
@@ -23,7 +23,7 @@ function ArticleCard({ item }: { item: Article }) {
           width={100}
           height={100}
           src={"/course.jpg"}
-          alt={item?.title}
+          alt={item?.title ?? ""}
         />
         <div className="px-6 py-4">
           <h2 className="text-xl font-semibold mb-2">{item?.title}</h2>
