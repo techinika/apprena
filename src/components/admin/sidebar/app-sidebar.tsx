@@ -75,10 +75,6 @@ export function AppSidebar({
             url: `/admin/${institutionId}/blog/new`,
           },
           {
-            title: "Categories",
-            url: `/admin/${institutionId}/blog/categories`,
-          },
-          {
             title: "Drafts",
             url: `/admin/${institutionId}/blog/drafts`,
           },
@@ -125,21 +121,6 @@ export function AppSidebar({
           {
             title: "Certifications",
             url: "#",
-          },
-        ],
-      },
-      {
-        title: "People",
-        url: "#",
-        icon: Users,
-        items: [
-          {
-            title: "Subscribers",
-            url: `/admin/${institutionId}/subscribers`,
-          },
-          {
-            title: "Contributors",
-            url: `/admin/${institutionId}/contributors`,
           },
         ],
       },
@@ -267,8 +248,20 @@ export function AppSidebar({
             url: `/admin/${institutionId}/users`,
           },
           {
-            title: "Add New User",
-            url: "#",
+            title: "Subscribers",
+            url: `/admin/${institutionId}/subscribers`,
+          },
+          {
+            title: "Contributors",
+            url: `/admin/${institutionId}/contributors`,
+          },
+          {
+            title: "Contributors",
+            url: `/admin/${institutionId}/employees`,
+          },
+          {
+            title: "Subscribers",
+            url: `/admin/${institutionId}/users/new`,
           },
           {
             title: "User Roles",

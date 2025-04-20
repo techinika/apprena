@@ -19,28 +19,35 @@ function AuthHome() {
           <SectionHeader
             title="Courses Enrolled In"
             buttonText="Explore More"
+            link="/courses"
           />
           {/* <CourseList /> */}
           <div className="p-3"></div>
-          <SectionHeader title="Articles Read" buttonText="Explore More" />
+          <SectionHeader
+            title="Articles Read"
+            buttonText="Explore More"
+            link="/articles"
+          />
           {/* <BlogList /> */}
           <div className="p-3"></div>
           <SectionHeader
             title="Training Enrolled In"
             buttonText="Explore More"
+            link="/training"
           />
           {/* <BlogList /> */}
           <div className="p-3"></div>
-          <SectionHeader
+          {/* <SectionHeader
             title="Challenges Participating In"
             buttonText="Explore More"
-          />
+            link="/challenges"
+          /> */}
           {/* <BlogList /> */}
           <div className="p-3"></div>
         </div>
         <Card className="col-span-2">
           <CardHeader>
-            <SectionHeader title="Leaderboard" buttonText={null} />
+            <SectionHeader title="Leaderboard" buttonText={null} link={null} />
           </CardHeader>
           <CardContent>
             <Leaderboard />
