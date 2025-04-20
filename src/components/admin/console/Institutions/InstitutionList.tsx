@@ -38,9 +38,16 @@ import {
 import { Badge } from "@/components/ui/badge";
 import PageHeader from "@/components/admin/main/PageHeader";
 import { Institution } from "@/types/Institution";
-import { collection, onSnapshot, query } from "firebase/firestore";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  query,
+} from "firebase/firestore";
 import { db } from "@/db/firebase";
 import { formatDistance } from "date-fns";
+import ConfirmDelete from "../../general/ConfirmDelete";
 
 export function InstitutionList() {
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -53,6 +60,8 @@ export function InstitutionList() {
   const [institutionData, setInstitutionData] = React.useState<Institution[]>(
     []
   );
+  const [openDelete, setOpenDelete] = React.useState(false);
+  const [idToDelete, setIdToDelete] = React.useState("");
 
   React.useEffect(() => {
     const getData = async () => {
@@ -137,7 +146,7 @@ export function InstitutionList() {
       id: "actions",
       enableHiding: false,
       cell: ({ row }) => {
-        const institution = row.original;
+        const item = row.original;
 
         return (
           <DropdownMenu>
@@ -150,13 +159,19 @@ export function InstitutionList() {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem
-                onClick={() => navigator.clipboard.writeText(institution.id)}
+                onClick={() => navigator.clipboard.writeText(item?.id)}
               >
                 Edit Institution
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem>Preview Institution</DropdownMenuItem>
-              <DropdownMenuItem color="danger">
+              <DropdownMenuItem
+                color="danger"
+                onClick={() => {
+                  setOpenDelete(true);
+                  setIdToDelete(item?.id);
+                }}
+              >
                 Delete Institution
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -185,6 +200,17 @@ export function InstitutionList() {
     },
   });
 
+  const handleDeleteItem = () => {
+    deleteDoc(doc(db, "institutions", idToDelete))
+      .then(() => {
+        setIdToDelete("");
+        setOpenDelete(false);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
   return (
     <div className="w-full space-y-4 p-8 pt-6">
       <PageHeader
@@ -194,6 +220,14 @@ export function InstitutionList() {
         onPublish={() => null}
         saveDraft={() => null}
       />
+      <ConfirmDelete
+        action={() => handleDeleteItem()}
+        cancel={() => {
+          setIdToDelete("");
+          setOpenDelete(false);
+        }}
+        open={openDelete}
+      ></ConfirmDelete>
       <div className="flex items-center py-4">
         <Input
           placeholder="Filter institutions..."

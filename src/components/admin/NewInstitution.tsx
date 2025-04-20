@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,7 +21,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { db } from "@/db/firebase";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  increment,
+  updateDoc,
+} from "firebase/firestore";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -63,13 +69,18 @@ const NewInstitution = ({
     try {
       const name = form.getValues("name");
       const type = form.getValues("type");
+      const userRef = doc(db, "profile", String(user?.uid));
+
       await addDoc(institutionCollection, {
         name,
         institutionType: type,
         organizationCreator: user?.uid,
         organizationAdmins: [user?.uid],
         accessLevel: "normal",
-        createdAt: serverTimestamp(),
+        createdAt: new Date(),
+      });
+      await updateDoc(userRef, {
+        institutionMemberships: increment(1),
       });
       toast("Item added successfully!");
       form.reset();

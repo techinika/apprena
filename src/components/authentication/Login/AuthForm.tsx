@@ -24,7 +24,13 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email format"),
@@ -54,9 +60,11 @@ export function UserAuthForm({
           const uid = user.uid;
           const userRef = doc(db, "profile", uid);
           getDoc(userRef)
-            .then((docSnap) => {
+            .then(async (docSnap) => {
               if (docSnap.exists()) {
-                console.log("User profile exists with ID: ", uid);
+                await updateDoc(userRef, {
+                  lastLogin: new Date(),
+                });
               } else {
                 const userProfile = {
                   uid,
@@ -165,9 +173,11 @@ export function UserAuthForm({
           const uid = user.uid;
           const userRef = doc(db, "profile", uid);
           getDoc(userRef)
-            .then((docSnap) => {
+            .then(async (docSnap) => {
               if (docSnap.exists()) {
-                console.log("User profile exists with ID: ", uid);
+                await updateDoc(userRef, {
+                  lastLogin: new Date(),
+                });
               } else {
                 const userProfile = {
                   uid,

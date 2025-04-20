@@ -1,75 +1,57 @@
 "use client";
 
-import { useAuth } from "@/lib/AuthContext";
-import React, { useEffect, useState } from "react";
-import AuthNav from "../../navigation/AuthNav";
-import Nav from "../../navigation/Nav";
-import FooterSection from "@/components/sections/footer/default";
-import { Article } from "@/types/Article";
-import ArticleCard from "./ArticleCard";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
-import Loading from "@/app/loading";
-import { Sidebar } from "./sidebar";
-import { Topic } from "@/types/Discussion";
+import { Metadata } from "next";
 
-const data: Article[] = [
-  {
-    title: "Arrange Your Code to Communicate Data Flow",
-    summary:
-      "Often you can further improve readability by extracting a method, e.g., by extracting the first 3 lines of the function on the above right into a getCheese method. However, in some scenarios, extracting a method isn’t possible or helpful, e.g., if data is used a second time for logging. If you order the lines to match the data flow, you can still increase code clarity:",
-    content: "This is the content",
-    isFeatured: true,
-    publishedAt: new Date(),
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    photoURL: "/article-thumbnail.jpg",
-    id: "1",
-    slug: "this-is-the-title",
-    institutionOwning: "1",
-    availability: "public",
-    tags: "tag1, tag2",
-    category: "Technology",
-    status: "published",
-    views: 0,
-    likes: 0,
-    commentsCount: 0,
-    readingTime: "5",
-    writtenBy: "John Doe",
-  },
-  {
-    title: "Arrange Your Code to Communicate Data Flow",
-    summary:
-      "Often you can further improve readability by extracting a method, e.g., by extracting the first 3 lines of the function on the above right into a getCheese method. However, in some scenarios, extracting a method isn’t possible or helpful, e.g., if data is used a second time for logging. If you order the lines to match the data flow, you can still increase code clarity:",
-    content: "This is the content",
-    isFeatured: false,
-    publishedAt: new Date(),
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    photoURL: "/article-thumbnail.jpg",
-    id: "19",
-    slug: "this-is-the-title",
-    institutionOwning: "1",
-    availability: "public",
-    tags: "tag1, tag2",
-    category: "Technology",
-    status: "published",
-    views: 0,
-    likes: 0,
-    commentsCount: 0,
-    readingTime: "5",
-    writtenBy: "John Doe",
-  },
-];
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+import { useAuth } from "@/lib/AuthContext";
+import AuthNav from "@/components/client/navigation/AuthNav";
+import Nav from "@/components/client/navigation/Nav";
+import { Sidebar } from "./sidebar";
+import { useEffect, useState } from "react";
+import Loading from "@/app/loading";
+import FooterSection from "@/components/sections/footer/default";
+import { Topic } from "@/types/Discussion";
+import TrainingSessionCard from "./TrainingSessionCard";
+import { Training } from "@/types/Training";
+
+export const metadata: Metadata = {
+  title: "APPRENA training",
+  description: "Example music app using the components.",
+};
 
 export default function MainPage() {
   const { user } = useAuth();
-  const [courses] = useState<(Article | null)[]>(data);
+  const [trainingSession, setTrainingSession] = useState<(Training | null)[]>(
+    []
+  );
   const [loading, setLoading] = useState(false);
   const [topics] = useState<Topic[]>([]);
 
   useEffect(() => {
-    const getData = async () => {};
+    const getData = async () => {
+      setTrainingSession([
+        {
+          id: "hvhy",
+          availability: "public",
+          createdAt: new Date().toString(),
+          updatedAt: new Date().toString(),
+          title: "Training 1",
+          coverImage: "/placeholder.jpg",
+          description: "Description of training 1",
+          startDate: new Date().toString(),
+          endDate: new Date().toString(),
+          upvotes: [
+            {
+              userId: "user1",
+              createdAt: new Date().toString(),
+            },
+          ],
+          status: "Enrolled",
+        },
+      ]);
+    };
     getData();
     setLoading(false);
   }, []);
@@ -102,35 +84,39 @@ export default function MainPage() {
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
                         <h2 className="text-2xl font-semibold tracking-tight">
-                          Active Articles & Case Studies
+                          Active training sessions
                         </h2>
                         <p className="text-sm text-muted-foreground">
-                          {`${courses.length} courses available.`}
+                          {`${trainingSession.length} training sessions available.`}
                         </p>
                       </div>
                     </div>
                     <Separator className="my-4" />
-                    <div className="grid grid-cols-3 gap-3">
-                      {courses.length > 0 ? (
-                        courses
-                          .toSorted((a: Article | null, b: Article | null) => {
-                            const dateA = a?.createdAt
-                              ? new Date(a?.createdAt).getTime()
-                              : new Date().getTime();
-                            const dateB = b?.createdAt
-                              ? new Date(b?.createdAt).getTime()
-                              : new Date().getTime();
-                            return dateB - dateA;
-                          })
+                    <div className="grid grid-cols-2 gap-3">
+                      {trainingSession.length > 0 ? (
+                        trainingSession
+                          .toSorted(
+                            (a: Training | null, b: Training | null) => {
+                              const dateA = a?.createdAt
+                                ? new Date(a?.createdAt).getTime()
+                                : new Date().getTime();
+                              const dateB = b?.createdAt
+                                ? new Date(b?.createdAt).getTime()
+                                : new Date().getTime();
+                              return dateB - dateA;
+                            }
+                          )
                           .map((item) => {
                             return (
                               <div key={item?.id}>
-                                <ArticleCard item={item} />
+                                <TrainingSessionCard item={item} />
                               </div>
                             );
                           })
                       ) : (
-                        <p>No articles for now! Please check back later.</p>
+                        <p>
+                          No training session for now! Please check back later.
+                        </p>
                       )}
                     </div>
                   </TabsContent>
@@ -141,27 +127,34 @@ export default function MainPage() {
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
                         <h2 className="text-2xl font-semibold tracking-tight">
-                          Popular Articles
+                          Popular training sessions
                         </h2>
                         <p className="text-sm text-muted-foreground">
-                          Articles with a big number of enrollment and upvotes.
+                          Training session with a big number of enrollment and
+                          upvotes.
                         </p>
                       </div>
                     </div>
                     <Separator className="my-4" />
-                    <div className="grid grid-cols-3 gap-3">
-                      {courses.length > 0 ? (
-                        courses
-                          .toSorted((a, b) => (b?.views ?? 0) - (a?.views ?? 0))
+                    <div className="grid grid-cols-2 gap-3">
+                      {trainingSession.length > 0 ? (
+                        trainingSession
+                          .toSorted(
+                            (a, b) =>
+                              (b ? b.upvotes?.length : 0) -
+                              (a ? a.upvotes?.length : 0)
+                          )
                           .map((item) => {
                             return (
                               <div key={item?.id}>
-                                <ArticleCard item={item} />
+                                <TrainingSessionCard item={item} />
                               </div>
                             );
                           })
                       ) : (
-                        <p>No articles for now! Please check back later.</p>
+                        <p>
+                          No training sessions for now! Please check back later.
+                        </p>
                       )}
                     </div>
                   </TabsContent>
@@ -172,17 +165,17 @@ export default function MainPage() {
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
                         <h2 className="text-2xl font-semibold tracking-tight">
-                          Oldest Articles
+                          Oldest training sessions
                         </h2>
                         <p className="text-sm text-muted-foreground">
-                          Articles sorted by post date.
+                          training sorted by post date.
                         </p>
                       </div>
                     </div>
                     <Separator className="my-4" />
-                    <div className="grid grid-cols-3 gap-3">
-                      {courses.length > 0 ? (
-                        courses
+                    <div className="grid grid-cols-2 gap-3">
+                      {trainingSession.length > 0 ? (
+                        trainingSession
                           .toSorted((a, b) => {
                             const dateA = a?.createdAt
                               ? new Date(a?.createdAt).getTime()
@@ -195,12 +188,14 @@ export default function MainPage() {
                           .map((item) => {
                             return (
                               <div key={item?.id}>
-                                <ArticleCard item={item} />
+                                <TrainingSessionCard item={item} />
                               </div>
                             );
                           })
                       ) : (
-                        <p>No articles for now! Please check back later.</p>
+                        <p>
+                          No training session for now! Please check back later.
+                        </p>
                       )}
                     </div>
                   </TabsContent>

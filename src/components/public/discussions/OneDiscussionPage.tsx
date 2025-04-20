@@ -77,7 +77,7 @@ export default function MainPage({ discussionId }: { discussionId: string }) {
                 id: userSnapshot?.id,
                 uid: userSnapshot?.id,
                 displayName: userSnapshot.data()?.displayName,
-                email: userSnapshot.data().email || "",
+                email: userSnapshot.data().email ?? "",
               };
             }
           }
@@ -88,6 +88,7 @@ export default function MainPage({ discussionId }: { discussionId: string }) {
               topicData = {
                 id: topicSnapshot?.id,
                 name: topicSnapshot.data().name,
+                createdAt: topicSnapshot.data().createdAt,
               };
             }
           }
@@ -217,7 +218,7 @@ export default function MainPage({ discussionId }: { discussionId: string }) {
                         </Avatar> */}
                         <div className="flex flex-col space-y-1">
                           <p className="text-sm font-medium leading-none">
-                            {discussion?.createdBy?.displayName || "No Name"}
+                            {discussion?.createdBy?.displayName ?? "No Name"}
                           </p>
                         </div>
                       </div>
@@ -233,7 +234,7 @@ export default function MainPage({ discussionId }: { discussionId: string }) {
                 <Separator className="my-3" />
                 <div
                   dangerouslySetInnerHTML={{
-                    __html: discussion?.content || "",
+                    __html: discussion?.content ?? "",
                   }}
                   style={{ lineHeight: 2 }}
                 ></div>

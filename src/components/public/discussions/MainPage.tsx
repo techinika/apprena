@@ -95,9 +95,9 @@ export default function MainPage() {
 
               return {
                 id: doc.id,
-                topic: topicData ? topicData : null,
+                topic: topicData ?? null,
                 createdAt: docData.createdAt.toDate(),
-                createdBy: userData ? userData : null,
+                createdBy: userData ?? null,
                 title: doc.data().title,
                 description: doc.data().description,
                 upvotes: doc.data().upvotes,

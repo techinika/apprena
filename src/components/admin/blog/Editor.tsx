@@ -12,6 +12,7 @@ import {
   Noop,
   RefCallBack,
 } from "react-hook-form";
+import Image from "@tiptap/extension-image";
 
 type ControllerRenderProps<
   TFieldValues extends FieldValues = FieldValues,
@@ -35,207 +36,291 @@ function MenuBar() {
   return (
     <div className="flex flex-wrap gap-2 p-2 border-b border-gray-200">
       <button
-        onClick={() => editor.chain().focus().toggleBold().run()}
+        onClick={(e) => {
+          e.preventDefault();
+          editor.chain().focus().toggleBold().run();
+        }}
         disabled={!editor.can().chain().focus().toggleBold().run()}
         className={`p-2 rounded ${
-          editor.isActive("bold")
-            ? "bg-blue-500 text-white"
-            : "bg-white dark:bg-gray-800"
+          editor.isActive("bold") ? "bg-primary text-white" : "bg-white"
         }`}
       >
         Bold
       </button>
       <button
-        onClick={() => editor.chain().focus().toggleItalic().run()}
+        onClick={(e) => {
+          e.preventDefault();
+          editor.chain().focus().toggleItalic().run();
+        }}
         disabled={!editor.can().chain().focus().toggleItalic().run()}
         className={`p-2 rounded ${
-          editor.isActive("italic")
-            ? "bg-blue-500 text-white"
-            : "bg-white dark:bg-gray-800"
+          editor.isActive("italic") ? "bg-primary text-white" : "bg-white"
         }`}
       >
         Italic
       </button>
       <button
-        onClick={() => editor.chain().focus().toggleStrike().run()}
+        onClick={(e) => {
+          e.preventDefault();
+          editor.chain().focus().toggleStrike().run();
+        }}
         disabled={!editor.can().chain().focus().toggleStrike().run()}
         className={`p-2 rounded ${
-          editor.isActive("strike")
-            ? "bg-blue-500 text-white"
-            : "bg-white dark:bg-gray-800"
+          editor.isActive("strike") ? "bg-primary text-white" : "bg-white"
         }`}
       >
         Strike
       </button>
+
       <button
-        onClick={() => editor.chain().focus().toggleCode().run()}
+        onClick={(e) => {
+          e.preventDefault();
+          editor.chain().focus().toggleCode().run();
+        }}
         disabled={!editor.can().chain().focus().toggleCode().run()}
         className={`p-2 rounded ${
-          editor.isActive("code")
-            ? "bg-blue-500 text-white"
-            : "bg-white dark:bg-gray-800"
+          editor.isActive("code") ? "bg-primary text-white" : "bg-white"
         }`}
       >
         Code
       </button>
       <button
-        onClick={() => editor.chain().focus().unsetAllMarks().run()}
-        className="p-2 rounded bg-white dark:bg-gray-800"
+        onClick={(e) => {
+          e.preventDefault();
+          editor.chain().focus().unsetAllMarks().run();
+        }}
+        className="p-2 rounded bg-white"
       >
         Clear marks
       </button>
       <button
-        onClick={() => editor.chain().focus().clearNodes().run()}
-        className="p-2 rounded bg-white dark:bg-gray-800"
+        onClick={(e) => {
+          e.preventDefault();
+          editor.chain().focus().clearNodes().run();
+        }}
+        className="p-2 rounded bg-white"
       >
         Clear nodes
       </button>
       <button
-        onClick={() => editor.chain().focus().setParagraph().run()}
+        onClick={(e) => {
+          e.preventDefault();
+          editor.chain().focus().setParagraph().run();
+        }}
         className={`p-2 rounded ${
-          editor.isActive("paragraph")
-            ? "bg-blue-500 text-white"
-            : "bg-white dark:bg-gray-800"
+          editor.isActive("paragraph") ? "bg-primary text-white" : "bg-white"
         }`}
       >
         Paragraph
       </button>
       <button
-        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+        onClick={(e) => {
+          e.preventDefault();
+          editor.chain().focus().toggleHeading({ level: 1 }).run();
+        }}
         className={`p-2 rounded ${
           editor.isActive("heading", { level: 1 })
-            ? "bg-blue-500 text-white"
-            : "bg-white dark:bg-gray-800"
+            ? "bg-primary text-white"
+            : "bg-white"
         }`}
       >
         H1
       </button>
       <button
-        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+        onClick={(e) => {
+          e.preventDefault();
+          editor.chain().focus().toggleHeading({ level: 2 }).run();
+        }}
         className={`p-2 rounded ${
           editor.isActive("heading", { level: 2 })
-            ? "bg-blue-500 text-white"
-            : "bg-white dark:bg-gray-800"
+            ? "bg-primary text-white"
+            : "bg-white"
         }`}
       >
         H2
       </button>
       <button
-        onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+        onClick={(e) => {
+          e.preventDefault();
+          editor.chain().focus().toggleHeading({ level: 3 }).run();
+        }}
         className={`p-2 rounded ${
           editor.isActive("heading", { level: 3 })
-            ? "bg-blue-500 text-white"
-            : "bg-white dark:bg-gray-800"
+            ? "bg-primary text-white"
+            : "bg-white"
         }`}
       >
         H3
       </button>
       <button
-        onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}
+        onClick={(e) => {
+          e.preventDefault();
+          editor.chain().focus().toggleHeading({ level: 4 }).run();
+        }}
         className={`p-2 rounded ${
           editor.isActive("heading", { level: 4 })
-            ? "bg-blue-500 text-white"
-            : "bg-white dark:bg-gray-800"
+            ? "bg-primary text-white"
+            : "bg-white"
         }`}
       >
         H4
       </button>
       <button
-        onClick={() => editor.chain().focus().toggleHeading({ level: 5 }).run()}
+        onClick={(e) => {
+          e.preventDefault();
+          editor.chain().focus().toggleHeading({ level: 5 }).run();
+        }}
         className={`p-2 rounded ${
           editor.isActive("heading", { level: 5 })
-            ? "bg-blue-500 text-white"
-            : "bg-white dark:bg-gray-800"
+            ? "bg-primary text-white"
+            : "bg-white"
         }`}
       >
         H5
       </button>
       <button
-        onClick={() => editor.chain().focus().toggleHeading({ level: 6 }).run()}
+        onClick={(e) => {
+          e.preventDefault();
+          editor.chain().focus().toggleHeading({ level: 6 }).run();
+        }}
         className={`p-2 rounded ${
           editor.isActive("heading", { level: 6 })
-            ? "bg-blue-500 text-white"
-            : "bg-white dark:bg-gray-800"
+            ? "bg-primary text-white"
+            : "bg-white"
         }`}
       >
         H6
       </button>
       <button
-        onClick={() => editor.chain().focus().toggleBulletList().run()}
+        onClick={(e) => {
+          e.preventDefault();
+          editor.chain().focus().toggleBulletList().run();
+        }}
         className={`p-2 rounded ${
-          editor.isActive("bulletList")
-            ? "bg-blue-500 text-white"
-            : "bg-white dark:bg-gray-800"
+          editor.isActive("bulletList") ? "bg-primary text-white" : "bg-white"
         }`}
       >
         Bullet list
       </button>
       <button
-        onClick={() => editor.chain().focus().toggleOrderedList().run()}
+        onClick={(e) => {
+          e.preventDefault();
+          editor.chain().focus().toggleOrderedList().run();
+        }}
         className={`p-2 rounded ${
-          editor.isActive("orderedList")
-            ? "bg-blue-500 text-white"
-            : "bg-white dark:bg-gray-800"
+          editor.isActive("orderedList") ? "bg-primary text-white" : "bg-white"
         }`}
       >
         Ordered list
       </button>
       <button
-        onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+        onClick={(e) => {
+          e.preventDefault();
+          editor.chain().focus().toggleCodeBlock().run();
+        }}
         className={`p-2 rounded ${
-          editor.isActive("codeBlock")
-            ? "bg-blue-500 text-white"
-            : "bg-white dark:bg-gray-800"
+          editor.isActive("codeBlock") ? "bg-primary text-white" : "bg-white"
         }`}
       >
         Code block
       </button>
       <button
-        onClick={() => editor.chain().focus().toggleBlockquote().run()}
+        onClick={(e) => {
+          e.preventDefault();
+          editor.chain().focus().toggleBlockquote().run();
+        }}
         className={`p-2 rounded ${
-          editor.isActive("blockquote")
-            ? "bg-blue-500 text-white"
-            : "bg-white dark:bg-gray-800"
+          editor.isActive("blockquote") ? "bg-primary text-white" : "bg-white"
         }`}
       >
         Blockquote
       </button>
       <button
-        onClick={() => editor.chain().focus().setHorizontalRule().run()}
-        className="p-2 rounded bg-white dark:bg-gray-800"
+        onClick={(e) => {
+          e.preventDefault();
+          editor.chain().focus().setHorizontalRule().run();
+        }}
+        className="p-2 rounded bg-white"
       >
         Horizontal rule
       </button>
       <button
-        onClick={() => editor.chain().focus().setHardBreak().run()}
-        className="p-2 rounded bg-white dark:bg-gray-800"
+        onClick={(e) => {
+          e.preventDefault();
+          editor.chain().focus().setHardBreak().run();
+        }}
+        className="p-2 rounded bg-white"
       >
         Hard break
       </button>
       <button
-        onClick={() => editor.chain().focus().undo().run()}
+        onClick={(e) => {
+          e.preventDefault();
+          editor.chain().focus().undo().run();
+        }}
         disabled={!editor.can().chain().focus().undo().run()}
-        className="p-2 rounded bg-white dark:bg-gray-800"
+        className="p-2 rounded bg-white"
       >
         Undo
       </button>
       <button
-        onClick={() => editor.chain().focus().redo().run()}
+        onClick={(e) => {
+          e.preventDefault();
+          editor.chain().focus().redo().run();
+        }}
         disabled={!editor.can().chain().focus().redo().run()}
-        className="p-2 rounded bg-white dark:bg-gray-800"
+        className="p-2 rounded bg-white"
       >
         Redo
       </button>
       <button
-        onClick={() => editor.chain().focus().setColor("#958DF1").run()}
+        onClick={(e) => {
+          e.preventDefault();
+          editor.chain().focus().setColor("#958DF1").run();
+        }}
         className={`p-2 rounded ${
           editor.isActive("textStyle", { color: "#958DF1" })
-            ? "bg-blue-500 text-white"
-            : "bg-white dark:bg-gray-800"
+            ? "bg-primary text-white"
+            : "bg-white"
         }`}
       >
         Purple
       </button>
+      <input
+        type="file"
+        accept="image/*"
+        onChange={async (e) => {
+          const file = e.target.files?.[0];
+          if (!file || !editor) return;
+
+          const formData = new FormData();
+          formData.append("file", file);
+
+          const response = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+          });
+          const result = await response.json();
+
+          editor
+            .chain()
+            .focus()
+            .setImage({ src: result?.url, alt: file.name })
+            .run();
+
+          const caption = prompt("Add a caption for your image (optional):");
+          if (caption) {
+            editor
+              .chain()
+              .focus()
+              .insertContent(
+                `<figure><img src="${result?.url}" alt="${file.name}"/><figcaption>${caption}</figcaption></figure>`
+              )
+              .run();
+          }
+        }}
+        className="p-2 rounded bg-white"
+      />
     </div>
   );
 }
@@ -244,6 +329,15 @@ const Editor = ({ field }: { field: ControllerRenderProps }) => {
   const extensions = [
     Color.configure({ types: [TextStyle.name, ListItem.name] }),
     TextStyle,
+    Image.extend({
+      addAttributes() {
+        return {
+          ...this.parent?.(),
+          alt: { default: null },
+          title: { default: null },
+        };
+      },
+    }),
     StarterKit.configure({
       bulletList: {
         keepMarks: true,
@@ -257,7 +351,7 @@ const Editor = ({ field }: { field: ControllerRenderProps }) => {
   ];
 
   return (
-    <div className="p-2 border border-gray-100 rounded min-h-[300px]">
+    <div className="p-2 border rounded min-h-[300px] prose">
       <EditorProvider
         slotBefore={<MenuBar />}
         immediatelyRender={false}

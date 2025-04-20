@@ -1,10 +1,10 @@
-import CategoryMain from "@/components/admin/blog/categories/CategoryMain";
+import MainPage from "@/components/client/content/training/MainPage";
 import React from "react";
 
 function page() {
   return (
     <div>
-      <CategoryMain />
+      <MainPage />
     </div>
   );
 }
