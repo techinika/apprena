@@ -23,7 +23,7 @@ export const getDeviceInfo = async () => {
   const os = result.os?.name || "Unknown";
 
   return {
-    location: "", // Can't get without external API
+    location: "",
     device,
     browser,
     os,
