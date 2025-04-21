@@ -19,6 +19,7 @@ import Loading from "@/app/loading";
 import Image from "next/image";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { CustomUser } from "@/components/public/discussions/OneDiscussionPage";
+import CTA from "@/components/sections/cta/default";
 
 function OneArticleView({ slug }: { slug: string | TrustedHTML }) {
   const { user } = useAuth();
@@ -126,7 +127,7 @@ function OneArticleView({ slug }: { slug: string | TrustedHTML }) {
     <div className="min-h-screen">
       {user ? <AuthNav /> : <Nav />}
 
-      <div className="mx-auto shadow-md">
+      <div className="mx-auto">
         {article && (
           <>
             <div className="relative w-full h-[40%]">
@@ -156,7 +157,7 @@ function OneArticleView({ slug }: { slug: string | TrustedHTML }) {
                 </CardHeader>
               </Card>
               <article
-                className="col-span-3 text-lg prose leading-relaxed article-content"
+                className="col-span-3 leading-normal article-content"
                 dangerouslySetInnerHTML={{
                   __html: article?.content || "<p>No content available.</p>",
                 }}
@@ -165,6 +166,7 @@ function OneArticleView({ slug }: { slug: string | TrustedHTML }) {
           </>
         )}
       </div>
+      {!user && <CTA />}
       <FooterSection />
     </div>
   );
