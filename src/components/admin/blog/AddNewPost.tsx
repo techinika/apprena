@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "../../ui/button";
 import { Label } from "../../ui/label";
 import {
@@ -39,9 +39,21 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/lib/AuthContext";
-import { collection, doc, setDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  DocumentReference,
+  getDoc,
+  getDocs,
+  query,
+  setDoc,
+  where,
+} from "firebase/firestore";
 import { toast } from "sonner";
 import { db } from "@/db/firebase";
+import { Topic } from "@/types/Discussion";
+import { User } from "@/types/Users";
+import Loading from "@/app/loading";
 
 export const FileSvgDraw = () => {
   return (
@@ -94,6 +106,63 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
   const [date, setDate] = React.useState<Date>();
   const [files, setFiles] = useState<File[] | null>(null);
   const articleCollection = collection(db, "articles");
+  const [topics, setTopics] = useState<Topic[]>([]);
+  const [contributors, setContributors] = useState<User[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const getData = async () => {
+      setLoading(true);
+      try {
+        const institutionDocRef = doc(db, "institutions", institutionId);
+        const institutionSnap = await getDoc(institutionDocRef);
+
+        if (!institutionSnap.exists()) {
+          console.warn("Institution not found");
+          return;
+        }
+
+        const institutionData = institutionSnap.data();
+        const adminRefs: DocumentReference[] =
+          institutionData.organizationAdmins ?? [];
+
+        // Fetch topics owned by the institution
+        const topicsQuery = query(
+          collection(db, "topics"),
+          where("institutionOwning", "==", institutionDocRef)
+        );
+        const topicsSnapshot = await getDocs(topicsQuery);
+        const topicsData = topicsSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Topic[];
+        setTopics(topicsData);
+
+        // Fetch users with valid roles
+        const usersQuery = query(
+          collection(db, "profile"),
+          where("role", "in", ["admin", "super_admin", "contributor"])
+        );
+        const usersSnapshot = await getDocs(usersQuery);
+        const allUsers = usersSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as User[];
+
+        // Filter users who are in the adminRefs array
+        const contributorData = allUsers.filter((user) =>
+          adminRefs.some((adminRef) => adminRef.id === user.id)
+        );
+        setContributors(contributorData);
+      } catch (error) {
+        console.error("Error fetching institution data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getData();
+  }, []);
 
   const dropZoneConfig = {
     maxFiles: 1,
@@ -164,17 +233,6 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
     },
   ];
 
-  const publishers = [
-    {
-      label: "Achille Songa",
-      value: "achille",
-    },
-    {
-      label: "Administrator",
-      value: "admin",
-    },
-  ];
-
   const handleSaveDraft = (data: formValues) => {
     const newData = {
       ...data,
@@ -195,6 +253,8 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
     processArticleCreation(newData);
   };
 
+  if (loading) return <Loading />;
+
   return (
     <div className="space-y-4 p-8 pt-6">
       <PageHeader
@@ -207,8 +267,8 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
         saveDraft={() => handleSaveDraft(form.getValues())}
       />
       <Form {...form}>
-        <div className="flex items-start justify-between gap-3">
-          <div className="w-[80%]">
+        <div className="grid grid-cols-4 items-start justify-between gap-3">
+          <div className="col-span-3">
             <FormField
               control={form.control}
               name="title"
@@ -238,7 +298,7 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
               )}
             />
           </div>
-          <div className="w-[20%] p-5 rounded border border-gray-100">
+          <div className="p-5 rounded border">
             <div className="flex flex-col gap-4">
               <div className="flex flex-col space-y-1.5 gap-1">
                 <div className="flex items-center justify-between">
@@ -368,13 +428,13 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
                           <SelectValue placeholder="Select author" />
                         </SelectTrigger>
                         <SelectContent position="popper">
-                          {publishers?.map((item) => (
+                          {contributors?.map((item) => (
                             <SelectItem
                               {...field}
-                              key={item?.value}
-                              value={item?.value}
+                              key={item?.id}
+                              value={item?.id}
                             >
-                              {item?.label}
+                              {item?.displayName}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -428,17 +488,17 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
                     <FormLabel className="font-bold">Category</FormLabel>
                     <FormControl>
                       <Select>
-                        <SelectTrigger id="visibility">
+                        <SelectTrigger id="category">
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
                         <SelectContent position="popper">
-                          {publishers?.map((item) => (
+                          {topics?.map((item) => (
                             <SelectItem
-                              key={item?.value}
+                              key={item?.id}
                               {...field}
-                              value={item?.value}
+                              value={item?.id}
                             >
-                              {item?.label}
+                              {item?.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
