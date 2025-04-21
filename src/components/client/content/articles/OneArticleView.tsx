@@ -17,6 +17,8 @@ import { useRouter } from "next/navigation";
 import { formatDistance } from "date-fns";
 import Loading from "@/app/loading";
 import Image from "next/image";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { CustomUser } from "@/components/public/discussions/OneDiscussionPage";
 
 function OneArticleView({ slug }: { slug: string | TrustedHTML }) {
   const { user } = useAuth();
@@ -45,38 +47,40 @@ function OneArticleView({ slug }: { slug: string | TrustedHTML }) {
           return;
         }
 
-        // Get refs
-        const userRef = docData.createdBy as
-          | DocumentReference<DocumentData>
-          | undefined;
-        const topicRef = docData.topic as
-          | DocumentReference<DocumentData>
-          | undefined;
+        const userRef = docData?.writtenBy as DocumentReference<DocumentData>;
+        const topicRef = docData?.category as DocumentReference<DocumentData>;
 
-        // Fetch user and topic in parallel
-        const [userSnap, topicSnap] = await Promise.all([
-          userRef ? getDoc(userRef) : Promise.resolve(null),
-          topicRef ? getDoc(topicRef) : Promise.resolve(null),
-        ]);
+        let userData: CustomUser | null = null;
+        let topicData: DocumentData | null = null;
 
-        const userData = userSnap?.exists()
-          ? {
-              id: userSnap.id,
-              uid: userSnap.id,
-              displayName: userSnap.data()?.displayName ?? "",
-              email: userSnap.data()?.email ?? "",
+        try {
+          if (userRef) {
+            const userSnapshot = await getDoc(userRef);
+            if (userSnapshot.exists()) {
+              userData = {
+                id: userSnapshot?.id,
+                uid: userSnapshot?.id,
+                displayName: userSnapshot.data()?.displayName,
+                email: userSnapshot.data().email ?? "",
+              };
             }
-          : null;
+          }
 
-        const topicData = topicSnap?.exists()
-          ? {
-              id: topicSnap.id,
-              name: topicSnap.data()?.name ?? "",
-              createdAt: topicSnap.data()?.createdAt,
+          if (topicRef) {
+            const topicSnapshot = await getDoc(topicRef);
+            if (topicSnapshot.exists()) {
+              topicData = {
+                id: topicSnapshot?.id,
+                name: topicSnapshot.data().name,
+                createdAt: topicSnapshot.data().createdAt,
+              };
             }
-          : null;
+          }
+        } catch (error) {
+          console.error("Error fetching referenced document:", error);
+          return null;
+        }
 
-        // Set state
         setArticle({
           id: articleSnap.id,
           category: topicData
@@ -102,8 +106,9 @@ function OneArticleView({ slug }: { slug: string | TrustedHTML }) {
           summary: docData.description ?? "",
           views: docData.views ?? 0,
           availability: docData.availability ?? "public",
-          institutionOwning: "", // populate if needed
+          institutionOwning: "",
           slug: docData.slug ?? "",
+          photoURL: docData?.photoURL,
         });
       } catch (error) {
         console.error("Error fetching article data:", error);
@@ -121,34 +126,42 @@ function OneArticleView({ slug }: { slug: string | TrustedHTML }) {
     <div className="min-h-screen">
       {user ? <AuthNav /> : <Nav />}
 
-      <div className="mx-auto shadow-md rounded-lg p-6">
+      <div className="mx-auto shadow-md">
         {article && (
           <>
-            <div className="relative w-full h-[30%]">
+            <div className="relative w-full h-[40%]">
               <Image
                 src={article?.photoURL ?? "/placeholder.jpg"}
                 width={1000}
                 height={500}
                 alt={article.title}
-                className="w-full h-64 object-cover rounded-lg shadow-md"
+                className="w-full h-96 object-cover shadow-md"
               />
 
-              <div className="absolute inset-0 bg-black bg-opacity-40 rounded-lg"></div>
+              <div className="absolute inset-0 bg-black bg-opacity-80"></div>
 
               <div className="size absolute inset-0 flex flex-col justify-center items-center text-white text-center px-4">
                 <h1 className="text-4xl font-bold">{article.title}</h1>
                 <p className="text-sm mt-2">
-                  Published on {article?.createdAt} | Category:{" "}
-                  {article?.category?.name}
+                  Published on {article?.createdAt} by{" "}
+                  {article?.writtenBy?.displayName ?? "Unknown"} | Category:{" "}
+                  {article?.category?.name ?? "General"}
                 </p>
               </div>
             </div>
-            <article
-              className="size mt-6 text-lg leading-relaxed article-content"
-              dangerouslySetInnerHTML={{
-                __html: article?.content || "<p>No content available.</p>",
-              }}
-            />
+            <div className="size grid grid-cols-4 items-start gap-4 p-6 m-5">
+              <Card className="">
+                <CardHeader>
+                  <CardTitle>Related Articles</CardTitle>
+                </CardHeader>
+              </Card>
+              <article
+                className="col-span-3 text-lg prose leading-relaxed article-content"
+                dangerouslySetInnerHTML={{
+                  __html: article?.content || "<p>No content available.</p>",
+                }}
+              />
+            </div>
           </>
         )}
       </div>
