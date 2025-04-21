@@ -38,7 +38,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Switch } from "@/components/ui/switch";
-import { useAuth } from "@/lib/AuthContext";
 import {
   collection,
   doc,
@@ -102,13 +101,13 @@ const formSchema = z.object({
 type formValues = z.infer<typeof formSchema>;
 
 const AddNewPost = ({ institutionId }: { institutionId: string }) => {
-  const { user } = useAuth();
   const [date, setDate] = React.useState<Date>();
   const [files, setFiles] = useState<File[] | null>(null);
   const articleCollection = collection(db, "articles");
   const [topics, setTopics] = useState<Topic[]>([]);
   const [contributors, setContributors] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
+  const [cover, setCover] = React.useState<string | null>(null);
 
   useEffect(() => {
     const getData = async () => {
@@ -126,7 +125,6 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
         const adminRefs: DocumentReference[] =
           institutionData.organizationAdmins ?? [];
 
-        // Fetch topics owned by the institution
         const topicsQuery = query(
           collection(db, "topics"),
           where("institutionOwning", "==", institutionDocRef)
@@ -138,7 +136,6 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
         })) as Topic[];
         setTopics(topicsData);
 
-        // Fetch users with valid roles
         const usersQuery = query(
           collection(db, "profile"),
           where("role", "in", ["admin", "super_admin", "contributor"])
@@ -149,9 +146,8 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
           ...doc.data(),
         })) as User[];
 
-        // Filter users who are in the adminRefs array
-        const contributorData = allUsers.filter((user) =>
-          adminRefs.some((adminRef) => adminRef.id === user.id)
+        const contributorData = allUsers.filter((u) =>
+          adminRefs.some((adminRef) => adminRef.id === u.uid)
         );
         setContributors(contributorData);
       } catch (error) {
@@ -175,7 +171,7 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
     defaultValues: {
       title: "",
       content: "",
-      photoURL: "",
+      photoURL: cover ?? "",
       isFeatured: "false",
       publishedAt: "",
       visibility: "private",
@@ -184,15 +180,15 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
       tags: "",
       category: "",
       institutionOwning: institutionId,
-      writtenBy: user?.uid,
+      writtenBy: "",
     },
     mode: "onChange",
   });
 
   const processArticleCreation = async (data: formValues) => {
     try {
-      const photoURL =
-        "https://media.licdn.com/dms/image/v2/D5612AQFGrpxALY6I6g/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1677692208884?e=2147483647&v=beta&t=R8FVCwF2m3MIPmp1J0tLOxhAyPdsw-_Bhs7dIhwahYE";
+      const userRef = doc(db, "profile", String(data?.writtenBy));
+      const institutionRef = doc(db, "institutions", institutionId);
 
       const slug = data?.title
         .toLowerCase()
@@ -202,16 +198,16 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
 
       await setDoc(doc(articleCollection, slug), {
         title: data?.title,
-        content: data?.content || "",
-        photoURL: photoURL || "/placeholder.jpg",
-        isFeatured: data?.isFeatured || false,
-        publishedAt: data?.publishedAt || "",
-        visibility: data?.visibility || "private",
-        writtenBy: data?.writtenBy || user?.uid,
-        summary: data?.summary || "",
-        tags: data?.tags || "",
-        category: data?.category || "",
-        institutionOwning: institutionId || data?.institutionOwning,
+        content: data?.content ?? "",
+        photoURL: data?.photoURL ?? "/placeholder.jpg",
+        isFeatured: data?.isFeatured ?? false,
+        publishedAt: data?.publishedAt ?? "",
+        visibility: data?.visibility ?? "private",
+        writtenBy: userRef,
+        summary: data?.summary ?? "",
+        tags: data?.tags ?? "",
+        category: data?.category ?? "",
+        institutionOwning: institutionRef,
         status: data?.status === "draft" ? "draft" : "published",
         createdAt: new Date().toISOString(),
       });
@@ -251,6 +247,41 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
     };
 
     processArticleCreation(newData);
+  };
+
+  const handleUploadImage = async () => {
+    if (!files || files.length === 0) {
+      alert("Please select an image to upload.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", files[0]);
+
+    try {
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const result = await response.json();
+
+      if (response.ok) {
+        setCover(result.url);
+        setFiles(null);
+        toast.success("Image uploaded successfully!");
+        form.setValue("photoURL", result.url);
+      } else {
+        console.error("Image upload failed", result.message);
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFiles([e.target.files[0]]);
+    }
   };
 
   if (loading) return <Loading />;
@@ -305,7 +336,9 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
                   <Label htmlFor="visibility" className="font-bold">
                     Cover Image
                   </Label>
-                  <Button size="xs">Upload</Button>
+                  <Button size="xs" onClick={handleUploadImage}>
+                    Upload
+                  </Button>
                 </div>
                 <FileUploader
                   value={files}
@@ -313,7 +346,10 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
                   dropzoneOptions={dropZoneConfig}
                   className="relative bg-background rounded-lg p-2"
                 >
-                  <FileInput className="outline-dashed outline-1 outline-white">
+                  <FileInput
+                    onChange={handleFileChange}
+                    className="outline-dashed outline-1 outline-white"
+                  >
                     <div className="flex items-center justify-center flex-col pt-3 pb-4 w-full ">
                       <FileSvgDraw />
                     </div>

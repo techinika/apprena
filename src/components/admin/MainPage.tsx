@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import NewInstitution from "./NewInstitution";
 import { Institution } from "@/types/Institution";
 import { db } from "@/db/firebase";
-import { collection, onSnapshot, query, where } from "firebase/firestore";
+import { collection, doc, onSnapshot, query, where } from "firebase/firestore";
 import { useAuth } from "@/lib/AuthContext";
 import { formatDistanceToNow } from "date-fns";
 import { enUS } from "date-fns/locale";
@@ -23,9 +23,10 @@ function MainPage() {
 
   useEffect(() => {
     const getData = async () => {
+      const userRef = doc(db, "profile", String(user?.uid));
       const q = query(
         collection(db, "institutions"),
-        where("organizationAdmins", "array-contains", user?.uid)
+        where("organizationAdmins", "array-contains", userRef)
       );
       onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map((doc) => {

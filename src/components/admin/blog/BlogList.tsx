@@ -38,9 +38,16 @@ import {
 import { Article } from "@/types/Article";
 import { Badge } from "../../ui/badge";
 import PageHeader from "../main/PageHeader";
-import { collection, onSnapshot, query, where } from "firebase/firestore";
+import {
+  collection,
+  getDoc,
+  onSnapshot,
+  query,
+  where,
+} from "firebase/firestore";
 import { db } from "@/db/firebase";
 import Loading from "@/app/loading";
+import { User } from "@/types/Users";
 
 export default function BlogList({ institutionId }: { institutionId: string }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -55,7 +62,9 @@ export default function BlogList({ institutionId }: { institutionId: string }) {
 
   React.useEffect(() => {
     if (!institutionId) return;
+
     setLoading(true);
+
     const articlesRef = collection(db, "articles");
     const q = query(
       articlesRef,
@@ -64,12 +73,32 @@ export default function BlogList({ institutionId }: { institutionId: string }) {
 
     const unsubscribe = onSnapshot(
       q,
-      (snapshot) => {
-        const articlesData: Article[] = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as Article[];
-        setArticles(articlesData);
+      async (snapshot) => {
+        const articlesWithWriters: Article[] = await Promise.all(
+          snapshot.docs.map(async (doc) => {
+            const data = doc.data();
+            let writerData: User | null = null;
+
+            if (data.writtenBy) {
+              try {
+                const writerSnap = await getDoc(data.writtenBy);
+                writerData = writerSnap.exists()
+                  ? { id: writerSnap.id, ...(writerSnap.data() ?? {}) }
+                  : null;
+              } catch (err) {
+                console.warn("Error fetching writer for article:", err);
+              }
+            }
+
+            return {
+              id: doc.id,
+              ...data,
+              writtenBy: writerData,
+            };
+          })
+        );
+
+        setArticles(articlesWithWriters);
         setLoading(false);
       },
       (err) => {
@@ -119,10 +148,10 @@ export default function BlogList({ institutionId }: { institutionId: string }) {
       },
     },
     {
-      accessorKey: "status",
-      header: "Status",
+      accessorKey: "visibility",
+      header: "Visibility",
       cell: ({ row }) => (
-        <Badge className="capitalize">{row.getValue("status")}</Badge>
+        <Badge className="capitalize">{row.getValue("visibility")}</Badge>
       ),
     },
     {
@@ -136,7 +165,7 @@ export default function BlogList({ institutionId }: { institutionId: string }) {
       accessorKey: "writtenBy",
       header: "Author",
       cell: ({ row }) => (
-        <div className="capitalize">{row.getValue("writtenBy")}</div>
+        <div className="capitalize">{row?.original.writtenBy?.displayName}</div>
       ),
     },
     {

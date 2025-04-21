@@ -74,8 +74,8 @@ const NewInstitution = ({
       await addDoc(institutionCollection, {
         name,
         institutionType: type,
-        organizationCreator: user?.uid,
-        organizationAdmins: [user?.uid],
+        organizationCreator: userRef,
+        organizationAdmins: [userRef],
         accessLevel: "normal",
         createdAt: new Date(),
       });

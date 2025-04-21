@@ -92,7 +92,6 @@ function NewEvent({ institutionId }: { institutionId: string }) {
     }
 
     const slug = generateSlug(data?.title);
-    console.log(slug);
     try {
       await setDoc(doc(eventsRef, slug), data);
       toast.success("New event added successfully!");

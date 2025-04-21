@@ -1,13 +1,14 @@
+import { User } from "./Users";
+
 export type Article = {
   id: string;
   title: string;
   slug: string;
   content: string;
   summary?: string;
-  coverImage?: string;
   availability: "public" | "private";
   status: "draft" | "published";
-  writtenBy: string;
+  writtenBy: User;
   institutionOwning: string;
   tags?: string;
   createdAt: Date;
