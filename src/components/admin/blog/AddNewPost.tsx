@@ -189,6 +189,7 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
     try {
       const userRef = doc(db, "profile", String(data?.writtenBy));
       const institutionRef = doc(db, "institutions", institutionId);
+      const topicRef = doc(db, "topics", data?.category);
 
       const slug = data?.title
         .toLowerCase()
@@ -206,10 +207,10 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
         writtenBy: userRef,
         summary: data?.summary ?? "",
         tags: data?.tags ?? "",
-        category: data?.category ?? "",
+        category: topicRef ?? "",
         institutionOwning: institutionRef,
         status: data?.status === "draft" ? "draft" : "published",
-        createdAt: new Date().toISOString(),
+        createdAt: new Date(),
       });
       toast("Article created successfully");
       form.reset();
@@ -232,7 +233,7 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
   const handleSaveDraft = (data: formValues) => {
     const newData = {
       ...data,
-      visibility: "draft",
+      status: "draft",
       publishedAt: "",
     };
 
@@ -242,8 +243,8 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
   const handlePublish = (data: formValues) => {
     const newData = {
       ...data,
-      visibility: "published",
-      publishedAt: new Date().toISOString(),
+      status: "published",
+      publishedAt: String(new Date()),
     };
 
     processArticleCreation(newData);
