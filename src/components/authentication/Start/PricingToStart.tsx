@@ -64,7 +64,7 @@ export default function PricingToStart({
                   >
                     <hr
                       className={cn(
-                        "absolute top-0 h-[1px] border-0 bg-gradient-to-r from-transparent via-foreground/60 to-transparent"
+                        "absolute top-0 h-[1px] border-0 bg-linear-to-r from-transparent via-foreground/60 to-transparent"
                       )}
                     />
                     <div className="flex flex-col gap-7">

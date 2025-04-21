@@ -6,7 +6,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import DashboardHeader from "./DashboardHeader";
 import React from "react";
 import { useAuth } from "@/lib/AuthContext";
-import { collection, onSnapshot, query, where } from "firebase/firestore";
+import { collection, doc, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "@/db/firebase";
 import { formatDistanceToNow } from "date-fns";
 import { enUS } from "date-fns/locale";
@@ -29,12 +29,14 @@ export default function Page({
     const getData = async () => {
       if (!user) return;
 
+      const userRef = doc(db, "profile", user.uid);
+
       const cookieData = await getCookies();
       const cookieInstitution = cookieData?.activeInstitution;
 
       const q = query(
         collection(db, "institutions"),
-        where("organizationAdmins", "array-contains", user?.uid)
+        where("organizationAdmins", "array-contains", userRef)
       );
       onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map((doc) => {

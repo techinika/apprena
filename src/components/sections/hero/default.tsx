@@ -23,7 +23,7 @@ export default function Hero() {
               <ArrowRightIcon className="h-3 w-3" />
             </Link>
           </Badge>
-          <h1 className="relative inline-block animate-appear bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-4xl font-semibold leading-tight text-transparent drop-shadow-2xl sm:text-6xl sm:leading-tight md:text-8xl md:leading-tight">
+          <h1 className="relative inline-block animate-appear bg-linear-to-r from-foreground to-muted-foreground bg-clip-text text-4xl font-semibold leading-tight text-transparent drop-shadow-2xl sm:text-6xl sm:leading-tight md:text-8xl md:leading-tight">
             The Learning Platform You Deserve
           </h1>
           <p className="text-md relative max-w-[550px] animate-appear font-medium text-muted-foreground opacity-100 delay-100 sm:text-xl">

@@ -14,7 +14,7 @@ function Recommended({ item }: { item: Article }) {
 
   return (
     <div
-      className="rounded-xl border bg-card text-card-foreground shadow flex gap-6 items-center max-h-[50%] cursor-pointer"
+      className="rounded-xl border bg-card text-card-foreground shadow-sm flex gap-6 items-center max-h-[50%] cursor-pointer"
       onClick={() => router.push(`/articles/${item?.id}`)}
     >
       <div className="h-full">
