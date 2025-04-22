@@ -1,3 +1,5 @@
+import { DocumentReference } from "firebase/firestore";
+
 export type ContactInformation = {
   name: string; // Name of the contact person
   title: string; // Job title of the contact person
@@ -70,6 +72,6 @@ export type Institution = {
   roles?: InstitutionRole[];
   createdAt: string;
   updatedAt: string;
-  organizationAdmins: string[];
+  organizationAdmins: DocumentReference[];
   organizationOwner: string;
 };

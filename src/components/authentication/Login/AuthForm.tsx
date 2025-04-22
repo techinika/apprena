@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { cn, getDeviceInfo } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -25,12 +25,15 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
+  addDoc,
+  collection,
   doc,
   getDoc,
   serverTimestamp,
   setDoc,
   updateDoc,
 } from "firebase/firestore";
+import { use } from "react";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email format"),
@@ -44,6 +47,9 @@ export function UserAuthForm({
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
   const router = useRouter();
+  const loginCollection = collection(db, "logins");
+  const { device, browser, os } = use(getDeviceInfo());
+
   const {
     register,
     handleSubmit,
@@ -65,6 +71,19 @@ export function UserAuthForm({
                 await updateDoc(userRef, {
                   lastLogin: new Date(),
                 });
+                await addDoc(loginCollection, {
+                  user: userRef,
+                  createdAt: new Date(),
+                  device: device,
+                  browser: browser,
+                  os: os,
+                })
+                  .then(() => {
+                    console.log("Login record created with ID: ", uid);
+                  })
+                  .catch((error) => {
+                    console.error("Error creating login record:", error);
+                  });
               } else {
                 const userProfile = {
                   uid,
@@ -133,8 +152,23 @@ export function UserAuthForm({
                 };
 
                 setDoc(userRef, userProfile)
-                  .then(() => {
-                    console.log("User profile created with ID: ", uid);
+                  .then(async () => {
+                    await updateDoc(userRef, {
+                      lastLogin: new Date(),
+                    });
+                    await addDoc(loginCollection, {
+                      user: userRef,
+                      createdAt: new Date(),
+                      device: device,
+                      browser: browser,
+                      os: os,
+                    })
+                      .then(() => {
+                        console.log("Login record created with ID: ", uid);
+                      })
+                      .catch((error) => {
+                        console.error("Error creating login record:", error);
+                      });
                   })
                   .catch((error) => {
                     console.error("Error creating user profile:", error);
@@ -178,6 +212,19 @@ export function UserAuthForm({
                 await updateDoc(userRef, {
                   lastLogin: new Date(),
                 });
+                await addDoc(loginCollection, {
+                  user: userRef,
+                  createdAt: new Date(),
+                  device: device,
+                  browser: browser,
+                  os: os,
+                })
+                  .then(() => {
+                    console.log("Login record created with ID: ", uid);
+                  })
+                  .catch((error) => {
+                    console.error("Error creating login record:", error);
+                  });
               } else {
                 const userProfile = {
                   uid,
@@ -246,8 +293,23 @@ export function UserAuthForm({
                 };
 
                 setDoc(userRef, userProfile)
-                  .then(() => {
-                    console.log("User profile created with ID: ", uid);
+                  .then(async () => {
+                    await updateDoc(userRef, {
+                      lastLogin: new Date(),
+                    });
+                    await addDoc(loginCollection, {
+                      user: userRef,
+                      createdAt: new Date(),
+                      device: device,
+                      browser: browser,
+                      os: os,
+                    })
+                      .then(() => {
+                        console.log("Login record created with ID: ", uid);
+                      })
+                      .catch((error) => {
+                        console.error("Error creating login record:", error);
+                      });
                   })
                   .catch((error) => {
                     console.error("Error creating user profile:", error);

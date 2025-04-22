@@ -32,6 +32,8 @@ import { redirect } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
 import { Institution } from "@/types/Institution";
 import { NavCommunity } from "./app-community";
+import { db } from "@/db/firebase";
+import { doc } from "firebase/firestore";
 
 export function AppSidebar({
   activeInstitution,
@@ -50,8 +52,12 @@ export function AppSidebar({
   React.useEffect(() => {
     if (!institutionId || !user || !activeInstitution) return;
 
+    const userRef = doc(db, "profile", user.uid);
+
     const isCurrentTeam = activeInstitution.id === institutionId;
-    const isMember = activeInstitution?.organizationAdmins?.includes(user?.uid);
+    const isMember = activeInstitution?.organizationAdmins?.some(
+      (ref) => ref?.id === userRef?.id
+    );
 
     if (!isCurrentTeam || !isMember) {
       redirect("/admin");
@@ -104,7 +110,11 @@ export function AppSidebar({
         items: [
           {
             title: "All Courses",
-            url: "#",
+            url: `/admin/${institutionId}/courses`,
+          },
+          {
+            title: "New Course",
+            url: `/admin/${institutionId}/courses/new`,
           },
           {
             title: "Knowledge Base",

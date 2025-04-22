@@ -6,83 +6,167 @@ import Nav from "../../navigation/Nav";
 import { useAuth } from "@/lib/AuthContext";
 import FooterSection from "@/components/sections/footer/default";
 import { Article } from "@/types/Article";
+import {
+  doc,
+  DocumentData,
+  DocumentReference,
+  getDoc,
+} from "firebase/firestore";
+import { db } from "@/db/firebase";
+import { useRouter } from "next/navigation";
+import { formatDistance } from "date-fns";
+import Loading from "@/app/loading";
+import Image from "next/image";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { CustomUser } from "@/components/public/discussions/OneDiscussionPage";
+import CTA from "@/components/sections/cta/default";
 
 function OneArticleView({ slug }: { slug: string | TrustedHTML }) {
   const { user } = useAuth();
+  const router = useRouter();
   const [article, setArticle] = useState<Article>();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (slug) {
-      setArticle({
-        title:
-          "The Future of Technology: Innovations That Will Change the World",
-        content: `
-          <h1>The Future of Technology</h1>
-          <p>Technology is evolving at a rapid pace, bringing innovations that shape our daily lives. From AI advancements to sustainable energy solutions, the future looks promising.</p>
-          
-          <h2>Artificial Intelligence</h2>
-          <p>AI is transforming industries by automating tasks, enhancing decision-making, and personalizing user experiences. Self-driving cars, AI-driven healthcare, and smart assistants are just a few examples.</p>
-          
-          <img src="/course.jpg" alt="AI Revolution" class="rounded-xl shadow-md mx-auto my-4" />
-          
-          <h2>Renewable Energy</h2>
-          <p>With the climate crisis becoming more urgent, the shift to renewable energy sources like solar and wind is accelerating. Innovations in battery storage and energy efficiency are making clean energy more viable.</p>
-          
-          <blockquote class="italic border-l-4 border-blue-500 pl-4 my-4">
-            "The best way to predict the future is to create it." — Peter Drucker
-          </blockquote>
-          
-          <h2>Space Exploration</h2>
-          <p>Private companies like SpaceX and Blue Origin are making space travel more accessible. Colonization of Mars and deep-space exploration may soon become a reality.</p>
-          
-          <p class="font-bold mt-6">Stay tuned for more insights into the world of tech!</p>
-        `,
-        slug: "future-of-technology",
-        writtenBy: "1",
-        availability: "public",
-        coverImage: "/course.jpg",
-        status: "published",
-        createdAt: new Date(),
-        id: "future-of-technology",
-        institutionOwning: "Techinika",
-        category: "Technology",
-      });
-    }
+    if (!slug) return;
+
+    setLoading(true);
+
+    const fetchData = async () => {
+      try {
+        const articleRef = doc(db, "articles", slug as string);
+        const articleSnap = await getDoc(articleRef);
+
+        if (!articleSnap.exists()) {
+          router.push("/articles");
+          return;
+        }
+
+        const docData = articleSnap.data();
+        if (!docData) {
+          console.warn("No data in article doc.");
+          return;
+        }
+
+        const userRef = docData?.writtenBy as DocumentReference<DocumentData>;
+        const topicRef = docData?.category as DocumentReference<DocumentData>;
+
+        let userData: CustomUser | null = null;
+        let topicData: DocumentData | null = null;
+
+        try {
+          if (userRef) {
+            const userSnapshot = await getDoc(userRef);
+            if (userSnapshot.exists()) {
+              userData = {
+                id: userSnapshot?.id,
+                uid: userSnapshot?.id,
+                displayName: userSnapshot.data()?.displayName,
+                email: userSnapshot.data().email ?? "",
+              };
+            }
+          }
+
+          if (topicRef) {
+            const topicSnapshot = await getDoc(topicRef);
+            if (topicSnapshot.exists()) {
+              topicData = {
+                id: topicSnapshot?.id,
+                name: topicSnapshot.data().name,
+                createdAt: topicSnapshot.data().createdAt,
+              };
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching referenced document:", error);
+          return null;
+        }
+
+        setArticle({
+          id: articleSnap.id,
+          category: topicData
+            ? {
+                id: topicData.id,
+                name: topicData.name,
+                createdAt: formatDistance(
+                  topicData.createdAt?.toDate?.() ?? new Date(),
+                  new Date(),
+                  { includeSeconds: true }
+                ),
+              }
+            : null,
+          createdAt: formatDistance(
+            docData.createdAt?.toDate?.() ?? new Date(),
+            new Date(),
+            { includeSeconds: true }
+          ),
+          writtenBy: userData,
+          content: docData.content ?? "",
+          title: docData.title ?? "",
+          status: docData.status ?? "",
+          summary: docData.description ?? "",
+          views: docData.views ?? 0,
+          availability: docData.availability ?? "public",
+          institutionOwning: "",
+          slug: docData.slug ?? "",
+          photoURL: docData?.photoURL,
+        });
+      } catch (error) {
+        console.error("Error fetching article data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [slug]);
+
+  if (loading) return <Loading />;
 
   return (
     <div className="min-h-screen">
       {user ? <AuthNav /> : <Nav />}
 
-      <div className="mx-auto shadow-md rounded-lg p-6">
+      <div className="mx-auto">
         {article && (
           <>
-            <div className="relative w-full h-[30%]">
-              <img
-                src={article?.coverImage}
+            <div className="relative w-full h-[40%]">
+              <Image
+                src={article?.photoURL ?? "/placeholder.jpg"}
+                width={1000}
+                height={500}
                 alt={article.title}
-                className="w-full h-64 object-cover rounded-lg shadow-md"
+                className="w-full h-96 object-cover shadow-md"
               />
 
-              <div className="absolute inset-0 bg-black bg-opacity-40 rounded-lg"></div>
+              <div className="absolute inset-0 bg-black bg-opacity-80"></div>
 
               <div className="size absolute inset-0 flex flex-col justify-center items-center text-white text-center px-4">
                 <h1 className="text-4xl font-bold">{article.title}</h1>
                 <p className="text-sm mt-2">
-                  Published on {article.createdAt.toDateString()} | Category:{" "}
-                  {article.category}
+                  Published on {article?.createdAt} by{" "}
+                  {article?.writtenBy?.displayName ?? "Unknown"} | Category:{" "}
+                  {article?.category?.name ?? "General"}
                 </p>
               </div>
             </div>
-            <article
-              className="size mt-6 text-lg leading-relaxed article-content"
-              dangerouslySetInnerHTML={{
-                __html: article?.content || "<p>No content available.</p>",
-              }}
-            />
+            <div className="size grid grid-cols-4 items-start gap-4 p-6 m-5">
+              <Card className="">
+                <CardHeader>
+                  <CardTitle>Related Articles</CardTitle>
+                </CardHeader>
+              </Card>
+              <article
+                className="col-span-3 leading-normal article-content"
+                dangerouslySetInnerHTML={{
+                  __html: article?.content || "<p>No content available.</p>",
+                }}
+              />
+            </div>
           </>
         )}
       </div>
+      {!user && <CTA />}
       <FooterSection />
     </div>
   );

@@ -34,7 +34,7 @@ function MenuBar() {
   }
 
   return (
-    <div className="flex flex-wrap gap-2 p-2 border-b border-gray-200">
+    <div className="flex flex-wrap gap-2 p-2 border-b ">
       <button
         onClick={(e) => {
           e.preventDefault();
@@ -42,7 +42,7 @@ function MenuBar() {
         }}
         disabled={!editor.can().chain().focus().toggleBold().run()}
         className={`p-2 rounded ${
-          editor.isActive("bold") ? "bg-primary text-white" : "bg-white"
+          editor.isActive("bold") ? "bg-primary " : ""
         }`}
       >
         Bold
@@ -54,7 +54,7 @@ function MenuBar() {
         }}
         disabled={!editor.can().chain().focus().toggleItalic().run()}
         className={`p-2 rounded ${
-          editor.isActive("italic") ? "bg-primary text-white" : "bg-white"
+          editor.isActive("italic") ? "bg-primary " : ""
         }`}
       >
         Italic
@@ -66,7 +66,7 @@ function MenuBar() {
         }}
         disabled={!editor.can().chain().focus().toggleStrike().run()}
         className={`p-2 rounded ${
-          editor.isActive("strike") ? "bg-primary text-white" : "bg-white"
+          editor.isActive("strike") ? "bg-primary " : ""
         }`}
       >
         Strike
@@ -79,7 +79,7 @@ function MenuBar() {
         }}
         disabled={!editor.can().chain().focus().toggleCode().run()}
         className={`p-2 rounded ${
-          editor.isActive("code") ? "bg-primary text-white" : "bg-white"
+          editor.isActive("code") ? "bg-primary " : ""
         }`}
       >
         Code
@@ -89,7 +89,7 @@ function MenuBar() {
           e.preventDefault();
           editor.chain().focus().unsetAllMarks().run();
         }}
-        className="p-2 rounded bg-white"
+        className="p-2 rounded "
       >
         Clear marks
       </button>
@@ -98,7 +98,7 @@ function MenuBar() {
           e.preventDefault();
           editor.chain().focus().clearNodes().run();
         }}
-        className="p-2 rounded bg-white"
+        className="p-2 rounded "
       >
         Clear nodes
       </button>
@@ -108,7 +108,7 @@ function MenuBar() {
           editor.chain().focus().setParagraph().run();
         }}
         className={`p-2 rounded ${
-          editor.isActive("paragraph") ? "bg-primary text-white" : "bg-white"
+          editor.isActive("paragraph") ? "bg-primary " : ""
         }`}
       >
         Paragraph
@@ -119,9 +119,7 @@ function MenuBar() {
           editor.chain().focus().toggleHeading({ level: 1 }).run();
         }}
         className={`p-2 rounded ${
-          editor.isActive("heading", { level: 1 })
-            ? "bg-primary text-white"
-            : "bg-white"
+          editor.isActive("heading", { level: 1 }) ? "bg-primary " : ""
         }`}
       >
         H1
@@ -132,9 +130,7 @@ function MenuBar() {
           editor.chain().focus().toggleHeading({ level: 2 }).run();
         }}
         className={`p-2 rounded ${
-          editor.isActive("heading", { level: 2 })
-            ? "bg-primary text-white"
-            : "bg-white"
+          editor.isActive("heading", { level: 2 }) ? "bg-primary " : ""
         }`}
       >
         H2
@@ -145,9 +141,7 @@ function MenuBar() {
           editor.chain().focus().toggleHeading({ level: 3 }).run();
         }}
         className={`p-2 rounded ${
-          editor.isActive("heading", { level: 3 })
-            ? "bg-primary text-white"
-            : "bg-white"
+          editor.isActive("heading", { level: 3 }) ? "bg-primary " : ""
         }`}
       >
         H3
@@ -158,9 +152,7 @@ function MenuBar() {
           editor.chain().focus().toggleHeading({ level: 4 }).run();
         }}
         className={`p-2 rounded ${
-          editor.isActive("heading", { level: 4 })
-            ? "bg-primary text-white"
-            : "bg-white"
+          editor.isActive("heading", { level: 4 }) ? "bg-primary " : ""
         }`}
       >
         H4
@@ -171,9 +163,7 @@ function MenuBar() {
           editor.chain().focus().toggleHeading({ level: 5 }).run();
         }}
         className={`p-2 rounded ${
-          editor.isActive("heading", { level: 5 })
-            ? "bg-primary text-white"
-            : "bg-white"
+          editor.isActive("heading", { level: 5 }) ? "bg-primary " : ""
         }`}
       >
         H5
@@ -184,9 +174,7 @@ function MenuBar() {
           editor.chain().focus().toggleHeading({ level: 6 }).run();
         }}
         className={`p-2 rounded ${
-          editor.isActive("heading", { level: 6 })
-            ? "bg-primary text-white"
-            : "bg-white"
+          editor.isActive("heading", { level: 6 }) ? "bg-primary " : ""
         }`}
       >
         H6
@@ -197,7 +185,7 @@ function MenuBar() {
           editor.chain().focus().toggleBulletList().run();
         }}
         className={`p-2 rounded ${
-          editor.isActive("bulletList") ? "bg-primary text-white" : "bg-white"
+          editor.isActive("bulletList") ? "bg-primary " : ""
         }`}
       >
         Bullet list
@@ -208,7 +196,7 @@ function MenuBar() {
           editor.chain().focus().toggleOrderedList().run();
         }}
         className={`p-2 rounded ${
-          editor.isActive("orderedList") ? "bg-primary text-white" : "bg-white"
+          editor.isActive("orderedList") ? "bg-primary " : ""
         }`}
       >
         Ordered list
@@ -219,7 +207,7 @@ function MenuBar() {
           editor.chain().focus().toggleCodeBlock().run();
         }}
         className={`p-2 rounded ${
-          editor.isActive("codeBlock") ? "bg-primary text-white" : "bg-white"
+          editor.isActive("codeBlock") ? "bg-primary " : ""
         }`}
       >
         Code block
@@ -230,7 +218,7 @@ function MenuBar() {
           editor.chain().focus().toggleBlockquote().run();
         }}
         className={`p-2 rounded ${
-          editor.isActive("blockquote") ? "bg-primary text-white" : "bg-white"
+          editor.isActive("blockquote") ? "bg-primary " : ""
         }`}
       >
         Blockquote
@@ -240,7 +228,7 @@ function MenuBar() {
           e.preventDefault();
           editor.chain().focus().setHorizontalRule().run();
         }}
-        className="p-2 rounded bg-white"
+        className="p-2 rounded "
       >
         Horizontal rule
       </button>
@@ -249,7 +237,7 @@ function MenuBar() {
           e.preventDefault();
           editor.chain().focus().setHardBreak().run();
         }}
-        className="p-2 rounded bg-white"
+        className="p-2 rounded "
       >
         Hard break
       </button>
@@ -259,7 +247,7 @@ function MenuBar() {
           editor.chain().focus().undo().run();
         }}
         disabled={!editor.can().chain().focus().undo().run()}
-        className="p-2 rounded bg-white"
+        className="p-2 rounded "
       >
         Undo
       </button>
@@ -269,7 +257,7 @@ function MenuBar() {
           editor.chain().focus().redo().run();
         }}
         disabled={!editor.can().chain().focus().redo().run()}
-        className="p-2 rounded bg-white"
+        className="p-2 rounded "
       >
         Redo
       </button>
@@ -280,8 +268,8 @@ function MenuBar() {
         }}
         className={`p-2 rounded ${
           editor.isActive("textStyle", { color: "#958DF1" })
-            ? "bg-primary text-white"
-            : "bg-white"
+            ? "bg-primary "
+            : ""
         }`}
       >
         Purple
@@ -319,7 +307,7 @@ function MenuBar() {
               .run();
           }
         }}
-        className="p-2 rounded bg-white"
+        className="p-2 rounded "
       />
     </div>
   );

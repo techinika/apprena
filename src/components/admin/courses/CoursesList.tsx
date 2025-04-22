@@ -1,22 +1,21 @@
 "use client";
 
-import * as React from "react";
+import { Button } from "@/components/ui/button";
+import React from "react";
+import PageHeader from "../main/PageHeader";
+import Loading from "@/app/loading";
 import {
   ColumnDef,
   ColumnFiltersState,
-  SortingState,
-  VisibilityState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  SortingState,
   useReactTable,
+  VisibilityState,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -26,6 +25,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Course } from "@/types/Course";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -35,9 +37,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Article } from "@/types/Article";
-import { Badge } from "../../ui/badge";
-import PageHeader from "../main/PageHeader";
 import {
   collection,
   DocumentData,
@@ -48,9 +47,9 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "@/db/firebase";
-import Loading from "@/app/loading";
+import { Badge } from "@/components/ui/badge";
 
-export default function BlogList({ institutionId }: { institutionId: string }) {
+function CoursesList({ institutionId }: { institutionId: string }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -58,7 +57,7 @@ export default function BlogList({ institutionId }: { institutionId: string }) {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
-  const [articles, setArticles] = React.useState<Article[]>([]);
+  const [courses, setCourses] = React.useState<Course[]>([]);
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
@@ -66,24 +65,23 @@ export default function BlogList({ institutionId }: { institutionId: string }) {
 
     setLoading(true);
 
-    const articlesRef = collection(db, "articles");
+    const coursesRef = collection(db, "courses");
     const q = query(
-      articlesRef,
+      coursesRef,
       where("institutionOwning", "==", institutionId)
     );
 
     const unsubscribe = onSnapshot(
       q,
       async (snapshot) => {
-        const articlesWithWriters: Article[] = await Promise.all(
+        const coursessWithCreators: Course[] = await Promise.all(
           snapshot.docs.map(async (doc) => {
             const data = doc.data();
-
             let userData: DocumentData | null = null;
 
-            if (data.writtenBy) {
+            if (data?.createdBy) {
               const userRef =
-                data?.createdBy as DocumentReference<DocumentData>;
+                data?.writtenBy as DocumentReference<DocumentData>;
 
               try {
                 const writerSnap = await getDoc(userRef);
@@ -103,12 +101,12 @@ export default function BlogList({ institutionId }: { institutionId: string }) {
             return {
               id: doc.id,
               ...data,
-              writtenBy: userData,
-            } as Article;
+              createdBy: userData,
+            } as Course;
           })
         );
 
-        setArticles(articlesWithWriters);
+        setCourses(coursessWithCreators);
         setLoading(false);
       },
       (err) => {
@@ -120,7 +118,7 @@ export default function BlogList({ institutionId }: { institutionId: string }) {
     return () => unsubscribe();
   }, [institutionId]);
 
-  const columns: ColumnDef<Article>[] = [
+  const columns: ColumnDef<Course>[] = [
     {
       id: "select",
       header: ({ table }) => (
@@ -175,7 +173,9 @@ export default function BlogList({ institutionId }: { institutionId: string }) {
       accessorKey: "writtenBy",
       header: "Author",
       cell: ({ row }) => (
-        <div className="capitalize">{row?.original.writtenBy?.displayName}</div>
+        <div className="capitalize">
+          {row?.original?.createdBy?.displayName}
+        </div>
       ),
     },
     {
@@ -210,7 +210,7 @@ export default function BlogList({ institutionId }: { institutionId: string }) {
   ];
 
   const table = useReactTable({
-    data: articles,
+    data: courses,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -233,7 +233,7 @@ export default function BlogList({ institutionId }: { institutionId: string }) {
   return (
     <div className="w-full space-y-4 p-8 pt-6">
       <PageHeader
-        title="Posts"
+        title="Courses"
         newItem={false}
         onExport={() => null}
         onPublish={() => null}
@@ -241,7 +241,7 @@ export default function BlogList({ institutionId }: { institutionId: string }) {
       />
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter posts..."
+          placeholder="Filter courses..."
           value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn("title")?.setFilterValue(event.target.value)
@@ -352,3 +352,5 @@ export default function BlogList({ institutionId }: { institutionId: string }) {
     </div>
   );
 }
+
+export default CoursesList;

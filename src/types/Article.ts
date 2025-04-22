@@ -1,18 +1,20 @@
+import { CustomUser } from "@/components/public/discussions/OneDiscussionPage";
+import { Topic } from "./Discussion";
+
 export type Article = {
   id: string;
   title: string;
   slug: string;
   content: string;
   summary?: string;
-  coverImage?: string;
   availability: "public" | "private";
   status: "draft" | "published";
-  writtenBy: string;
+  writtenBy: CustomUser | null;
   institutionOwning: string;
   tags?: string;
-  createdAt: Date;
-  updatedAt?: Date;
-  publishedAt?: Date;
+  createdAt: string;
+  updatedAt?: string;
+  publishedAt?: string;
   views?: number;
   likes?: number;
   photoURL?: string;
@@ -20,7 +22,7 @@ export type Article = {
   readingTime?: string;
   isFeatured?: boolean;
   relatedArticles?: string[];
-  category: string;
+  category: Topic | null;
 };
 
 export type Category = {
