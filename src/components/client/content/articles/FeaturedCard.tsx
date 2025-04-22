@@ -57,7 +57,11 @@ function FeaturedCard({ item }: { item: Article }) {
           </Avatar>
           <div>
             <p className="font-semibold">{user?.displayName}</p>
-            <p className="text-xs">Posted {item?.publishedAt?.getDay()}</p>
+            {item?.publishedAt && (
+              <p className="text-xs">
+                Posted {new Date(item?.publishedAt)?.getDay()}
+              </p>
+            )}
           </div>
         </div>
         <Button onClick={() => router.push(`/articles/${item?.id}`)}>

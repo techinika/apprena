@@ -39,13 +39,15 @@ import {
 } from "@/components/ui/table";
 import {
   collection,
+  DocumentData,
+  DocumentReference,
   getDoc,
   onSnapshot,
   query,
   where,
 } from "firebase/firestore";
 import { db } from "@/db/firebase";
-import { CustomUser } from "@/components/public/discussions/OneDiscussionPage";
+import { Badge } from "@/components/ui/badge";
 
 function CoursesList({ institutionId }: { institutionId: string }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -75,13 +77,21 @@ function CoursesList({ institutionId }: { institutionId: string }) {
         const coursessWithCreators: Course[] = await Promise.all(
           snapshot.docs.map(async (doc) => {
             const data = doc.data();
-            let writerData: CustomUser | null = null;
+            let userData: DocumentData | null = null;
 
-            if (data.writtenBy) {
+            if (data?.createdBy) {
+              const userRef =
+                data?.writtenBy as DocumentReference<DocumentData>;
+
               try {
-                const writerSnap = await getDoc(data.writtenBy);
-                writerData = writerSnap.exists()
-                  ? { id: writerSnap.id, ...(writerSnap.data() ?? {}) }
+                const writerSnap = await getDoc(userRef);
+                userData = writerSnap.exists()
+                  ? {
+                      id: writerSnap.id,
+                      displayName: writerSnap.data().displayName,
+                      email: writerSnap.data().email,
+                      uid: writerSnap.data().uid,
+                    }
                   : null;
               } catch (err) {
                 console.warn("Error fetching writer for article:", err);
@@ -91,8 +101,8 @@ function CoursesList({ institutionId }: { institutionId: string }) {
             return {
               id: doc.id,
               ...data,
-              writtenBy: writerData,
-            };
+              createdBy: userData,
+            } as Course;
           })
         );
 
@@ -163,7 +173,9 @@ function CoursesList({ institutionId }: { institutionId: string }) {
       accessorKey: "writtenBy",
       header: "Author",
       cell: ({ row }) => (
-        <div className="capitalize">{row?.original.writtenBy?.displayName}</div>
+        <div className="capitalize">
+          {row?.original?.createdBy?.displayName}
+        </div>
       ),
     },
     {

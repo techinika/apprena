@@ -42,6 +42,7 @@ export interface Course {
   courseRequirements: string[];
   targetAudience: string[];
   curriculum: Curriculum | undefined;
+  createdBy: CustomUser;
 }
 
 export interface Review {

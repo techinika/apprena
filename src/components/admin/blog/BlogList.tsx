@@ -40,6 +40,8 @@ import { Badge } from "../../ui/badge";
 import PageHeader from "../main/PageHeader";
 import {
   collection,
+  DocumentData,
+  DocumentReference,
   getDoc,
   onSnapshot,
   query,
@@ -47,7 +49,6 @@ import {
 } from "firebase/firestore";
 import { db } from "@/db/firebase";
 import Loading from "@/app/loading";
-import { User } from "@/types/Users";
 
 export default function BlogList({ institutionId }: { institutionId: string }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -77,13 +78,22 @@ export default function BlogList({ institutionId }: { institutionId: string }) {
         const articlesWithWriters: Article[] = await Promise.all(
           snapshot.docs.map(async (doc) => {
             const data = doc.data();
-            let writerData: User | null = null;
+
+            let userData: DocumentData | null = null;
 
             if (data.writtenBy) {
+              const userRef =
+                data?.createdBy as DocumentReference<DocumentData>;
+
               try {
-                const writerSnap = await getDoc(data.writtenBy);
-                writerData = writerSnap.exists()
-                  ? { id: writerSnap.id, ...(writerSnap.data() ?? {}) }
+                const writerSnap = await getDoc(userRef);
+                userData = writerSnap.exists()
+                  ? {
+                      id: writerSnap.id,
+                      displayName: writerSnap.data().displayName,
+                      email: writerSnap.data().email,
+                      uid: writerSnap.data().uid,
+                    }
                   : null;
               } catch (err) {
                 console.warn("Error fetching writer for article:", err);
@@ -93,8 +103,8 @@ export default function BlogList({ institutionId }: { institutionId: string }) {
             return {
               id: doc.id,
               ...data,
-              writtenBy: writerData,
-            };
+              writtenBy: userData,
+            } as Article;
           })
         );
 
