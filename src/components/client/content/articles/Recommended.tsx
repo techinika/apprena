@@ -28,7 +28,7 @@ function Recommended({ item }: { item: Article }) {
       </div>
       <div className="flex flex-col justify-between items-start gap-2 p-4">
         <Badge className="text-xs font-semibold">
-          {item?.category.toUpperCase()}
+          {item?.category?.name.toUpperCase()}
         </Badge>
         <h2 className="font-bold text-lg">{item?.title}</h2>
         <div className="flex items-center gap-3">
@@ -41,7 +41,11 @@ function Recommended({ item }: { item: Article }) {
           </Avatar>
           <div>
             <p className="font-semibold">{user?.displayName}</p>
-            <p className="text-xs">Posted {item?.publishedAt?.getDay()}</p>
+            {item?.publishedAt && (
+              <p className="text-xs">
+                Posted {new Date(item?.publishedAt).getDay()}
+              </p>
+            )}
           </div>
         </div>
       </div>
