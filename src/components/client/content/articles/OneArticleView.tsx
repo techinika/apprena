@@ -157,7 +157,7 @@ function OneArticleView({ slug }: { slug: string | TrustedHTML }) {
                 </CardHeader>
               </Card>
               <article
-                className="col-span-3 leading-normal article-content"
+                className="prose col-span-3 leading-normal article-content"
                 dangerouslySetInnerHTML={{
                   __html: article?.content || "<p>No content available.</p>",
                 }}
