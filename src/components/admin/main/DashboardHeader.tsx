@@ -24,7 +24,7 @@ function DashboardHeader({
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
           <Link
-            href={`/admin/${activeInstitution?.id}`}
+            href={`/org/${activeInstitution?.id}`}
             className="font-semibold"
           >
             {activeInstitution?.name || "Select Institution"}

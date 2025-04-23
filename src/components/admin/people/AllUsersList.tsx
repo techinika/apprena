@@ -123,7 +123,7 @@ export function AllUsersList() {
         </Button>
       ),
       cell: ({ row }) => (
-        <Link href={`/admin/users/${row?.original?.id}`}>
+        <Link href={`/org/users/${row?.original?.id}`}>
           {row.getValue("displayName")}
         </Link>
       ),
@@ -137,7 +137,7 @@ export function AllUsersList() {
       accessorKey: "role",
       header: "Role",
       cell: ({ row }) => (
-        <Link href={`/admin/users/roles`} className="capitalize">
+        <Link href={`/org/users/roles`} className="capitalize">
           {row.getValue("role")}
         </Link>
       ),
@@ -184,7 +184,7 @@ export function AllUsersList() {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                onClick={() => router.push(`/admin/users/${subscriber?.id}`)}
+                onClick={() => router.push(`/org/users/${subscriber?.id}`)}
               >
                 Preview User
               </DropdownMenuItem>

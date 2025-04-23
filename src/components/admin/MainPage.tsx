@@ -77,7 +77,7 @@ function MainPage() {
               <Card
                 key={item?.id}
                 className="p-5 cursor-pointer"
-                onClick={() => router.push(`/admin/${item?.id}`)}
+                onClick={() => router.push(`/org/${item?.id}`)}
               >
                 <CardTitle className="text-center">{item?.name}</CardTitle>
                 <CardContent className="flex items-center justify-center p-4">
