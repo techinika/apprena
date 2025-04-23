@@ -42,7 +42,7 @@ function MenuBar() {
         }}
         disabled={!editor.can().chain().focus().toggleBold().run()}
         className={`p-2 rounded ${
-          editor.isActive("bold") ? "bg-primary " : ""
+          editor.isActive("bold") ? "bg-primary text-secondary" : ""
         }`}
       >
         Bold
@@ -54,7 +54,7 @@ function MenuBar() {
         }}
         disabled={!editor.can().chain().focus().toggleItalic().run()}
         className={`p-2 rounded ${
-          editor.isActive("italic") ? "bg-primary " : ""
+          editor.isActive("italic") ? "bg-primary text-secondary" : ""
         }`}
       >
         Italic
@@ -66,7 +66,7 @@ function MenuBar() {
         }}
         disabled={!editor.can().chain().focus().toggleStrike().run()}
         className={`p-2 rounded ${
-          editor.isActive("strike") ? "bg-primary " : ""
+          editor.isActive("strike") ? "bg-primary text-secondary" : ""
         }`}
       >
         Strike
@@ -79,7 +79,7 @@ function MenuBar() {
         }}
         disabled={!editor.can().chain().focus().toggleCode().run()}
         className={`p-2 rounded ${
-          editor.isActive("code") ? "bg-primary " : ""
+          editor.isActive("code") ? "bg-primary text-secondary" : ""
         }`}
       >
         Code
@@ -108,7 +108,7 @@ function MenuBar() {
           editor.chain().focus().setParagraph().run();
         }}
         className={`p-2 rounded ${
-          editor.isActive("paragraph") ? "bg-primary " : ""
+          editor.isActive("paragraph") ? "bg-primary text-secondary" : ""
         }`}
       >
         Paragraph
@@ -119,7 +119,9 @@ function MenuBar() {
           editor.chain().focus().toggleHeading({ level: 1 }).run();
         }}
         className={`p-2 rounded ${
-          editor.isActive("heading", { level: 1 }) ? "bg-primary " : ""
+          editor.isActive("heading", { level: 1 })
+            ? "bg-primary text-secondary"
+            : ""
         }`}
       >
         H1
@@ -130,7 +132,9 @@ function MenuBar() {
           editor.chain().focus().toggleHeading({ level: 2 }).run();
         }}
         className={`p-2 rounded ${
-          editor.isActive("heading", { level: 2 }) ? "bg-primary " : ""
+          editor.isActive("heading", { level: 2 })
+            ? "bg-primary text-secondary"
+            : ""
         }`}
       >
         H2
@@ -141,7 +145,9 @@ function MenuBar() {
           editor.chain().focus().toggleHeading({ level: 3 }).run();
         }}
         className={`p-2 rounded ${
-          editor.isActive("heading", { level: 3 }) ? "bg-primary " : ""
+          editor.isActive("heading", { level: 3 })
+            ? "bg-primary text-secondary"
+            : ""
         }`}
       >
         H3
@@ -152,7 +158,9 @@ function MenuBar() {
           editor.chain().focus().toggleHeading({ level: 4 }).run();
         }}
         className={`p-2 rounded ${
-          editor.isActive("heading", { level: 4 }) ? "bg-primary " : ""
+          editor.isActive("heading", { level: 4 })
+            ? "bg-primary text-secondary"
+            : ""
         }`}
       >
         H4
@@ -163,7 +171,9 @@ function MenuBar() {
           editor.chain().focus().toggleHeading({ level: 5 }).run();
         }}
         className={`p-2 rounded ${
-          editor.isActive("heading", { level: 5 }) ? "bg-primary " : ""
+          editor.isActive("heading", { level: 5 })
+            ? "bg-primary text-secondary"
+            : ""
         }`}
       >
         H5
@@ -174,7 +184,9 @@ function MenuBar() {
           editor.chain().focus().toggleHeading({ level: 6 }).run();
         }}
         className={`p-2 rounded ${
-          editor.isActive("heading", { level: 6 }) ? "bg-primary " : ""
+          editor.isActive("heading", { level: 6 })
+            ? "bg-primary text-secondary"
+            : ""
         }`}
       >
         H6
@@ -185,7 +197,7 @@ function MenuBar() {
           editor.chain().focus().toggleBulletList().run();
         }}
         className={`p-2 rounded ${
-          editor.isActive("bulletList") ? "bg-primary " : ""
+          editor.isActive("bulletList") ? "bg-primary text-secondary" : ""
         }`}
       >
         Bullet list
@@ -196,7 +208,7 @@ function MenuBar() {
           editor.chain().focus().toggleOrderedList().run();
         }}
         className={`p-2 rounded ${
-          editor.isActive("orderedList") ? "bg-primary " : ""
+          editor.isActive("orderedList") ? "bg-primary text-secondary" : ""
         }`}
       >
         Ordered list
@@ -207,7 +219,7 @@ function MenuBar() {
           editor.chain().focus().toggleCodeBlock().run();
         }}
         className={`p-2 rounded ${
-          editor.isActive("codeBlock") ? "bg-primary " : ""
+          editor.isActive("codeBlock") ? "bg-primary text-secondary" : ""
         }`}
       >
         Code block
@@ -218,7 +230,7 @@ function MenuBar() {
           editor.chain().focus().toggleBlockquote().run();
         }}
         className={`p-2 rounded ${
-          editor.isActive("blockquote") ? "bg-primary " : ""
+          editor.isActive("blockquote") ? "bg-primary text-secondary" : ""
         }`}
       >
         Blockquote
@@ -268,7 +280,7 @@ function MenuBar() {
         }}
         className={`p-2 rounded ${
           editor.isActive("textStyle", { color: "#958DF1" })
-            ? "bg-primary "
+            ? "bg-primary text-secondary"
             : ""
         }`}
       >
@@ -339,7 +351,7 @@ const Editor = ({ field }: { field: ControllerRenderProps }) => {
   ];
 
   return (
-    <div className="p-2 border rounded min-h-[300px] prose">
+    <div className="p-2 border rounded min-h-[300px] w-full">
       <EditorProvider
         slotBefore={<MenuBar />}
         immediatelyRender={false}
