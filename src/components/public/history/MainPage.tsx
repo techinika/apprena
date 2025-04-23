@@ -160,7 +160,7 @@ export default function MainPage() {
                                 />
                               </div>
                               <div
-                                className="py-2 prose"
+                                className="py-2 prose !max-w-none dark:prose-invert"
                                 dangerouslySetInnerHTML={{
                                   __html: album?.description || "",
                                 }}

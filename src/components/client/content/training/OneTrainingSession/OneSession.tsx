@@ -116,7 +116,7 @@ export default function SessionPage({ id }: { id: string }) {
                 <div className="py-4">
                   <h2 className="text-2xl font-bold py-2">Description</h2>
                   <div
-                    className="prose"
+                    className="prose !max-w-none dark:prose-invert"
                     dangerouslySetInnerHTML={{
                       __html: course?.detailedSummary ?? "",
                     }}
