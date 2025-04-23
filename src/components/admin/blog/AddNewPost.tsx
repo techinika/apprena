@@ -14,7 +14,7 @@ import Editor from "./Editor";
 import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
 import { CalendarIcon, Paperclip } from "lucide-react";
 import { Calendar } from "../../ui/calendar";
-import { cn } from "@/lib/utils";
+import { cn, generateSlug } from "@/lib/utils";
 import { format } from "date-fns";
 import PageHeader from "../main/PageHeader";
 import { Textarea } from "@/components/ui/textarea";
@@ -53,6 +53,7 @@ import { db } from "@/db/firebase";
 import { Topic } from "@/types/Discussion";
 import { User } from "@/types/Users";
 import Loading from "@/app/loading";
+import { useAuth } from "@/lib/AuthContext";
 
 export const FileSvgDraw = () => {
   return (
@@ -95,12 +96,12 @@ const formSchema = z.object({
   summary: z.string().max(200).min(4),
   tags: z.string(),
   category: z.string(),
-  institutionOwning: z.string(),
 });
 
 type formValues = z.infer<typeof formSchema>;
 
 const AddNewPost = ({ institutionId }: { institutionId: string }) => {
+  const { user } = useAuth();
   const [date, setDate] = React.useState<Date>();
   const [files, setFiles] = useState<File[] | null>(null);
   const articleCollection = collection(db, "articles");
@@ -108,6 +109,7 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
   const [contributors, setContributors] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [cover, setCover] = React.useState<string | null>(null);
+  const institutionRef = doc(db, "institutions", institutionId);
 
   useEffect(() => {
     const getData = async () => {
@@ -179,7 +181,6 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
       summary: "",
       tags: "",
       category: "",
-      institutionOwning: institutionId,
       writtenBy: "",
     },
     mode: "onChange",
@@ -187,15 +188,28 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
 
   const processArticleCreation = async (data: formValues) => {
     try {
-      const userRef = doc(db, "profile", String(data?.writtenBy));
-      const institutionRef = doc(db, "institutions", institutionId);
+      console.log(data?.writtenBy);
+
+      const userRef = doc(db, "profile", data?.writtenBy, data?.category);
       const topicRef = doc(db, "topics", data?.category);
 
-      const slug = data?.title
-        .toLowerCase()
-        .replace(/[^\w\s]/g, "")
-        .replace(/\s+/g, "-")
-        .trim();
+      const slug = generateSlug(data?.title ?? "");
+
+      console.log({
+        title: data?.title,
+        content: data?.content ?? "",
+        photoURL: data?.photoURL ?? "/placeholder.jpg",
+        isFeatured: data?.isFeatured ?? false,
+        publishedAt: data?.publishedAt ?? "",
+        visibility: data?.visibility ?? "private",
+        writtenBy: userRef ?? doc(db, "profile", String(user?.uid)),
+        summary: data?.summary ?? "",
+        tags: data?.tags ?? "",
+        category: topicRef ?? "",
+        institutionOwning: institutionRef,
+        status: data?.status === "draft" ? "draft" : "published",
+        createdAt: new Date(),
+      });
 
       await setDoc(doc(articleCollection, slug), {
         title: data?.title,
@@ -204,7 +218,7 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
         isFeatured: data?.isFeatured ?? false,
         publishedAt: data?.publishedAt ?? "",
         visibility: data?.visibility ?? "private",
-        writtenBy: userRef,
+        writtenBy: userRef ?? doc(db, "profile", String(user?.uid)),
         summary: data?.summary ?? "",
         tags: data?.tags ?? "",
         category: topicRef ?? "",
@@ -321,7 +335,7 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
               control={form.control}
               name="content"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="w-full">
                   <FormControl>
                     <Editor field={field} />
                   </FormControl>
@@ -432,7 +446,7 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
                   <FormItem>
                     <FormLabel className="font-bold">Visibility</FormLabel>
                     <FormControl>
-                      <Select>
+                      <Select onValueChange={field.onChange}>
                         <SelectTrigger id="visibility">
                           <SelectValue placeholder="Select visibility" />
                         </SelectTrigger>
@@ -460,8 +474,8 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
                   <FormItem>
                     <FormLabel className="font-bold">Author</FormLabel>
                     <FormControl>
-                      <Select>
-                        <SelectTrigger id="visibility">
+                      <Select onValueChange={field.onChange}>
+                        <SelectTrigger id="writtenBy">
                           <SelectValue placeholder="Select author" />
                         </SelectTrigger>
                         <SelectContent position="popper">
@@ -524,7 +538,7 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
                   <FormItem>
                     <FormLabel className="font-bold">Category</FormLabel>
                     <FormControl>
-                      <Select>
+                      <Select onValueChange={field.onChange}>
                         <SelectTrigger id="category">
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>

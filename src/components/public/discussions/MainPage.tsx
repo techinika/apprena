@@ -113,7 +113,6 @@ export default function MainPage() {
       });
     };
     getData();
-    console.log(questions);
     setLoading(false);
   }, []);
 

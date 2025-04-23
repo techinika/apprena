@@ -2,6 +2,6 @@ export enum APP {
   NAME = "Apprena",
   OWNER = "Techinika",
   VERSION = "1.0",
-  SLOGAN = "The Learning Platform You Deserve",
-  DESCRIPTION = "A platform yo help learners acquire modern skills, and organizations to connect with learners.",
+  SLOGAN = "Operating system for education institutions",
+  DESCRIPTION = "a solution designed to help education institutions streamline operations, keep teams aligned, expand monetization options, and boost productivity.",
 }

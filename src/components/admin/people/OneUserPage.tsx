@@ -33,7 +33,6 @@ function OneUserPage() {
       }
     };
     fetchUserProfile();
-    console.log(user);
   }, [username, user]);
 
   return (

@@ -32,8 +32,8 @@ import { redirect } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
 import { Institution } from "@/types/Institution";
 import { NavCommunity } from "./app-community";
-import { db } from "@/db/firebase";
-import { doc } from "firebase/firestore";
+// import { db } from "@/db/firebase";
+// import { doc } from "firebase/firestore";
 
 export function AppSidebar({
   activeInstitution,
@@ -52,15 +52,15 @@ export function AppSidebar({
   React.useEffect(() => {
     if (!institutionId || !user || !activeInstitution) return;
 
-    const userRef = doc(db, "profile", user.uid);
+    // const userRef = doc(db, "profile", user?.uid);
 
     const isCurrentTeam = activeInstitution.id === institutionId;
-    const isMember = activeInstitution?.organizationAdmins?.some(
-      (ref) => ref?.id === userRef?.id
-    );
+    // const isMember = activeInstitution?.organizationAdmins?.some(
+    //   (ref) => ref?.id === userRef?.id
+    // );
 
-    if (!isCurrentTeam || !isMember) {
-      redirect("/admin");
+    if (!isCurrentTeam) {
+      redirect("/org");
     }
   }, [institutionId, user, activeInstitution]);
 
@@ -74,15 +74,15 @@ export function AppSidebar({
         items: [
           {
             title: "All Posts",
-            url: `/admin/${institutionId}/blog`,
+            url: `/org/${institutionId}/blog`,
           },
           {
             title: "Add New Post",
-            url: `/admin/${institutionId}/blog/new`,
+            url: `/org/${institutionId}/blog/new`,
           },
           {
             title: "Drafts",
-            url: `/admin/${institutionId}/blog/drafts`,
+            url: `/org/${institutionId}/blog/drafts`,
           },
         ],
       },
@@ -94,11 +94,11 @@ export function AppSidebar({
         items: [
           {
             title: "All Events",
-            url: `/admin/${institutionId}/events`,
+            url: `/org/${institutionId}/events`,
           },
           {
             title: "Add New Event",
-            url: `/admin/${institutionId}/events/new`,
+            url: `/org/${institutionId}/events/new`,
           },
         ],
       },
@@ -110,11 +110,11 @@ export function AppSidebar({
         items: [
           {
             title: "All Courses",
-            url: `/admin/${institutionId}/courses`,
+            url: `/org/${institutionId}/courses`,
           },
           {
             title: "New Course",
-            url: `/admin/${institutionId}/courses/new`,
+            url: `/org/${institutionId}/courses/new`,
           },
           {
             title: "Knowledge Base",
@@ -165,7 +165,7 @@ export function AppSidebar({
     communication: [
       {
         name: "Comments",
-        url: `/admin/${institutionId}/comments`,
+        url: `/org/${institutionId}/comments`,
         icon: MessageCircle,
       },
       {
@@ -177,12 +177,12 @@ export function AppSidebar({
     community: [
       {
         name: "Topics",
-        url: `/admin/${institutionId}/topics`,
+        url: `/org/${institutionId}/topics`,
         icon: Lightbulb,
       },
       {
         name: "Discussions",
-        url: `/admin/${institutionId}/discussions`,
+        url: `/org/${institutionId}/discussions`,
         icon: MailQuestion,
       },
     ],
@@ -195,7 +195,7 @@ export function AppSidebar({
         items: [
           {
             title: "All Institutions",
-            url: `/admin/${institutionId}/institutions`,
+            url: `/org/${institutionId}/institutions`,
           },
           {
             title: "Add new Institution",
@@ -211,19 +211,19 @@ export function AppSidebar({
         items: [
           {
             title: "FAQs",
-            url: `/admin/${institutionId}/faqs`,
+            url: `/org/${institutionId}/faqs`,
           },
           {
             title: "Subscription Plans",
-            url: `/admin/${institutionId}/plans`,
+            url: `/org/${institutionId}/plans`,
           },
           {
             title: "System Features",
-            url: `/admin/${institutionId}/features`,
+            url: `/org/${institutionId}/features`,
           },
           {
             title: "Permissions",
-            url: `/admin/${institutionId}/permissions`,
+            url: `/org/${institutionId}/permissions`,
           },
         ],
       },
@@ -235,7 +235,7 @@ export function AppSidebar({
         items: [
           {
             title: "Personal Settings",
-            url: `/admin/${institutionId}/profile`,
+            url: `/org/${institutionId}/profile`,
           },
           {
             title: "Team Settings",
@@ -255,27 +255,27 @@ export function AppSidebar({
         items: [
           {
             title: "Users List",
-            url: `/admin/${institutionId}/users`,
+            url: `/org/${institutionId}/users`,
           },
           {
             title: "Subscribers",
-            url: `/admin/${institutionId}/subscribers`,
+            url: `/org/${institutionId}/subscribers`,
           },
           {
             title: "Contributors",
-            url: `/admin/${institutionId}/contributors`,
+            url: `/org/${institutionId}/contributors`,
           },
           {
             title: "Contributors",
-            url: `/admin/${institutionId}/employees`,
+            url: `/org/${institutionId}/employees`,
           },
           {
             title: "Subscribers",
-            url: `/admin/${institutionId}/users/new`,
+            url: `/org/${institutionId}/users/new`,
           },
           {
             title: "User Roles",
-            url: `/admin/${institutionId}/users/roles`,
+            url: `/org/${institutionId}/users/roles`,
           },
         ],
       },

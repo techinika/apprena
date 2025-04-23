@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { Section } from "../../ui/section";
 import {
@@ -12,12 +12,18 @@ import { db } from "@/db/firebase";
 import React from "react";
 import { Faqs } from "@/types/General";
 
-export default function FAQ() {
-  const faqCollection = collection(db, "faqs");
+export default function FAQ({
+  setLoading,
+}: {
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
   const [faqsData, setFaqsData] = React.useState<Faqs[]>([]);
 
   React.useEffect(() => {
     const getData = async () => {
+      const faqCollection = collection(db, "faqs");
+
+      setLoading(true);
       const q = query(faqCollection);
       onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map((doc) => {
@@ -29,9 +35,10 @@ export default function FAQ() {
         });
         setFaqsData(data);
       });
+      setLoading(false);
     };
     getData();
-  }, [faqCollection, faqsData]);
+  }, [faqsData]);
 
   return (
     <Section>

@@ -95,7 +95,6 @@ function NewDiscussion() {
 
   async function onSubmit() {
     const data = form.getValues();
-    console.log(data);
 
     setLoading(true);
     const { title, description, tags, topic, content } = data;
