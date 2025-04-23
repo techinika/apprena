@@ -9,15 +9,19 @@ import FooterSection from "@/components/sections/footer/default";
 import CTA from "@/components/sections/cta/default";
 import { Testimonials } from "@/components/sections/testimonials/default";
 import { Benefits } from "@/components/sections/benefits/learners";
+import Loading from "@/app/loading";
 
 function LandingPage() {
+  const [loading, setLoading] = React.useState(false);
+
+  if (loading) return <Loading />;
   return (
     <div>
       <Nav />
       <Hero />
       <Benefits />
-      <Pricing />
-      <FAQ />
+      <Pricing setLoading={setLoading} />
+      <FAQ setLoading={setLoading} />
       <Testimonials />
       <CTA />
       <FooterSection />
