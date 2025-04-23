@@ -32,8 +32,8 @@ import { redirect } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
 import { Institution } from "@/types/Institution";
 import { NavCommunity } from "./app-community";
-import { db } from "@/db/firebase";
-import { doc } from "firebase/firestore";
+// import { db } from "@/db/firebase";
+// import { doc } from "firebase/firestore";
 
 export function AppSidebar({
   activeInstitution,
@@ -52,14 +52,14 @@ export function AppSidebar({
   React.useEffect(() => {
     if (!institutionId || !user || !activeInstitution) return;
 
-    const userRef = doc(db, "profile", user.uid);
+    // const userRef = doc(db, "profile", user?.uid);
 
     const isCurrentTeam = activeInstitution.id === institutionId;
-    const isMember = activeInstitution?.organizationAdmins?.some(
-      (ref) => ref?.id === userRef?.id
-    );
+    // const isMember = activeInstitution?.organizationAdmins?.some(
+    //   (ref) => ref?.id === userRef?.id
+    // );
 
-    if (!isCurrentTeam || !isMember) {
+    if (!isCurrentTeam) {
       redirect("/org");
     }
   }, [institutionId, user, activeInstitution]);

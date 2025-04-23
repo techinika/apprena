@@ -86,7 +86,6 @@ function MainInfoPage() {
 
   const changeBillingPeriod = (e: any) => {
     const val = e.target.value;
-    console.log(val);
 
     if (val === "month") {
       setAmount(selectedPlan?.price);
@@ -155,7 +154,6 @@ function MainInfoPage() {
 
       const invoiceResponse = await response.json();
       if (!response?.ok) {
-        console.log(response);
         alert("Invoice generation failed");
         return;
       }

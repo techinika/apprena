@@ -138,7 +138,6 @@ function Discussions({ institutionId }: { institutionId: string }) {
           })
         );
         setDiscussions(discussionsData);
-        console.log(discussionsData);
       });
     };
     getData();
