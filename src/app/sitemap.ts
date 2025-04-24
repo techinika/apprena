@@ -18,7 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${BASE_URL}/discussions/${doc?.id}`,
       lastModified:
         data.updatedAt?.toDate?.().toISOString?.() ?? new Date().toISOString(),
-      changeFrequency: "always" as const,
+      changeFrequency: "always",
       priority: 0.7,
     };
   });
