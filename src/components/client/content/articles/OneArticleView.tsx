@@ -159,7 +159,7 @@ function OneArticleView({ slug }: { slug: string | TrustedHTML }) {
               <article
                 className="prose col-span-3 leading-normal article-content !max-w-none dark:prose-invert"
                 dangerouslySetInnerHTML={{
-                  __html: article?.content || "<p>No content available.</p>",
+                  __html: article?.content ?? "<p>No content available.</p>",
                 }}
               />
             </div>

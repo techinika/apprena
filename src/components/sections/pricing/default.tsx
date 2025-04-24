@@ -10,18 +10,14 @@ import { db } from "@/db/firebase";
 import React from "react";
 import { Plans } from "@/types/General";
 
-export default function Pricing({
-  setLoading,
-}: {
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
+export default function Pricing() {
   const [plansData, setPlansData] = React.useState<Plans[]>([]);
 
   React.useEffect(() => {
     const getData = async () => {
+      // setLoading(true);
       const planCollection = collection(db, "sub-plans");
 
-      setLoading(true);
       const q = query(planCollection);
       onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map((doc) => {
@@ -32,11 +28,11 @@ export default function Pricing({
           } as Plans;
         });
         setPlansData(data);
+        // setLoading(false);
       });
-      setLoading(false);
     };
     getData();
-  }, []);
+  }, [plansData]);
 
   return (
     <Section>

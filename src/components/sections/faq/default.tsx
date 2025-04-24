@@ -12,18 +12,14 @@ import { db } from "@/db/firebase";
 import React from "react";
 import { Faqs } from "@/types/General";
 
-export default function FAQ({
-  setLoading,
-}: {
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
+export default function Faq() {
   const [faqsData, setFaqsData] = React.useState<Faqs[]>([]);
 
   React.useEffect(() => {
     const getData = async () => {
+      // setLoading(true);
       const faqCollection = collection(db, "faqs");
 
-      setLoading(true);
       const q = query(faqCollection);
       onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map((doc) => {
@@ -34,8 +30,8 @@ export default function FAQ({
           } as Faqs;
         });
         setFaqsData(data);
+        // setLoading(false);
       });
-      setLoading(false);
     };
     getData();
   }, [faqsData]);
