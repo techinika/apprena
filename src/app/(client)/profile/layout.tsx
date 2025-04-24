@@ -3,7 +3,7 @@ import ProtectedRoute from "@/lib/ProtectedRoute";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Profile",
+  title: "User Profile",
   description: "View and Edit Profile.",
 };
 

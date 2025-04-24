@@ -19,7 +19,7 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-export default function CTA() {
+export default function Cta() {
   const [success, setSuccess] = React.useState(false);
 
   const {

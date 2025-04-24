@@ -6,7 +6,7 @@ import Hero from "@/components/sections/hero/default";
 import Faq from "@/components/sections/faq/default";
 import Pricing from "@/components/sections/pricing/default";
 import FooterSection from "@/components/sections/footer/default";
-import CTA from "@/components/sections/cta/default";
+import Cta from "@/components/sections/cta/default";
 import { Testimonials } from "@/components/sections/testimonials/default";
 import { Benefits } from "@/components/sections/benefits/learners";
 
@@ -19,7 +19,7 @@ function LandingPage() {
       <Pricing />
       <Faq />
       <Testimonials />
-      <CTA />
+      <Cta />
       <FooterSection />
     </div>
   );
