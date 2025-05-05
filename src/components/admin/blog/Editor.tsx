@@ -26,6 +26,7 @@ import {
   Heading5,
   Heading6,
   Italic,
+  Link2,
   List,
   ListOrdered,
   Minus,
@@ -34,7 +35,11 @@ import {
   Redo2,
   Strikethrough,
   Undo2,
+  Unlink,
+  YoutubeIcon,
 } from "lucide-react";
+import Link from "@tiptap/extension-link";
+import Youtube from "@tiptap/extension-youtube";
 
 type ControllerRenderProps<
   TFieldValues extends FieldValues = FieldValues,
@@ -54,6 +59,44 @@ function MenuBar() {
   if (!editor) {
     return null;
   }
+
+  const setLink = () => {
+    const previousUrl = editor.getAttributes("link").href;
+    const url = window.prompt("URL", previousUrl);
+
+    if (url === null) {
+      return;
+    }
+
+    if (url === "") {
+      editor.chain().focus().extendMarkRange("link").unsetLink().run();
+
+      return;
+    }
+
+    try {
+      editor
+        .chain()
+        .focus()
+        .extendMarkRange("link")
+        .setLink({ href: url })
+        .run();
+    } catch (e) {
+      alert(e);
+    }
+  };
+
+  const addYoutubeVideo = () => {
+    const url = prompt("Enter YouTube URL");
+
+    if (url) {
+      editor.commands.setYoutubeVideo({
+        src: url,
+        width: 640,
+        height: 480,
+      });
+    }
+  };
 
   return (
     <div className="flex flex-wrap gap-2 p-2 border-b ">
@@ -226,6 +269,20 @@ function MenuBar() {
       </Button>
       <Button
         size="icon"
+        onClick={setLink}
+        className={editor.isActive("link") ? "is-active" : ""}
+      >
+        <Link2 />
+      </Button>
+      <Button
+        size="icon"
+        onClick={() => editor.chain().focus().unsetLink().run()}
+        disabled={!editor.isActive("link")}
+      >
+        <Unlink />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().toggleBulletList().run();
@@ -362,6 +419,9 @@ function MenuBar() {
         }}
         className="p-2 rounded "
       />
+      <Button size="icon" id="add" onClick={addYoutubeVideo}>
+        <YoutubeIcon />
+      </Button>
     </div>
   );
 }
@@ -389,10 +449,85 @@ const Editor = ({ field }: { field: ControllerRenderProps }) => {
         keepAttributes: false,
       },
     }),
+    Link.configure({
+      openOnClick: false,
+      autolink: true,
+      defaultProtocol: "https",
+      protocols: ["http", "https"],
+      isAllowedUri: (url, ctx) => {
+        try {
+          // construct URL
+          const parsedUrl = url.includes(":")
+            ? new URL(url)
+            : new URL(`${ctx.defaultProtocol}://${url}`);
+
+          // use default validation
+          if (!ctx.defaultValidate(parsedUrl.href)) {
+            return false;
+          }
+
+          // disallowed protocols
+          const disallowedProtocols = ["ftp", "file", "mailto"];
+          const protocol = parsedUrl.protocol.replace(":", "");
+
+          if (disallowedProtocols.includes(protocol)) {
+            return false;
+          }
+
+          // only allow protocols specified in ctx.protocols
+          const allowedProtocols = ctx.protocols.map((p) =>
+            typeof p === "string" ? p : p.scheme
+          );
+
+          if (!allowedProtocols.includes(protocol)) {
+            return false;
+          }
+
+          // disallowed domains
+          const disallowedDomains = [
+            "example-phishing.com",
+            "malicious-site.net",
+          ];
+          const domain = parsedUrl.hostname;
+
+          if (disallowedDomains.includes(domain)) {
+            return false;
+          }
+
+          // all checks have passed
+          return true;
+        } catch {
+          return false;
+        }
+      },
+      shouldAutoLink: (url) => {
+        try {
+          // construct URL
+          const parsedUrl = url.includes(":")
+            ? new URL(url)
+            : new URL(`https://${url}`);
+
+          // only auto-link if the domain is not in the disallowed list
+          const disallowedDomains = [
+            "example-no-autolink.com",
+            "another-no-autolink.com",
+          ];
+          const domain = parsedUrl.hostname;
+
+          return !disallowedDomains.includes(domain);
+        } catch {
+          return false;
+        }
+      },
+    }),
+    Youtube.configure({
+      controls: false,
+      nocookie: true,
+    }),
   ];
 
   return (
-    <div className="p-2 border rounded min-h-[300px] w-full">
+    <div className="p-2 border rounded min-h-[300px] w-full prose max-w-none">
       <EditorProvider
         slotBefore={<MenuBar />}
         immediatelyRender={false}
