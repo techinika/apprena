@@ -13,6 +13,33 @@ import {
   RefCallBack,
 } from "react-hook-form";
 import Image from "@tiptap/extension-image";
+import { Button } from "@/components/ui/button";
+import {
+  Bold,
+  Braces,
+  Code,
+  Dot,
+  Heading1,
+  Heading2,
+  Heading3,
+  Heading4,
+  Heading5,
+  Heading6,
+  Italic,
+  Link2,
+  List,
+  ListOrdered,
+  Minus,
+  Pilcrow,
+  Quote,
+  Redo2,
+  Strikethrough,
+  Undo2,
+  Unlink,
+  YoutubeIcon,
+} from "lucide-react";
+import Link from "@tiptap/extension-link";
+import Youtube from "@tiptap/extension-youtube";
 
 type ControllerRenderProps<
   TFieldValues extends FieldValues = FieldValues,
@@ -33,9 +60,48 @@ function MenuBar() {
     return null;
   }
 
+  const setLink = () => {
+    const previousUrl = editor.getAttributes("link").href;
+    const url = window.prompt("URL", previousUrl);
+
+    if (url === null) {
+      return;
+    }
+
+    if (url === "") {
+      editor.chain().focus().extendMarkRange("link").unsetLink().run();
+
+      return;
+    }
+
+    try {
+      editor
+        .chain()
+        .focus()
+        .extendMarkRange("link")
+        .setLink({ href: url })
+        .run();
+    } catch (e) {
+      alert(e);
+    }
+  };
+
+  const addYoutubeVideo = () => {
+    const url = prompt("Enter YouTube URL");
+
+    if (url) {
+      editor.commands.setYoutubeVideo({
+        src: url,
+        width: 640,
+        height: 480,
+      });
+    }
+  };
+
   return (
     <div className="flex flex-wrap gap-2 p-2 border-b ">
-      <button
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().toggleBold().run();
@@ -45,9 +111,10 @@ function MenuBar() {
           editor.isActive("bold") ? "bg-primary text-secondary" : ""
         }`}
       >
-        Bold
-      </button>
-      <button
+        <Bold />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().toggleItalic().run();
@@ -57,9 +124,10 @@ function MenuBar() {
           editor.isActive("italic") ? "bg-primary text-secondary" : ""
         }`}
       >
-        Italic
-      </button>
-      <button
+        <Italic />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().toggleStrike().run();
@@ -69,10 +137,11 @@ function MenuBar() {
           editor.isActive("strike") ? "bg-primary text-secondary" : ""
         }`}
       >
-        Strike
-      </button>
+        <Strikethrough />
+      </Button>
 
-      <button
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().toggleCode().run();
@@ -82,9 +151,9 @@ function MenuBar() {
           editor.isActive("code") ? "bg-primary text-secondary" : ""
         }`}
       >
-        Code
-      </button>
-      <button
+        <Code />
+      </Button>
+      {/* <button
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().unsetAllMarks().run();
@@ -101,8 +170,9 @@ function MenuBar() {
         className="p-2 rounded "
       >
         Clear nodes
-      </button>
-      <button
+      </button> */}
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().setParagraph().run();
@@ -111,9 +181,10 @@ function MenuBar() {
           editor.isActive("paragraph") ? "bg-primary text-secondary" : ""
         }`}
       >
-        Paragraph
-      </button>
-      <button
+        <Pilcrow />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().toggleHeading({ level: 1 }).run();
@@ -124,9 +195,10 @@ function MenuBar() {
             : ""
         }`}
       >
-        H1
-      </button>
-      <button
+        <Heading1 />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().toggleHeading({ level: 2 }).run();
@@ -137,9 +209,10 @@ function MenuBar() {
             : ""
         }`}
       >
-        H2
-      </button>
-      <button
+        <Heading2 />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().toggleHeading({ level: 3 }).run();
@@ -150,9 +223,10 @@ function MenuBar() {
             : ""
         }`}
       >
-        H3
-      </button>
-      <button
+        <Heading3 />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().toggleHeading({ level: 4 }).run();
@@ -163,9 +237,10 @@ function MenuBar() {
             : ""
         }`}
       >
-        H4
-      </button>
-      <button
+        <Heading4 />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().toggleHeading({ level: 5 }).run();
@@ -176,9 +251,10 @@ function MenuBar() {
             : ""
         }`}
       >
-        H5
-      </button>
-      <button
+        <Heading5 />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().toggleHeading({ level: 6 }).run();
@@ -189,9 +265,24 @@ function MenuBar() {
             : ""
         }`}
       >
-        H6
-      </button>
-      <button
+        <Heading6 />
+      </Button>
+      <Button
+        size="icon"
+        onClick={setLink}
+        className={editor.isActive("link") ? "is-active" : ""}
+      >
+        <Link2 />
+      </Button>
+      <Button
+        size="icon"
+        onClick={() => editor.chain().focus().unsetLink().run()}
+        disabled={!editor.isActive("link")}
+      >
+        <Unlink />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().toggleBulletList().run();
@@ -200,9 +291,10 @@ function MenuBar() {
           editor.isActive("bulletList") ? "bg-primary text-secondary" : ""
         }`}
       >
-        Bullet list
-      </button>
-      <button
+        <List />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().toggleOrderedList().run();
@@ -211,9 +303,10 @@ function MenuBar() {
           editor.isActive("orderedList") ? "bg-primary text-secondary" : ""
         }`}
       >
-        Ordered list
-      </button>
-      <button
+        <ListOrdered />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().toggleCodeBlock().run();
@@ -222,9 +315,10 @@ function MenuBar() {
           editor.isActive("codeBlock") ? "bg-primary text-secondary" : ""
         }`}
       >
-        Code block
-      </button>
-      <button
+        <Braces />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().toggleBlockquote().run();
@@ -233,27 +327,30 @@ function MenuBar() {
           editor.isActive("blockquote") ? "bg-primary text-secondary" : ""
         }`}
       >
-        Blockquote
-      </button>
-      <button
+        <Quote />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().setHorizontalRule().run();
         }}
         className="p-2 rounded "
       >
-        Horizontal rule
-      </button>
-      <button
+        <Minus />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().setHardBreak().run();
         }}
         className="p-2 rounded "
       >
-        Hard break
-      </button>
-      <button
+        <Dot />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().undo().run();
@@ -261,9 +358,10 @@ function MenuBar() {
         disabled={!editor.can().chain().focus().undo().run()}
         className="p-2 rounded "
       >
-        Undo
-      </button>
-      <button
+        <Undo2 />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().redo().run();
@@ -271,9 +369,9 @@ function MenuBar() {
         disabled={!editor.can().chain().focus().redo().run()}
         className="p-2 rounded "
       >
-        Redo
-      </button>
-      <button
+        <Redo2 />
+      </Button>
+      {/* <button
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().setColor("#958DF1").run();
@@ -285,7 +383,7 @@ function MenuBar() {
         }`}
       >
         Purple
-      </button>
+      </button> */}
       <input
         type="file"
         accept="image/*"
@@ -321,6 +419,9 @@ function MenuBar() {
         }}
         className="p-2 rounded "
       />
+      <Button size="icon" id="add" onClick={addYoutubeVideo}>
+        <YoutubeIcon />
+      </Button>
     </div>
   );
 }
@@ -348,10 +449,85 @@ const Editor = ({ field }: { field: ControllerRenderProps }) => {
         keepAttributes: false,
       },
     }),
+    Link.configure({
+      openOnClick: false,
+      autolink: true,
+      defaultProtocol: "https",
+      protocols: ["http", "https"],
+      isAllowedUri: (url, ctx) => {
+        try {
+          // construct URL
+          const parsedUrl = url.includes(":")
+            ? new URL(url)
+            : new URL(`${ctx.defaultProtocol}://${url}`);
+
+          // use default validation
+          if (!ctx.defaultValidate(parsedUrl.href)) {
+            return false;
+          }
+
+          // disallowed protocols
+          const disallowedProtocols = ["ftp", "file", "mailto"];
+          const protocol = parsedUrl.protocol.replace(":", "");
+
+          if (disallowedProtocols.includes(protocol)) {
+            return false;
+          }
+
+          // only allow protocols specified in ctx.protocols
+          const allowedProtocols = ctx.protocols.map((p) =>
+            typeof p === "string" ? p : p.scheme
+          );
+
+          if (!allowedProtocols.includes(protocol)) {
+            return false;
+          }
+
+          // disallowed domains
+          const disallowedDomains = [
+            "example-phishing.com",
+            "malicious-site.net",
+          ];
+          const domain = parsedUrl.hostname;
+
+          if (disallowedDomains.includes(domain)) {
+            return false;
+          }
+
+          // all checks have passed
+          return true;
+        } catch {
+          return false;
+        }
+      },
+      shouldAutoLink: (url) => {
+        try {
+          // construct URL
+          const parsedUrl = url.includes(":")
+            ? new URL(url)
+            : new URL(`https://${url}`);
+
+          // only auto-link if the domain is not in the disallowed list
+          const disallowedDomains = [
+            "example-no-autolink.com",
+            "another-no-autolink.com",
+          ];
+          const domain = parsedUrl.hostname;
+
+          return !disallowedDomains.includes(domain);
+        } catch {
+          return false;
+        }
+      },
+    }),
+    Youtube.configure({
+      controls: false,
+      nocookie: true,
+    }),
   ];
 
   return (
-    <div className="p-2 border rounded min-h-[300px] w-full">
+    <div className="p-2 border rounded min-h-[300px] w-full prose max-w-none">
       <EditorProvider
         slotBefore={<MenuBar />}
         immediatelyRender={false}
