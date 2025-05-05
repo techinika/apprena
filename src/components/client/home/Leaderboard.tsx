@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
 
 export function Leaderboard() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 sm:w-full xs:w-full">
       <div className="flex items-center">
         <Avatar className="h-9 w-9">
           <AvatarImage src="/placeholder.jpg" alt="Avatar" />

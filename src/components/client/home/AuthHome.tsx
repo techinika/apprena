@@ -14,8 +14,8 @@ function AuthHome() {
     <ProtectedRoute>
       <AuthNav />
       <Stats />
-      <div className="size grid gap-4 md:grid-cols-2 lg:grid-cols-7 mb-4 items-start">
-        <div className="col-span-5">
+      <div className="size grid gap-4 grid-cols-1 md:grid-cols-7 mb-4 items-start">
+        <div className="md:col-span-5">
           <SectionHeader
             title="Courses Enrolled In"
             buttonText="Explore More"
@@ -45,7 +45,7 @@ function AuthHome() {
           {/* <BlogList /> */}
           <div className="p-3"></div>
         </div>
-        <Card className="col-span-2">
+        <Card className="md:col-span-2">
           <CardHeader>
             <SectionHeader title="Leaderboard" buttonText={null} link={null} />
           </CardHeader>

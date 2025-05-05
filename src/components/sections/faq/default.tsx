@@ -38,14 +38,14 @@ export default function Faq() {
 
   return (
     <Section>
-      <div className="flex items-start gap-8">
+      <div className="grid md:grid-cols-3 grid-cols-1 items-start gap-8">
         <h2 className="text-start text-3xl font-semibold flex-1 sm:text-5xl">
           Frequently Asked Questions
         </h2>
         <Accordion
           type="single"
           collapsible
-          className="w-full max-w-[800px] flex-2"
+          className="w-full max-w-[800px] flex-2 md:col-span-2"
         >
           {faqsData.length > 0 ? (
             faqsData.map((item) => (

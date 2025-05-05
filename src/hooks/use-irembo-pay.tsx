@@ -14,7 +14,7 @@ const useIremboPay = () => {
     }
 
     const script = document.createElement("script");
-    script.src = process.env.NEXT_PUBLIC_PAYMENT_PAGE_URL || "";
+    script.src = process.env.NEXT_PUBLIC_PAYMENT_PAGE_URL ?? "";
     script.async = true;
     script.onload = () => setLoaded(true);
     document.body.appendChild(script);

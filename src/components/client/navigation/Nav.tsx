@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { APP } from "@/variables/globals";
-import { ArrowRight, Moon, Sun } from "lucide-react";
+import { ArrowRight, Moon, SquareChevronDown, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
@@ -47,12 +47,12 @@ function Nav() {
         <Menu />
         <div className="px-4 flex gap-3 items-center">
           {!user && (
-            <Link href="/login">
+            <Link href="/login" className="hidden md:block">
               <Button variant="glow">Sign In</Button>
             </Link>
           )}
           {!user && (
-            <Link href="/register">
+            <Link href="/register" className="hidden md:block">
               <Button variant="default">
                 Create your Account
                 <ArrowRight className="h-3 w-3" />
@@ -60,7 +60,7 @@ function Nav() {
             </Link>
           )}
           {user && user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL && (
-            <Link href="/org">
+            <Link href="/org" className="hidden md:block">
               <Button variant="default">
                 Manage Institution
                 <ArrowRight />
@@ -86,6 +86,9 @@ function Nav() {
           </Button>
 
           {user && <UserNav />}
+          <Button size="icon" className="md:hidden" variant="outline">
+            <SquareChevronDown />
+          </Button>
         </div>
       </header>
       <Separator />

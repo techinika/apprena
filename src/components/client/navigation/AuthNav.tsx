@@ -2,7 +2,7 @@
 
 import { Separator } from "@/components/ui/separator";
 import { APP } from "@/variables/globals";
-import { ArrowRight, Moon, Sun } from "lucide-react";
+import { ArrowRight, Moon, SquareChevronDown, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
@@ -45,7 +45,7 @@ function AuthNav() {
         <AuthMenu />
         <div className="px-4 flex gap-3 items-center">
           {user && user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL && (
-            <Link href="/org">
+            <Link href="/org" className="hidden md:block">
               <Button variant="default">
                 Manage Institution
                 <ArrowRight />
@@ -71,6 +71,9 @@ function AuthNav() {
           </Button>
 
           <UserNav />
+          <Button size="icon" className="md:hidden" variant="outline">
+            <SquareChevronDown />
+          </Button>
         </div>
       </header>
       <Separator />

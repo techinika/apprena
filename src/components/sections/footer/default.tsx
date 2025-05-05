@@ -32,8 +32,8 @@ export default function FooterSection() {
       <Separator />
       <div className="mx-auto">
         <Footer>
-          <FooterContent className="flex justify-between gap-3 flex-wrap">
-            <FooterColumn className="col-span-2 sm:col-span-3 md:col-span-1">
+          <FooterContent className="grid md:grid-cols-5 grid-cols-1 justify-between gap-3 flex-wrap">
+            <FooterColumn className="col-span-2 sm:col-span-3 md:col-span-2">
               <Image
                 src={logoSrc}
                 width={200}

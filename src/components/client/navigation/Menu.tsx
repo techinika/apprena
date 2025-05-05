@@ -40,7 +40,7 @@ export function Menu() {
   const { user } = useAuth();
 
   return (
-    <NavigationMenu>
+    <NavigationMenu className="hidden md:flex">
       <NavigationMenuList>
         <NavigationMenuItem>
           <Link href={user ? "/home" : "/"} legacyBehavior passHref>
