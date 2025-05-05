@@ -190,26 +190,10 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
     try {
       console.log(data?.writtenBy);
 
-      const userRef = doc(db, "profile", data?.writtenBy, data?.category);
+      const userRef = doc(db, "profile", data?.writtenBy);
       const topicRef = doc(db, "topics", data?.category);
 
       const slug = generateSlug(data?.title ?? "");
-
-      console.log({
-        title: data?.title,
-        content: data?.content ?? "",
-        photoURL: data?.photoURL ?? "/placeholder.jpg",
-        isFeatured: data?.isFeatured ?? false,
-        publishedAt: data?.publishedAt ?? "",
-        visibility: data?.visibility ?? "private",
-        writtenBy: userRef ?? doc(db, "profile", String(user?.uid)),
-        summary: data?.summary ?? "",
-        tags: data?.tags ?? "",
-        category: topicRef ?? "",
-        institutionOwning: institutionRef,
-        status: data?.status === "draft" ? "draft" : "published",
-        createdAt: new Date(),
-      });
 
       await setDoc(doc(articleCollection, slug), {
         title: data?.title,

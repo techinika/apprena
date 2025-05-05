@@ -13,6 +13,28 @@ import {
   RefCallBack,
 } from "react-hook-form";
 import Image from "@tiptap/extension-image";
+import { Button } from "@/components/ui/button";
+import {
+  Bold,
+  Braces,
+  Code,
+  Dot,
+  Heading1,
+  Heading2,
+  Heading3,
+  Heading4,
+  Heading5,
+  Heading6,
+  Italic,
+  List,
+  ListOrdered,
+  Minus,
+  Pilcrow,
+  Quote,
+  Redo2,
+  Strikethrough,
+  Undo2,
+} from "lucide-react";
 
 type ControllerRenderProps<
   TFieldValues extends FieldValues = FieldValues,
@@ -35,7 +57,8 @@ function MenuBar() {
 
   return (
     <div className="flex flex-wrap gap-2 p-2 border-b ">
-      <button
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().toggleBold().run();
@@ -45,9 +68,10 @@ function MenuBar() {
           editor.isActive("bold") ? "bg-primary text-secondary" : ""
         }`}
       >
-        Bold
-      </button>
-      <button
+        <Bold />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().toggleItalic().run();
@@ -57,9 +81,10 @@ function MenuBar() {
           editor.isActive("italic") ? "bg-primary text-secondary" : ""
         }`}
       >
-        Italic
-      </button>
-      <button
+        <Italic />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().toggleStrike().run();
@@ -69,10 +94,11 @@ function MenuBar() {
           editor.isActive("strike") ? "bg-primary text-secondary" : ""
         }`}
       >
-        Strike
-      </button>
+        <Strikethrough />
+      </Button>
 
-      <button
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().toggleCode().run();
@@ -82,9 +108,9 @@ function MenuBar() {
           editor.isActive("code") ? "bg-primary text-secondary" : ""
         }`}
       >
-        Code
-      </button>
-      <button
+        <Code />
+      </Button>
+      {/* <button
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().unsetAllMarks().run();
@@ -101,8 +127,9 @@ function MenuBar() {
         className="p-2 rounded "
       >
         Clear nodes
-      </button>
-      <button
+      </button> */}
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().setParagraph().run();
@@ -111,9 +138,10 @@ function MenuBar() {
           editor.isActive("paragraph") ? "bg-primary text-secondary" : ""
         }`}
       >
-        Paragraph
-      </button>
-      <button
+        <Pilcrow />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().toggleHeading({ level: 1 }).run();
@@ -124,9 +152,10 @@ function MenuBar() {
             : ""
         }`}
       >
-        H1
-      </button>
-      <button
+        <Heading1 />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().toggleHeading({ level: 2 }).run();
@@ -137,9 +166,10 @@ function MenuBar() {
             : ""
         }`}
       >
-        H2
-      </button>
-      <button
+        <Heading2 />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().toggleHeading({ level: 3 }).run();
@@ -150,9 +180,10 @@ function MenuBar() {
             : ""
         }`}
       >
-        H3
-      </button>
-      <button
+        <Heading3 />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().toggleHeading({ level: 4 }).run();
@@ -163,9 +194,10 @@ function MenuBar() {
             : ""
         }`}
       >
-        H4
-      </button>
-      <button
+        <Heading4 />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().toggleHeading({ level: 5 }).run();
@@ -176,9 +208,10 @@ function MenuBar() {
             : ""
         }`}
       >
-        H5
-      </button>
-      <button
+        <Heading5 />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().toggleHeading({ level: 6 }).run();
@@ -189,9 +222,10 @@ function MenuBar() {
             : ""
         }`}
       >
-        H6
-      </button>
-      <button
+        <Heading6 />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().toggleBulletList().run();
@@ -200,9 +234,10 @@ function MenuBar() {
           editor.isActive("bulletList") ? "bg-primary text-secondary" : ""
         }`}
       >
-        Bullet list
-      </button>
-      <button
+        <List />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().toggleOrderedList().run();
@@ -211,9 +246,10 @@ function MenuBar() {
           editor.isActive("orderedList") ? "bg-primary text-secondary" : ""
         }`}
       >
-        Ordered list
-      </button>
-      <button
+        <ListOrdered />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().toggleCodeBlock().run();
@@ -222,9 +258,10 @@ function MenuBar() {
           editor.isActive("codeBlock") ? "bg-primary text-secondary" : ""
         }`}
       >
-        Code block
-      </button>
-      <button
+        <Braces />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().toggleBlockquote().run();
@@ -233,27 +270,30 @@ function MenuBar() {
           editor.isActive("blockquote") ? "bg-primary text-secondary" : ""
         }`}
       >
-        Blockquote
-      </button>
-      <button
+        <Quote />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().setHorizontalRule().run();
         }}
         className="p-2 rounded "
       >
-        Horizontal rule
-      </button>
-      <button
+        <Minus />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().setHardBreak().run();
         }}
         className="p-2 rounded "
       >
-        Hard break
-      </button>
-      <button
+        <Dot />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().undo().run();
@@ -261,9 +301,10 @@ function MenuBar() {
         disabled={!editor.can().chain().focus().undo().run()}
         className="p-2 rounded "
       >
-        Undo
-      </button>
-      <button
+        <Undo2 />
+      </Button>
+      <Button
+        size="icon"
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().redo().run();
@@ -271,9 +312,9 @@ function MenuBar() {
         disabled={!editor.can().chain().focus().redo().run()}
         className="p-2 rounded "
       >
-        Redo
-      </button>
-      <button
+        <Redo2 />
+      </Button>
+      {/* <button
         onClick={(e) => {
           e.preventDefault();
           editor.chain().focus().setColor("#958DF1").run();
@@ -285,7 +326,7 @@ function MenuBar() {
         }`}
       >
         Purple
-      </button>
+      </button> */}
       <input
         type="file"
         accept="image/*"
