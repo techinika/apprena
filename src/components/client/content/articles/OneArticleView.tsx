@@ -5,12 +5,14 @@ import AuthNav from "../../navigation/AuthNav";
 import Nav from "../../navigation/Nav";
 import { useAuth } from "@/lib/AuthContext";
 import FooterSection from "@/components/sections/footer/default";
-import { Article } from "@/types/Article";
+import { Article, Read } from "@/types/Article";
 import {
   doc,
   DocumentData,
   DocumentReference,
   getDoc,
+  increment,
+  runTransaction,
 } from "firebase/firestore";
 import { db } from "@/db/firebase";
 import { useRouter } from "next/navigation";
@@ -105,7 +107,7 @@ function OneArticleView({ slug }: { slug: string | TrustedHTML }) {
           title: docData.title ?? "",
           status: docData.status ?? "",
           summary: docData.description ?? "",
-          views: docData.views ?? 0,
+          reads: docData.reads ?? [],
           availability: docData.availability ?? "public",
           institutionOwning: "",
           slug: docData.slug ?? "",
@@ -120,6 +122,74 @@ function OneArticleView({ slug }: { slug: string | TrustedHTML }) {
 
     fetchData();
   }, [slug]);
+
+  useEffect(() => {
+    const updateArticleReads = async () => {
+      try {
+        const articleRef = doc(db, "articles", String(slug));
+        const userRef = user ? doc(db, "profile", String(user.uid)) : null;
+        const now = new Date();
+
+        await runTransaction(db, async (transaction) => {
+          const articleSnap = await transaction.get(articleRef);
+          if (!articleSnap.exists()) {
+            throw new Error("Article not found");
+          }
+
+          const articleData = articleSnap.data();
+          const reads = articleData.reads || [];
+          let updatedReads;
+
+          if (user) {
+            const existingReadIndex = reads.findIndex(
+              (read: Read) => read?.id === user?.uid
+            );
+
+            if (existingReadIndex !== -1) {
+              updatedReads = reads.map((read: Read, index: number) =>
+                index === existingReadIndex
+                  ? { ...read, readTimes: read.readTimes + 1, updatedAt: now }
+                  : read
+              );
+            } else {
+              const newRead = {
+                id: user.uid,
+                article: articleRef,
+                user: userRef,
+                readTimes: 1,
+                createdAt: now,
+                updatedAt: now,
+              };
+              updatedReads = [...reads, newRead];
+
+              if (userRef) {
+                transaction.update(userRef, {
+                  blogsRead: increment(1),
+                  blogsReadInLastMonth: increment(1),
+                });
+              }
+            }
+          } else {
+            const newRead = {
+              id: String(Date.now()),
+              article: articleRef,
+              user: null,
+              readTimes: 1,
+              createdAt: now,
+              updatedAt: now,
+            };
+            updatedReads = [...reads, newRead];
+          }
+
+          transaction.update(articleRef, { reads: updatedReads });
+        });
+      } catch (error) {
+        console.error("Error updating article reads:", error);
+      }
+    };
+
+    updateArticleReads();
+  }, [user, slug]);
 
   if (loading) return <Loading />;
 
@@ -139,7 +209,7 @@ function OneArticleView({ slug }: { slug: string | TrustedHTML }) {
                 className="w-full h-96 object-cover shadow-md"
               />
 
-              <div className="absolute inset-0 bg-black bg-opacity-80"></div>
+              <div className="absolute inset-0 bg-black bg-opacity-75"></div>
 
               <div className="size absolute inset-0 flex flex-col justify-center items-center text-white text-center px-4">
                 <h1 className="text-4xl font-bold">{article.title}</h1>

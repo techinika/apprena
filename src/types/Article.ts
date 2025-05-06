@@ -15,7 +15,7 @@ export type Article = {
   createdAt: string;
   updatedAt?: string;
   publishedAt?: string;
-  views?: number;
+  reads?: Read[];
   likes?: number;
   photoURL?: string;
   commentsCount?: number;
@@ -23,6 +23,15 @@ export type Article = {
   isFeatured?: boolean;
   relatedArticles?: string[];
   category: Topic | null;
+};
+
+export type Read = {
+  id: string;
+  article: string;
+  user: string;
+  createdAt: string;
+  updatedAt: string;
+  readTimes: number;
 };
 
 export type Category = {
