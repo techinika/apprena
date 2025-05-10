@@ -38,99 +38,20 @@ import {
 import { Article } from "@/types/Article";
 import { Badge } from "../../ui/badge";
 import PageHeader from "../main/PageHeader";
+import {
+  collection,
+  doc,
+  DocumentData,
+  DocumentReference,
+  getDoc,
+  onSnapshot,
+  query,
+  where,
+} from "firebase/firestore";
+import { db } from "@/db/firebase";
+import Loading from "@/app/loading";
 
-const data: Article[] = [];
-
-export const columns: ColumnDef<Article>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "title",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Title
-          <ArrowUpDown />
-        </Button>
-      );
-    },
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => (
-      <Badge className="capitalize">{row.getValue("status")}</Badge>
-    ),
-  },
-  {
-    accessorKey: "availability",
-    header: "Availability",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("availability")}</div>
-    ),
-  },
-  {
-    accessorKey: "author",
-    header: "Author",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("author")}</div>
-    ),
-  },
-  {
-    id: "actions",
-    enableHiding: false,
-    cell: ({ row }) => {
-      const payment = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(payment.id)}
-            >
-              Edit the post
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Preview post</DropdownMenuItem>
-            <DropdownMenuItem color="danger">Delete Post</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
-  },
-];
-
-export function Drafts() {
+export default function Drafts({ institutionId }: { institutionId: string }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -138,9 +59,161 @@ export function Drafts() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+  const [articles, setArticles] = React.useState<Article[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const institutionRef = doc(db, "institutions", institutionId);
+
+  React.useEffect(() => {
+    if (!institutionId) return;
+
+    setLoading(true);
+
+    const articlesRef = collection(db, "articles");
+    const q = query(
+      articlesRef,
+      where("institutionOwning", "==", institutionRef),
+      where("status", "==", "draft")
+    );
+
+    const unsubscribe = onSnapshot(
+      q,
+      async (snapshot) => {
+        const articlesWithWriters: Article[] = await Promise.all(
+          snapshot.docs.map(async (doc) => {
+            const data = doc.data();
+
+            let userData: DocumentData | null = null;
+
+            if (data.writtenBy) {
+              const userRef =
+                data?.createdBy as DocumentReference<DocumentData>;
+
+              try {
+                const writerSnap = await getDoc(userRef);
+                userData = writerSnap.exists()
+                  ? {
+                      id: writerSnap.id,
+                      displayName: writerSnap.data().displayName,
+                      email: writerSnap.data().email,
+                      uid: writerSnap.data().uid,
+                    }
+                  : null;
+              } catch (err) {
+                console.warn("Error fetching writer for article:", err);
+              }
+            }
+
+            return {
+              id: doc.id,
+              ...data,
+              writtenBy: userData,
+            } as Article;
+          })
+        );
+
+        setArticles(articlesWithWriters);
+        setLoading(false);
+      },
+      (err) => {
+        console.error("Error fetching articles:", err);
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [institutionId]);
+
+  const columns: ColumnDef<Article>[] = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: "title",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Title
+            <ArrowUpDown />
+          </Button>
+        );
+      },
+    },
+    {
+      accessorKey: "visibility",
+      header: "Visibility",
+      cell: ({ row }) => (
+        <Badge className="capitalize">{row.getValue("visibility")}</Badge>
+      ),
+    },
+    {
+      accessorKey: "availability",
+      header: "Availability",
+      cell: ({ row }) => (
+        <div className="capitalize">{row.getValue("availability")}</div>
+      ),
+    },
+    {
+      accessorKey: "writtenBy",
+      header: "Author",
+      cell: ({ row }) => (
+        <div className="capitalize">{row?.original.writtenBy?.displayName}</div>
+      ),
+    },
+    {
+      id: "actions",
+      enableHiding: false,
+      cell: ({ row }) => {
+        const payment = row.original;
+
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem
+                onClick={() => navigator.clipboard.writeText(payment.id)}
+              >
+                Edit the post
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>Preview post</DropdownMenuItem>
+              <DropdownMenuItem color="danger">Delete Post</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
 
   const table = useReactTable({
-    data,
+    data: articles,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -158,10 +231,12 @@ export function Drafts() {
     },
   });
 
+  if (loading) return <Loading />;
+
   return (
     <div className="w-full space-y-4 p-8 pt-6">
       <PageHeader
-        title="Drafts"
+        title="Post Drafts"
         newItem={false}
         onExport={() => null}
         onPublish={() => null}

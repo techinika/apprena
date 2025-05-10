@@ -45,10 +45,14 @@ import {
   collection,
   deleteDoc,
   doc,
+  DocumentData,
+  DocumentReference,
+  getDoc,
   onSnapshot,
   query,
   where,
 } from "firebase/firestore";
+import { CustomUser } from "@/components/public/discussions/OneDiscussionPage";
 
 export default function EventList({
   institutionId,
@@ -66,30 +70,81 @@ export default function EventList({
   const [loading, setLoading] = React.useState(true);
   const [openDelete, setOpenDelete] = React.useState(false);
   const [idToDelete, setIdToDelete] = React.useState<string | null>(null);
+  const institutionRef = doc(db, "institutions", institutionId);
 
   React.useEffect(() => {
-    if (!institutionId) return;
-    setLoading(true);
-    const eventsRef = collection(db, "historyEvents");
-    const q = query(eventsRef, where("institutionOwning", "==", institutionId));
+    const fetchData = async () => {
+      if (!institutionId) return;
+      setLoading(true);
+      const eventsRef = collection(db, "historyEvents");
+      const q = query(
+        eventsRef,
+        where("institutionOwning", "==", institutionRef)
+      );
 
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const eventsData: History[] = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as History[];
-        setEvents(eventsData);
-        setLoading(false);
-      },
-      (err) => {
-        console.error("Error fetching events:", err);
-        setLoading(false);
-      }
-    );
+      const unsubscribe = onSnapshot(
+        q,
+        async (snapshot) => {
+          const eventsData: History[] = [];
 
-    return () => unsubscribe();
+          for (const doc of snapshot.docs) {
+            const docData = doc.data();
+            const userRef =
+              docData?.createdBy as DocumentReference<DocumentData>;
+            const institutionRef =
+              docData?.institutionOwning as DocumentReference<DocumentData>;
+
+            let userData: CustomUser | null = null;
+            let institutionData: { id: string; name: string } | null = null;
+
+            try {
+              if (userRef) {
+                const userSnapshot = await getDoc(userRef);
+                if (userSnapshot.exists()) {
+                  const userSnapshotData = userSnapshot.data();
+                  userData = {
+                    id: userSnapshot.id,
+                    uid: userSnapshot.id,
+                    displayName: userSnapshotData?.displayName,
+                    email: userSnapshotData?.email ?? "",
+                  };
+                }
+              }
+
+              if (institutionRef) {
+                const institutionSnapshot = await getDoc(institutionRef);
+                if (institutionSnapshot.exists()) {
+                  const institutionSnapshotData = institutionSnapshot.data();
+                  institutionData = {
+                    id: institutionSnapshot.id,
+                    name: institutionSnapshotData?.name,
+                  };
+                }
+              }
+            } catch (error) {
+              console.error("Error fetching referenced document:", error);
+              continue;
+            }
+
+            eventsData.push({
+              id: doc.id,
+              ...docData,
+              createdBy: userData,
+              institutionOwning: institutionData?.name,
+            } as History);
+          }
+          setEvents(eventsData);
+          setLoading(false);
+        },
+        (err) => {
+          console.error("Error fetching events:", err);
+          setLoading(false);
+        }
+      );
+
+      return () => unsubscribe();
+    };
+    fetchData();
   }, [institutionId]);
 
   const columns: ColumnDef<History>[] = [
@@ -147,7 +202,9 @@ export default function EventList({
       accessorKey: "createdBy",
       header: "Created By",
       cell: ({ row }) => (
-        <div className="capitalize">{row.getValue("Created By")}</div>
+        <div className="capitalize">
+          {row?.original?.createdBy?.displayName ?? "Unknown"}
+        </div>
       ),
     },
     {

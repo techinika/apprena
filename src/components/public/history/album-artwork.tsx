@@ -30,7 +30,7 @@ export function AlbumArtwork({
         <ContextMenuTrigger>
           <div className="overflow-hidden rounded-md">
             <Image
-              src={album.cover}
+              src={album?.cover}
               alt={album?.title}
               width={width}
               height={height}
@@ -47,8 +47,10 @@ export function AlbumArtwork({
         </ContextMenuContent>
       </ContextMenu>
       <div className="space-y-1 text-sm">
-        <h3 className="font-medium leading-none">{album?.title}</h3>
-        <p className="text-xs text-muted-foreground">{album?.createdBy}</p>
+        <h3 className="font-medium leading-none my-2">{album?.title}</h3>
+        <p className="text-xs text-muted-foreground">
+          {album?.createdBy?.displayName}
+        </p>
       </div>
     </div>
   );
