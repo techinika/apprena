@@ -11,14 +11,14 @@ export interface Course {
     user: string;
   }[];
   coverImage: string;
-  status: "Enrolled" | "Completed" | "Not Enrolled";
+  status: "draft" | "published";
   duration: string;
   modules: string;
   lessons: string;
-  availability: "OPEN" | "SUBSCRIPTION REQUIRED";
-  topic: Topic;
+  visibility: "public" | "private";
+  topic: Topic | null;
   learners: string;
-  realPrice: number;
+  realPrice: string;
   discountePrice: number;
   discount: boolean;
   discountPercentage: number;
@@ -27,22 +27,15 @@ export interface Course {
   updatedAt: string;
   rating: number;
   ratingDistribution: { stars: number; percentage: number }[];
-  instructors: {
-    id: string;
-    photoURL: string;
-    displayName: string;
-    title: string;
-    courseRatings: number;
-    students: number;
-    coursesMade: number;
-    bio: string;
-  }[];
+  instructors: Instructor[];
   detailedSummary: string;
   keyLessons: string[];
   courseRequirements: string[];
   targetAudience: string[];
   curriculum: Curriculum | undefined;
-  createdBy: CustomUser;
+  createdBy: CustomUser | null;
+  reviews: Review[];
+  institutionOwning?: { name: string; id: string } | null;
 }
 
 export interface Review {
@@ -51,6 +44,17 @@ export interface Review {
   rating: number;
   createdAt: string;
   createdBy: CustomUser;
+}
+
+export interface Instructor {
+  id: string;
+  photoURL: string;
+  displayName: string;
+  title: string;
+  courseRatings: number;
+  students: number;
+  coursesMade: number;
+  bio: string;
 }
 
 export type LessonType = "video" | "file";

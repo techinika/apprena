@@ -10,14 +10,17 @@ import { Play, FileText } from "lucide-react";
 export function CurriculumAccordion({
   curriculum,
 }: {
-  curriculum: Curriculum | undefined;
+  curriculum: Curriculum | undefined | null;
 }) {
+  // if (curriculum == null || curriculum == undefined)
+  // return <p className="text-center w-full p-5">No curriculum yet!</p>;
+
   return (
     <Accordion
       type="multiple"
       className="w-full bg-gray-100 dark:bg-gray-900 p-4 rounded-md"
     >
-      {curriculum ? (
+      {curriculum?.modules ? (
         curriculum.modules.map((module: Module, i) => (
           <AccordionItem key={i + 1} value={`module-${i + 1}`}>
             <AccordionTrigger className="justify-between text-left">

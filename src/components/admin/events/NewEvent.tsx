@@ -16,7 +16,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,17 +31,17 @@ import { collection, doc, setDoc } from "firebase/firestore";
 import { generateSlug } from "@/lib/utils";
 import { db } from "@/db/firebase";
 import Loading from "@/app/loading";
+import Editor from "../blog/Editor";
 
 const formSchema = z.object({
   title: z.string(),
-  institutionOwning: z.string(),
   cover: z.string().optional(),
   occuringDate: z.string().optional(),
-  description: z.string().optional(),
+  description: z.string().min(10).max(400),
   likes: z.array(z.string()).optional(),
   shares: z.number().optional(),
+  seo: z.string().optional(),
   createdAt: z.string().optional(),
-  createdBy: z.string().optional(),
   updatedBy: z.string().optional(),
   updatedAt: z.string().optional(),
 });
@@ -55,6 +54,8 @@ function NewEvent({ institutionId }: { institutionId: string }) {
   const [files, setFiles] = useState<File[] | null>(null);
   const eventsRef = collection(db, "historyEvents");
   const [loading, setLoading] = useState(false);
+  const institutionRef = doc(db, "institutions", institutionId);
+  const userRef = doc(db, "profile", String(user?.uid));
 
   const dropZoneConfig = {
     maxFiles: 1,
@@ -67,13 +68,12 @@ function NewEvent({ institutionId }: { institutionId: string }) {
     defaultValues: {
       title: "",
       description: "",
-      cover: cover ? cover : "",
+      seo: "today in history, history events",
+      cover: cover ?? "/placeholder.jpg",
       occuringDate: "",
-      institutionOwning: institutionId,
       likes: [],
       shares: 0,
       createdAt: new Date().toISOString(),
-      createdBy: user?.uid,
     },
     mode: "onChange",
   });
@@ -93,7 +93,15 @@ function NewEvent({ institutionId }: { institutionId: string }) {
 
     const slug = generateSlug(data?.title);
     try {
-      await setDoc(doc(eventsRef, slug), data);
+      await setDoc(doc(eventsRef, slug), {
+        ...data,
+        slug: slug,
+        institutionOwning: institutionRef,
+        seo: data?.seo ?? "today in history, history events",
+        createdBy: userRef,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
       toast.success("New event added successfully!");
       form.reset();
     } catch (error) {
@@ -199,10 +207,7 @@ function NewEvent({ institutionId }: { institutionId: string }) {
                 <FormItem>
                   <FormLabel className="font-bold">Description</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder={`Describe the article in a few words`}
-                      {...field}
-                    />
+                    <Editor field={field} />
                   </FormControl>
                   <FormDescription>
                     Not more than 400 characters
@@ -246,6 +251,28 @@ function NewEvent({ institutionId }: { institutionId: string }) {
                 </FileUploaderContent>
               </FileUploader>
             </div>
+            <FormField
+              control={form.control}
+              name="seo"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-bold">
+                    SEO Keywords (Optional)
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder={`technology, science, health, etc`}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    These keywords will help in search engine optimization.
+                    Separate them with commas
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
         </form>
       </Form>

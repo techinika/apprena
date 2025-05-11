@@ -1,10 +1,16 @@
-import { Drafts } from "@/components/admin/blog/Drafts";
+import Drafts from "@/components/admin/blog/Drafts";
 import React from "react";
 
-function page() {
+async function page({
+  params,
+}: {
+  params: Promise<{ institutionid: string }>;
+}) {
+  const { institutionid } = await params;
+
   return (
     <div>
-      <Drafts />
+      <Drafts institutionId={institutionid} />
     </div>
   );
 }

@@ -1,3 +1,5 @@
+import { CustomUser } from "@/components/public/discussions/OneDiscussionPage";
+
 export interface History {
   id: string;
   title: string;
@@ -12,6 +14,6 @@ export interface History {
   shares: number;
   createdAt: string;
   updatedAt: string;
-  createdBy: string;
+  createdBy: CustomUser | null;
   updatedBy: string;
 }

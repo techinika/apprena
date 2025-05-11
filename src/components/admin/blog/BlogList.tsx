@@ -40,6 +40,7 @@ import { Badge } from "../../ui/badge";
 import PageHeader from "../main/PageHeader";
 import {
   collection,
+  doc,
   DocumentData,
   DocumentReference,
   getDoc,
@@ -60,6 +61,7 @@ export default function BlogList({ institutionId }: { institutionId: string }) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [articles, setArticles] = React.useState<Article[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const institutionRef = doc(db, "institutions", institutionId);
 
   React.useEffect(() => {
     if (!institutionId) return;
@@ -69,7 +71,7 @@ export default function BlogList({ institutionId }: { institutionId: string }) {
     const articlesRef = collection(db, "articles");
     const q = query(
       articlesRef,
-      where("institutionOwning", "==", institutionId)
+      where("institutionOwning", "==", institutionRef)
     );
 
     const unsubscribe = onSnapshot(

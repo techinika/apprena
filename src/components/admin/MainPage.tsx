@@ -14,15 +14,18 @@ import { collection, doc, onSnapshot, query, where } from "firebase/firestore";
 import { useAuth } from "@/lib/AuthContext";
 import { formatDistanceToNow } from "date-fns";
 import { enUS } from "date-fns/locale";
+import Loading from "@/app/loading";
 
 function MainPage() {
   const { user } = useAuth();
   const router = useRouter();
   const [openNew, setOpenNew] = useState(false);
   const [institutions, setInstitutions] = useState<Institution[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const getData = async () => {
+      setLoading(true);
       const userRef = doc(db, "profile", String(user?.uid));
       const q = query(
         collection(db, "institutions"),
@@ -43,6 +46,7 @@ function MainPage() {
           } as Institution;
         });
         setInstitutions(data);
+        setLoading(false);
       });
     };
     getData();
@@ -51,6 +55,8 @@ function MainPage() {
   const handleOpenNew = () => {
     setOpenNew(!openNew);
   };
+
+  if (loading) return <Loading />;
 
   return (
     <div className="size my-16">

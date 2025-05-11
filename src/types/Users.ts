@@ -28,7 +28,7 @@ export type User = {
   mostActiveTimes: string;
   photoURL: string;
   subscriptionPlan: SubscriptionPlan;
-  // coursesEnrolled: string[];
+  coursesEnrolled: {courseId: string, enrollmentStatus: ""}[];
   // preferences: UserPreferences;
   preferredLanguage: string;
   createdAt: string;

@@ -9,25 +9,69 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { db } from "@/db/firebase";
+import { useAuth } from "@/lib/AuthContext";
 import { Course } from "@/types/Course";
+import { doc, getDoc } from "firebase/firestore";
 import { Clock, Component, Milestone } from "lucide-react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import React from "react";
+import Link from "next/link";
+import React, { useEffect, useState } from "react";
 
 function CourseCard({ item }: { item: Course | null }) {
-  const router = useRouter();
+  const { user } = useAuth();
+  const [userStatus, setUserStatus] = useState("Not Enrolled");
+
+  useEffect(() => {
+    const fetchUserEnrollmentStatus = async () => {
+      if (!user || !item?.id) {
+        setUserStatus("Not Enrolled");
+        return;
+      }
+
+      try {
+        const userRef = doc(db, "profile", user.uid);
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          const coursesEnrolled = userData.coursesEnrolled ?? [];
+
+          const enrollment = coursesEnrolled.find(
+            (entry: { courseId: string; enrollmentStatus: string }) =>
+              entry?.courseId === item?.id
+          );
+
+          if (enrollment) {
+            setUserStatus(enrollment.enrollmentStatus ?? "Enrolled");
+          } else {
+            setUserStatus("Not Enrolled");
+          }
+        } else {
+          setUserStatus("Not Enrolled");
+        }
+      } catch (error) {
+        console.error("Error fetching user enrollment status:", error);
+        setUserStatus("Not Enrolled");
+      }
+    };
+
+    fetchUserEnrollmentStatus();
+  }, [user, item]);
+
   return (
     <Card className="overflow-hidden cursor-pointer relative">
-      <div className="absolute top-0 left-0 z-50 bg-yellow-600 p-1 text-xs font-bold">
-        {item?.availability}
-      </div>
+      {item?.realPrice == "0" && (
+        <div className="absolute top-0 left-0 z-50 bg-yellow-600 p-1 text-xs font-bold">
+          Free
+        </div>
+      )}
       <Image
-        src={item?.coverImage ? item?.coverImage : "/placeholder.jpg"}
-        width={100}
-        height={100}
+        src={item?.coverImage ?? "/placeholder.jpg"}
+        width={500}
+        height={400}
         className="w-full object-cover h-40"
-        alt={item?.title ? item?.title : "Course Cover Image"}
+        alt={item?.title ?? "Course Cover Image"}
       />
       <CardHeader>
         <CardTitle>{item?.title}</CardTitle>
@@ -45,20 +89,20 @@ function CourseCard({ item }: { item: Course | null }) {
         </div>
       </CardContent>
       <CardFooter className="flex justify-between items-center">
-        <Button size="sm" onClick={() => router.push(`/courses/${item?.id}`)}>
-          Start Learning
-        </Button>
-        <p
-          className={`${
-            item?.status === "Completed"
-              ? "text-green-600"
-              : item?.status === "Enrolled"
-              ? "text-yellow-600"
-              : "text-muted-foreground"
-          } font-bold text-sm`}
-        >
-          {item?.status}
-        </p>
+        <Link href={`/courses/${item?.id}`}>
+          <Button size="sm">Start Learning</Button>
+        </Link>
+        {(() => {
+          let statusClass = "text-muted-foreground";
+          if (userStatus === "Completed") {
+            statusClass = "text-green-600";
+          } else if (userStatus === "Enrolled") {
+            statusClass = "text-yellow-600";
+          }
+          return (
+            <p className={`${statusClass} font-bold text-sm`}>{userStatus}</p>
+          );
+        })()}
       </CardFooter>
     </Card>
   );

@@ -112,12 +112,12 @@ export default function MainPage() {
                           Active Articles & Case Studies
                         </h2>
                         <p className="text-sm text-muted-foreground">
-                          {`${articles.length} courses available.`}
+                          {`${articles.length} articles available.`}
                         </p>
                       </div>
                     </div>
                     <Separator className="my-4" />
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       {articles.length > 0 ? (
                         articles
                           .toSorted((a: Article | null, b: Article | null) => {
@@ -156,10 +156,13 @@ export default function MainPage() {
                       </div>
                     </div>
                     <Separator className="my-4" />
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       {articles.length > 0 ? (
                         articles
-                          .toSorted((a, b) => (b?.views ?? 0) - (a?.views ?? 0))
+                          .toSorted(
+                            (a, b) =>
+                              (b?.reads?.length ?? 0) - (a?.reads?.length ?? 0)
+                          )
                           .map((item) => {
                             return (
                               <div key={item?.id}>
@@ -187,7 +190,7 @@ export default function MainPage() {
                       </div>
                     </div>
                     <Separator className="my-4" />
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       {articles.length > 0 ? (
                         articles
                           .toSorted((a, b) => {

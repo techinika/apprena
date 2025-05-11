@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/table";
 import {
   collection,
+  doc,
   DocumentData,
   DocumentReference,
   getDoc,
@@ -59,29 +60,31 @@ function CoursesList({ institutionId }: { institutionId: string }) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [courses, setCourses] = React.useState<Course[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const institutionRef = doc(db, "institutions", institutionId);
 
   React.useEffect(() => {
     if (!institutionId) return;
 
     setLoading(true);
 
-    const coursesRef = collection(db, "courses");
+    const articlesRef = collection(db, "courses");
     const q = query(
-      coursesRef,
-      where("institutionOwning", "==", institutionId)
+      articlesRef,
+      where("institutionOwning", "==", institutionRef)
     );
 
     const unsubscribe = onSnapshot(
       q,
       async (snapshot) => {
-        const coursessWithCreators: Course[] = await Promise.all(
+        const articlesWithWriters: Course[] = await Promise.all(
           snapshot.docs.map(async (doc) => {
             const data = doc.data();
+
             let userData: DocumentData | null = null;
 
-            if (data?.createdBy) {
+            if (data.createdBy) {
               const userRef =
-                data?.writtenBy as DocumentReference<DocumentData>;
+                data?.createdBy as DocumentReference<DocumentData>;
 
               try {
                 const writerSnap = await getDoc(userRef);
@@ -94,7 +97,7 @@ function CoursesList({ institutionId }: { institutionId: string }) {
                     }
                   : null;
               } catch (err) {
-                console.warn("Error fetching writer for article:", err);
+                console.warn("Error fetching writer for course:", err);
               }
             }
 
@@ -106,7 +109,7 @@ function CoursesList({ institutionId }: { institutionId: string }) {
           })
         );
 
-        setCourses(coursessWithCreators);
+        setCourses(articlesWithWriters);
         setLoading(false);
       },
       (err) => {
@@ -163,10 +166,12 @@ function CoursesList({ institutionId }: { institutionId: string }) {
       ),
     },
     {
-      accessorKey: "availability",
-      header: "Availability",
+      accessorKey: "realPrice",
+      header: "Price",
       cell: ({ row }) => (
-        <div className="capitalize">{row.getValue("availability")}</div>
+        <div className="capitalize">
+          {row?.original?.realPrice !== "0" ? row?.original?.realPrice : "Free"}
+        </div>
       ),
     },
     {

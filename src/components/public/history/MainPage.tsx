@@ -21,10 +21,18 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Heart, Share2 } from "lucide-react";
 import React, { useEffect } from "react";
-import { collection, onSnapshot, query } from "firebase/firestore";
+import {
+  collection,
+  DocumentData,
+  DocumentReference,
+  getDoc,
+  onSnapshot,
+  query,
+} from "firebase/firestore";
 import { db } from "@/db/firebase";
 import { History } from "@/types/History";
 import Loading from "@/app/loading";
+import { CustomUser } from "../discussions/OneDiscussionPage";
 
 export const metadata: Metadata = {
   title: "Music App",
@@ -56,11 +64,57 @@ export default function MainPage() {
 
         const unsubscribe = onSnapshot(
           q,
-          (snapshot) => {
-            const eventsList: History[] = snapshot.docs.map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            })) as History[];
+          async (snapshot) => {
+            const eventsList: History[] = [];
+
+            for (const doc of snapshot.docs) {
+              const docData = doc.data();
+              const userRef =
+                docData?.createdBy as DocumentReference<DocumentData>;
+              const institutionRef =
+                docData?.institutionOwning as DocumentReference<DocumentData>;
+
+              let userData: CustomUser | null = null;
+              let institutionData: { id: string; name: string } | null = null;
+
+              try {
+                if (userRef) {
+                  const userSnapshot = await getDoc(userRef);
+                  if (userSnapshot.exists()) {
+                    const userSnapshotData = userSnapshot.data();
+                    userData = {
+                      id: userSnapshot.id,
+                      uid: userSnapshot.id,
+                      displayName: userSnapshotData?.displayName,
+                      email: userSnapshotData?.email ?? "",
+                    };
+                  }
+                }
+
+                if (institutionRef) {
+                  const institutionSnapshot = await getDoc(institutionRef);
+                  if (institutionSnapshot.exists()) {
+                    const institutionSnapshotData = institutionSnapshot.data();
+                    institutionData = {
+                      id: institutionSnapshot.id,
+                      name: institutionSnapshotData?.name,
+                    };
+                  }
+                }
+              } catch (error) {
+                console.error("Error fetching referenced document:", error);
+                continue;
+              }
+
+              eventsList.push({
+                id: doc.id,
+                ...docData,
+                createdBy: userData,
+                institutionOwning: institutionData?.name,
+              } as History);
+            }
+
+            console.log("Fetched events:", eventsList);
 
             const todayEvents = eventsList.filter((event) => {
               if (!event.occuringDate) {
@@ -78,16 +132,12 @@ export default function MainPage() {
                 return false;
               }
               const eventDate = new Date(event.occuringDate);
-              const eventMonthDay = `${eventDate.getMonth()}-${eventDate.getDate()}`;
-              const startMonthDay = `${startOfWeek.getMonth()}-${startOfWeek.getDate()}`;
-              const endMonthDay = `${endOfWeek.getMonth()}-${endOfWeek.getDate()}`;
-
-              return (
-                eventMonthDay >= startMonthDay && eventMonthDay <= endMonthDay
-              );
+              return eventDate >= startOfWeek && eventDate <= endOfWeek;
             });
+
             setTodayEvents(todayEvents);
             setWeekEvents(weekEvents);
+            setLoading(false);
           },
           (err) => {
             console.error("Error fetching articles:", err);
@@ -98,7 +148,6 @@ export default function MainPage() {
         return () => unsubscribe();
       } catch (error) {
         console.error("Error fetching history events:", error);
-      } finally {
         setLoading(false);
       }
     };
@@ -145,7 +194,7 @@ export default function MainPage() {
                           <SheetContent>
                             <SheetHeader>
                               <SheetTitle>{album?.title}</SheetTitle>
-                              <SheetDescription>{`Uploaded by ${album?.createdBy}`}</SheetDescription>
+                              <SheetDescription>{`Uploaded by ${album?.createdBy?.displayName}`}</SheetDescription>
                             </SheetHeader>
                             <div>
                               <div className="overflow-hidden rounded-lg my-5">
@@ -162,7 +211,7 @@ export default function MainPage() {
                               <div
                                 className="py-2 prose !max-w-none dark:prose-invert"
                                 dangerouslySetInnerHTML={{
-                                  __html: album?.description || "",
+                                  __html: album?.description ?? "",
                                 }}
                               ></div>
                               <p className="font-bold text-xs">{`Happened on ${album?.occuringDate}`}</p>
