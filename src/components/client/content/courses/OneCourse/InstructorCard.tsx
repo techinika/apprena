@@ -20,15 +20,15 @@ function InstructorCard({
   };
 }) {
   return (
-    <Card className="flex items-start gap-5 p-5 bg-gray-100 dark:bg-gray-900 my-3">
+    <Card className="grid grid-cols-5 items-start gap-5 p-5 bg-gray-100 dark:bg-gray-900 my-3">
       <Image
         src={item?.photoURL ?? "/placeholder.jpg"}
-        width={200}
-        height={200}
-        alt={item?.title}
+        width={400}
+        height={400}
+        alt={item?.title ?? ""}
         className="object-cover rounded-full"
       />
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col col-span-4 gap-4">
         <h2 className="text-3xl font-semibold">{item?.displayName}</h2>
         <p className="text-xs text-muted-foreground">{item?.title}</p>
         <div className="flex items-center gap-4 text-sm text-muted-foreground">

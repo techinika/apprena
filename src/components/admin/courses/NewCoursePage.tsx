@@ -1,8 +1,22 @@
 "use client";
 
 import Loading from "@/app/loading";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { db } from "@/db/firebase";
 import { Topic } from "@/types/Discussion";
@@ -19,7 +33,7 @@ import {
   where,
 } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import PageHeader from "../main/PageHeader";
@@ -27,40 +41,71 @@ import { Input } from "@/components/ui/input";
 import Editor from "../blog/Editor";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { FileInput, FileUploader, FileUploaderContent, FileUploaderItem } from "@/components/ui/file-uploader";
+import {
+  FileInput,
+  FileUploader,
+  FileUploaderContent,
+  FileUploaderItem,
+} from "@/components/ui/file-uploader";
 import { FileSvgDraw } from "../blog/AddNewPost";
-import { CalendarIcon, Paperclip } from "lucide-react";
+import { CalendarIcon, Paperclip, X } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn, generateSlug } from "@/lib/utils";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
+import { TagInput } from "@/components/ui/TagInput";
+import TagSelect from "@/components/ui/TagSelect";
+import Image from "next/image";
+import { useAuth } from "@/lib/AuthContext";
 
 const formSchema = z.object({
   title: z.string(),
-  content: z.string(),
-  photoURL: z.string(),
+  description: z.string().min(10).max(150),
+  detailedSummary: z.string(),
+  coverImage: z.string(),
   isFeatured: z.string(),
   publishedAt: z.string(),
-  visibility: z.string(),
+  availability: z.string(),
+  topic: z.string(),
+  realPrice: z.string(),
+  discountedPrice: z.string(),
+  discount: z.boolean(),
+  discountPercentage: z.string(),
+  level: z.string(),
+  courseLanguage: z.string(),
   status: z.string(),
-  writtenBy: z.string(),
-  summary: z.string().max(200).min(4),
   tags: z.string(),
-  category: z.string(),
   institutionOwning: z.string(),
+  courseRequirements: z
+    .array(z.string())
+    .nonempty("Please add at least one requirement."),
+  keyLessons: z
+    .array(z.string())
+    .nonempty("Please add at least one key lesson."),
+  targetAudience: z
+    .array(z.string())
+    .nonempty("Please specify at least one target audience."),
+  instructors: z
+    .array(z.string())
+    .nonempty("The course needs at least one instructor"),
 });
 
 type formValues = z.infer<typeof formSchema>;
 
 function NewCoursePage({ institutionId }: { institutionId: string }) {
+  const { user } = useAuth();
   const [date, setDate] = React.useState<Date>();
   const [files, setFiles] = useState<File[] | null>(null);
-  const articleCollection = collection(db, "articles");
+  const courseCollection = collection(db, "courses");
   const [topics, setTopics] = useState<Topic[]>([]);
-  const [contributors, setContributors] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [cover, setCover] = React.useState<string | null>(null);
+  const [contributors, setContributors] = React.useState<User[]>();
 
   useEffect(() => {
     const getData = async () => {
@@ -111,7 +156,7 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
     };
 
     getData();
-  }, []);
+  }, [institutionId]);
 
   const dropZoneConfig = {
     maxFiles: 1,
@@ -123,52 +168,63 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
-      content: "",
-      photoURL: cover ?? "",
+      description: "",
+      coverImage: cover ?? "",
       isFeatured: "false",
       publishedAt: "",
-      visibility: "private",
+      availability: "private",
       status: "draft",
-      summary: "",
       tags: "",
-      category: "",
+      topic: "",
       institutionOwning: institutionId,
-      writtenBy: "",
+      keyLessons: [],
+      courseRequirements: [],
+      targetAudience: [],
+      detailedSummary: "",
+      instructors: [],
     },
     mode: "onChange",
   });
 
   const processArticleCreation = async (data: formValues) => {
     try {
-      const userRef = doc(db, "profile", String(data?.writtenBy));
+      const userRef = doc(db, "profile", String(user?.uid));
       const institutionRef = doc(db, "institutions", institutionId);
-      const topicRef = doc(db, "topics", data?.category);
+      let topicRef = null;
+      if (data?.topic) {
+        topicRef = doc(db, "topics", String(data.topic));
+      }
 
-      const slug = data?.title
-        .toLowerCase()
-        .replace(/[^\w\s]/g, "")
-        .replace(/\s+/g, "-")
-        .trim();
+      const slug = generateSlug(data?.title);
 
-      await setDoc(doc(articleCollection, slug), {
+      await setDoc(doc(courseCollection, slug), {
         title: data?.title,
-        content: data?.content ?? "",
-        photoURL: data?.photoURL ?? "/placeholder.jpg",
+        description: data?.description ?? "",
+        coverImage: data?.coverImage ?? "/placeholder.jpg",
         isFeatured: data?.isFeatured ?? false,
         publishedAt: data?.publishedAt ?? "",
-        visibility: data?.visibility ?? "private",
+        visibility: data?.availability ?? "private",
         writtenBy: userRef,
-        summary: data?.summary ?? "",
         tags: data?.tags ?? "",
-        category: topicRef ?? "",
+        topic: topicRef,
         institutionOwning: institutionRef,
+        createdBy: userRef,
+        realPrice: data?.realPrice,
         status: data?.status === "draft" ? "draft" : "published",
         createdAt: new Date(),
+        courseRequirements: data?.courseRequirements ?? [],
+        keyLessons: data?.keyLessons ?? [],
+        targetAudience: data?.targetAudience ?? [],
+        curriculum: null,
+        instructors: data?.instructors ?? [],
+        learners: 0,
+        upvotes: [],
+        rating: null,
       });
-      toast("Article created successfully");
+      toast("Course created successfully");
       form.reset();
     } catch (error) {
-      console.error("Error processing article creation:", error);
+      console.error("Error processing course creation:", error);
     }
   };
 
@@ -223,7 +279,7 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
         setCover(result.url);
         setFiles(null);
         toast.success("Image uploaded successfully!");
-        form.setValue("photoURL", result.url);
+        form.setValue("coverImage", result.url);
       } else {
         console.error("Image upload failed", result.message);
       }
@@ -243,7 +299,7 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
   return (
     <div className="space-y-4 p-8 pt-6">
       <PageHeader
-        title="Add New Cpurse"
+        title="Add New Course"
         newItem={true}
         onPublish={() => {
           handlePublish(form.getValues());
@@ -259,9 +315,10 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
               name="title"
               render={({ field }) => (
                 <FormItem>
+                  <FormLabel className="font-bold">Title</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="This is the title of the post"
+                      placeholder="This is the title of the course"
                       className="text-4xl font-bold py-5 mb-3 w-full"
                       {...field}
                     />
@@ -272,14 +329,160 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
             />
             <FormField
               control={form.control}
-              name="content"
+              name="description"
               render={({ field }) => (
                 <FormItem>
+                  <FormLabel className="font-bold">Description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Provide a brief description of the course"
+                      className="font-bold w-full"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                  <FormDescription>
+                    Not more than 150 characters.
+                  </FormDescription>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="detailedSummary"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-bold">
+                    Detailed Description
+                  </FormLabel>
                   <FormControl>
                     <Editor field={field} />
                   </FormControl>
+                  <FormDescription>
+                    Share a detailed explanation to help learners understand the
+                    course better and what to expect from it.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="realPrice"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-bold">Course Price ($)</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="0"
+                      className="font-bold w-full"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                  <FormDescription>
+                    If your course if free, add 0 on the price.
+                  </FormDescription>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="targetAudience"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-bold">Target Audience</FormLabel>
+                  <FormControl>
+                    <TagInput
+                      placeholder="Who is this course for?"
+                      className="font-bold w-full"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                  <FormDescription>
+                    Add ideal learners for this course. After one sentence,
+                    click enter to add another one.
+                  </FormDescription>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="courseRequirements"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-bold">
+                    Course Requirements
+                  </FormLabel>
+                  <FormControl>
+                    <TagInput
+                      placeholder="What are the requirements to take this course?"
+                      className="font-bold w-full"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                  <FormDescription>
+                    Add requirements to take this course. After one sentence,
+                    click enter to add another one.
+                  </FormDescription>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="keyLessons"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-bold">Key Lessons</FormLabel>
+                  <FormControl>
+                    <TagInput
+                      placeholder="What will learners learn from this course?"
+                      className="font-bold w-full"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                  <FormDescription>
+                    Add key outcomes from this course. After one sentence, click
+                    enter to add another one.
+                  </FormDescription>
+                </FormItem>
+              )}
+            />
+
+            <Label className="font-bold">Instructors</Label>
+            <Controller
+              name="instructors"
+              control={form?.control}
+              render={({ field }) => (
+                <TagSelect
+                  options={
+                    contributors
+                      ? contributors.map((c) => ({
+                          value: c.id,
+                          label: c.displayName,
+                        }))
+                      : [{ value: "undefined", label: "No Instructor" }]
+                  }
+                  value={
+                    contributors
+                      ? contributors
+                          .filter((c) => field.value.includes(c.id))
+                          .map((c) => ({
+                            value: c.id,
+                            label: c.displayName,
+                          }))
+                      : [{ value: "undefined", label: "No Instructor" }]
+                  }
+                  onChange={(selectedOptions) =>
+                    field.onChange(
+                      selectedOptions.map((option) => option.value)
+                    )
+                  }
+                  placeholder="Select instructors"
+                />
               )}
             />
           </div>
@@ -290,35 +493,71 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
                   <Label htmlFor="visibility" className="font-bold">
                     Cover Image
                   </Label>
-                  <Button size="xs" onClick={handleUploadImage}>
-                    Upload
-                  </Button>
+                  {cover ? (
+                    <Button
+                      size="xs"
+                      variant="destructive"
+                      onClick={() => {
+                        setCover(null);
+                        form.setValue("coverImage", "");
+                      }}
+                    >
+                      Remove
+                    </Button>
+                  ) : (
+                    <Button size="xs" onClick={handleUploadImage}>
+                      Upload
+                    </Button>
+                  )}
                 </div>
-                <FileUploader
-                  value={files}
-                  onValueChange={setFiles}
-                  dropzoneOptions={dropZoneConfig}
-                  className="relative bg-background rounded-lg p-2"
-                >
-                  <FileInput
-                    onChange={handleFileChange}
-                    className="outline-dashed outline-1 outline-white"
+                {!cover ? (
+                  <FileUploader
+                    value={files}
+                    onValueChange={setFiles}
+                    dropzoneOptions={dropZoneConfig}
+                    className="relative bg-background rounded-lg p-2"
                   >
-                    <div className="flex items-center justify-center flex-col pt-3 pb-4 w-full ">
-                      <FileSvgDraw />
-                    </div>
-                  </FileInput>
-                  <FileUploaderContent>
-                    {files &&
-                      files.length > 0 &&
-                      files.map((file, i) => (
-                        <FileUploaderItem key={i} index={i}>
-                          <Paperclip className="h-4 w-4 stroke-current" />
-                          <span>{file.name}</span>
-                        </FileUploaderItem>
-                      ))}
-                  </FileUploaderContent>
-                </FileUploader>
+                    <FileInput
+                      onChange={handleFileChange}
+                      className="outline-dashed outline-1 outline-white"
+                    >
+                      <div className="flex items-center justify-center flex-col pt-3 pb-4 w-full ">
+                        <FileSvgDraw />
+                      </div>
+                    </FileInput>
+                    <FileUploaderContent>
+                      {files &&
+                        files.length > 0 &&
+                        files.map((file, i) => (
+                          <FileUploaderItem key={i} index={i}>
+                            <Paperclip className="h-4 w-4 stroke-current" />
+                            <span>{file.name}</span>
+                          </FileUploaderItem>
+                        ))}
+                    </FileUploaderContent>
+                  </FileUploader>
+                ) : (
+                  <div className="relative w-full h-48 rounded-lg overflow-hidden border">
+                    <Image
+                      width={500}
+                      height={300}
+                      src={cover}
+                      alt="Cover Preview"
+                      className="object-cover w-full h-full rounded p-3"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute top-2 right-2 bg-white/80 hover:bg-white rounded-full"
+                      onClick={() => {
+                        setCover(null);
+                        form.setValue("coverImage", "");
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
               </div>
               <FormField
                 control={form.control}
@@ -327,14 +566,14 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
                   <FormItem>
                     <FormControl>
                       <div className="flex items-center space-x-2">
-                        <Switch id="feature-article" {...field} />
-                        <Label htmlFor="feature-article">
-                          Feature the article
+                        <Switch id="feature-course" {...field} />
+                        <Label htmlFor="feature-course">
+                          Feature the course
                         </Label>
                       </div>
                     </FormControl>
                     <FormDescription>
-                      Featured Article will appear on the top
+                      Featured Courses will appear on the top
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -380,7 +619,7 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
               />
               <FormField
                 control={form.control}
-                name="visibility"
+                name="availability"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="font-bold">Visibility</FormLabel>
@@ -408,53 +647,6 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
               />
               <FormField
                 control={form.control}
-                name="writtenBy"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-bold">Author</FormLabel>
-                    <FormControl>
-                      <Select>
-                        <SelectTrigger id="visibility">
-                          <SelectValue placeholder="Select author" />
-                        </SelectTrigger>
-                        <SelectContent position="popper">
-                          {contributors?.map((item) => (
-                            <SelectItem
-                              {...field}
-                              key={item?.id}
-                              value={item?.id}
-                            >
-                              {item?.displayName}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="summary"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-bold">Summary</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder={`Summary of the article`}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Not more than 200 characters
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
                 name="tags"
                 render={({ field }) => (
                   <FormItem>
@@ -472,14 +664,14 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
               />
               <FormField
                 control={form.control}
-                name="category"
+                name="topic"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="font-bold">Category</FormLabel>
+                    <FormLabel className="font-bold">Topic</FormLabel>
                     <FormControl>
                       <Select>
-                        <SelectTrigger id="category">
-                          <SelectValue placeholder="Select category" />
+                        <SelectTrigger id="topic">
+                          <SelectValue placeholder="Select topic" />
                         </SelectTrigger>
                         <SelectContent position="popper">
                           {topics?.map((item) => (

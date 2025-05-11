@@ -1,7 +1,5 @@
 "use client";
 
-import { Metadata } from "next";
-
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -15,11 +13,16 @@ import FooterSection from "@/components/sections/footer/default";
 import { Course } from "@/types/Course";
 import CourseCard from "./CourseCard";
 import { Topic } from "@/types/Discussion";
-
-export const metadata: Metadata = {
-  title: "APPRENA Courses",
-  description: "Example music app using the components.",
-};
+import {
+  collection,
+  DocumentData,
+  DocumentReference,
+  getDoc,
+  onSnapshot,
+  query,
+  where,
+} from "firebase/firestore";
+import { db } from "@/db/firebase";
 
 export default function MainPage() {
   const { user } = useAuth();
@@ -28,11 +31,57 @@ export default function MainPage() {
   const [topics] = useState<Topic[]>([]);
 
   useEffect(() => {
-    const getData = async () => {
-      setCourses([]);
-    };
-    getData();
-    setLoading(false);
+    setLoading(true);
+
+    const articlesRef = collection(db, "courses");
+    const q = query(articlesRef, where("visibility", "==", "private"));
+
+    const unsubscribe = onSnapshot(
+      q,
+      async (snapshot) => {
+        const articlesWithWriters: Course[] = await Promise.all(
+          snapshot.docs.map(async (doc) => {
+            const data = doc.data();
+
+            let userData: DocumentData | null = null;
+
+            if (data.createdBy) {
+              const userRef =
+                data?.createdBy as DocumentReference<DocumentData>;
+
+              try {
+                const writerSnap = await getDoc(userRef);
+                userData = writerSnap.exists()
+                  ? {
+                      id: writerSnap.id,
+                      displayName: writerSnap.data().displayName,
+                      email: writerSnap.data().email,
+                      uid: writerSnap.data().uid,
+                    }
+                  : null;
+              } catch (err) {
+                console.warn("Error fetching writer for course:", err);
+              }
+            }
+
+            return {
+              id: doc.id,
+              ...data,
+              createdBy: userData,
+            } as Course;
+          })
+        );
+
+        setCourses(articlesWithWriters);
+        setLoading(false);
+      },
+      (err) => {
+        console.error("Error fetching articles:", err);
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
   }, []);
 
   if (loading) return <Loading />;

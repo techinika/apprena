@@ -7,7 +7,7 @@ import Nav from "@/components/client/navigation/Nav";
 import { useEffect, useState } from "react";
 import Loading from "@/app/loading";
 import FooterSection from "@/components/sections/footer/default";
-import { Course, Review } from "@/types/Course";
+import { Course, Instructor } from "@/types/Course";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
@@ -41,66 +41,161 @@ import {
 import ReviewCard from "./ReviewCard";
 import InstructorCard from "./InstructorCard";
 import { CurriculumAccordion } from "./CurriculumView";
-
-export const metadata: Metadata = {
-  title: "APPRENA Courses",
-  description: "Example music app using the components.",
-};
+import {
+  doc,
+  DocumentData,
+  DocumentReference,
+  getDoc,
+} from "firebase/firestore";
+import { db } from "@/db/firebase";
+import { useRouter } from "next/navigation";
+import { CustomUser } from "@/components/public/discussions/OneDiscussionPage";
 
 export default function CoursePage({ id }: { id: string }) {
   const { user } = useAuth();
   const [course, setCourse] = useState<Course | null>(null);
-  const [reviews, setReviews] = useState<(Review | null)[]>([]);
+  const [instructors, setInstructors] = useState<Instructor[] | null>(null);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
-    const getData = async () => {
-      setLoading(true);
-      setCourse(null);
-      setReviews([
-        {
-          id: "yguwffyhw",
-          comment:
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Blanditiis adipisci voluptates amet corrupti exercitationem quae, aut excepturi repudiandae reiciendis nam.",
-          rating: 5,
-          createdAt: new Date().toLocaleDateString(),
-          createdBy: {
-            id: "hdhvhv",
-            uid: "hdhvhv",
-            displayName: "Achille Songa",
-            email: "hhshhs@hh.cnn",
-          },
-        },
-        {
-          id: "jsjjsjjss",
-          comment:
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Blanditiis adipisci voluptates amet corrupti exercitationem quae, aut excepturi repudiandae reiciendis nam.",
-          rating: 1,
-          createdAt: new Date().toLocaleDateString(),
-          createdBy: {
-            id: "hdhvhv",
-            uid: "hdhvhv",
-            displayName: "Achille Songa",
-            email: "hhshhs@hh.cnn",
-          },
-        },
-        {
-          id: "sjjsjjsjsjs",
-          comment:
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Blanditiis adipisci voluptates amet corrupti exercitationem quae, aut excepturi repudiandae reiciendis nam.",
-          rating: 3,
-          createdAt: new Date().toLocaleDateString(),
-          createdBy: {
-            id: "hdhvhv",
-            uid: "hdhvhv",
-            displayName: "Achille Songa",
-            email: "hhshhs@hh.cnn",
-          },
-        },
-      ]);
+    if (!id) return;
+
+    setLoading(true);
+
+    const fetchData = async () => {
+      try {
+        const articleRef = doc(db, "courses", id as string);
+        const articleSnap = await getDoc(articleRef);
+
+        if (!articleSnap.exists()) {
+          router.push("/courses");
+          return;
+        }
+
+        const docData = articleSnap.data();
+        if (!docData) {
+          console.warn("No data in course doc.");
+          return;
+        }
+
+        const userRef = docData?.createdBy as DocumentReference<DocumentData>;
+        const institutionRef =
+          docData?.institutionOwning as DocumentReference<DocumentData>;
+        const topicRef = docData?.topic as DocumentReference<DocumentData>;
+
+        let userData: CustomUser | null = null;
+        let topicData: DocumentData | null = null;
+        let institutionData: { id: string; name: string } | null = null;
+
+        try {
+          if (userRef) {
+            const userSnapshot = await getDoc(userRef);
+            if (userSnapshot.exists()) {
+              userData = {
+                id: userSnapshot?.id,
+                uid: userSnapshot?.id,
+                displayName: userSnapshot.data()?.displayName,
+                email: userSnapshot.data().email ?? "",
+              };
+            }
+          }
+
+          if (topicRef) {
+            const topicSnapshot = await getDoc(topicRef);
+            if (topicSnapshot.exists()) {
+              topicData = {
+                id: topicSnapshot?.id,
+                name: topicSnapshot.data().name,
+                createdAt: topicSnapshot.data().createdAt,
+              };
+            }
+          }
+
+          if (institutionRef) {
+            const institutionSnapshot = await getDoc(institutionRef);
+            if (institutionSnapshot.exists()) {
+              institutionData = {
+                id: institutionSnapshot?.id,
+                name: institutionSnapshot.data().name,
+              };
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching referenced document:", error);
+          return null;
+        }
+
+        try {
+          const instructorPromises = docData?.instructors.map((id: string) =>
+            getDoc(doc(db, "profile", id))
+          );
+          const instructorDocs = await Promise.all(instructorPromises);
+          const instructors = instructorDocs.map((doc) => ({
+            id: doc.id,
+            photoURL: doc.data().photoURL,
+            displayName: doc.data().displayName,
+            title: doc.data().title,
+            courseRatings: 5,
+            students: 0,
+            coursesMade: 0,
+            bio: doc.data().bio,
+          }));
+          console.log(instructors);
+          setInstructors(instructors);
+        } catch (error) {
+          console.error("Error fetching instructors:", error);
+        }
+
+        setCourse({
+          id: articleSnap.id,
+          topic: topicData
+            ? {
+                id: topicData.id,
+                name: topicData.name,
+                createdAt: topicData.createdAt,
+              }
+            : null,
+          createdAt: formatDistance(new Date(), new Date(), {
+            includeSeconds: true,
+          }),
+          createdBy: userData,
+          detailedSummary: docData?.detailedSummary ?? "",
+          title: docData.title ?? "",
+          status: docData.status ?? "",
+          description: docData.description ?? "",
+          visibility: docData?.visibility ?? "public",
+          institutionOwning: institutionData ?? null,
+          coverImage: docData?.coverImage,
+          upvotes: docData?.upvotes ?? 0,
+          duration: docData?.duration ?? 0,
+          modules: docData?.modules ?? [],
+          lessons: docData?.lessons ?? [],
+          learners: docData?.learners ?? 0,
+          levels: docData?.levels ?? "",
+          courseLanguage: docData?.courseLanguage ?? "",
+          keyLessons: docData?.keyLessons ?? [],
+          targetAudience: docData?.targetAudience ?? [],
+          courseRequirements: docData?.courseRequirements ?? [],
+          curriculum: docData?.curriculum ?? [],
+          instructors: docData?.instructors ?? [],
+          reviews: docData?.reviews ?? [],
+          rating: docData?.rating ?? 0,
+          ratingDistribution: docData?.ratingDistribution ?? [],
+          updatedAt: docData?.updatedAt ?? new Date(),
+          discount: docData?.discount ?? false,
+          discountePrice: docData?.discountePrice ?? 0,
+          realPrice: docData?.realPrice ?? 0,
+          discountPercentage: docData?.discountPercentage ?? 0,
+        });
+      } catch (error) {
+        console.error("Error fetching article data:", error);
+      } finally {
+        setLoading(false);
+      }
     };
-    getData();
-    setLoading(false);
+
+    fetchData();
   }, [id]);
 
   if (loading) return <Loading />;
@@ -124,20 +219,22 @@ export default function CoursePage({ id }: { id: string }) {
                 </p>
                 <p className="flex gap-2 items-center">
                   <Calendar className="h-4 w-4" /> Last Updated{" "}
-                  {formatDistance(course?.updatedAt ?? new Date(), new Date(), {
-                    includeSeconds: true,
-                  })}
+                  {course?.createdAt} ago
                 </p>
               </div>
-              <Button size="lg">Enroll Now</Button>
+              {course?.realPrice !== "0" ? (
+                <Button size="lg">Buy Now</Button>
+              ) : (
+                <Button size="lg">Enroll Now</Button>
+              )}
             </div>
             <div className="w-full h-64 rounded-xl overflow-hidden p-4">
               <Image
                 src={course?.coverImage ?? "/placeholder.jpg"}
-                width={500}
-                height={200}
+                width={700}
+                height={300}
                 alt={course?.title ?? "Course Cover Image"}
-                className="w-full object-cover h-full"
+                className="w-full object-cover w-64 h-full rounded-xl"
               />
             </div>
           </div>
@@ -210,9 +307,11 @@ export default function CoursePage({ id }: { id: string }) {
               <TabsContent value="curriculum">
                 <div className="py-4">
                   <h2 className="text-2xl font-bold py-2">Curriculum</h2>
-                  <CurriculumAccordion
-                    curriculum={course?.curriculum ?? undefined}
-                  />
+                  {course?.curriculum && (
+                    <CurriculumAccordion
+                      curriculum={course?.curriculum ?? null}
+                    />
+                  )}
                 </div>
               </TabsContent>
               <TabsContent value="instructor">
@@ -221,13 +320,13 @@ export default function CoursePage({ id }: { id: string }) {
                     Course Instructors
                   </h2>
                   <div className="flex flex-col gap-4">
-                    {course?.instructors && course?.instructors.length > 0 ? (
-                      course?.instructors.map((item) => (
+                    {instructors && instructors.length > 0 ? (
+                      instructors.map((item: Instructor) => (
                         <InstructorCard key={item?.id} item={item} />
                       ))
                     ) : (
                       <p className="p-5 text-center">
-                        No reviews yet! Be the first to review this course
+                        No instructors for this course!
                       </p>
                     )}
                   </div>
@@ -267,8 +366,8 @@ export default function CoursePage({ id }: { id: string }) {
                     </Select>
                   </div>
                   <div className="py-4">
-                    {reviews.length > 0 ? (
-                      reviews.map((item, index) => {
+                    {course?.reviews && course?.reviews.length > 0 ? (
+                      course?.reviews.map((item, index) => {
                         return (
                           <div key={item?.id}>
                             {index !== 0 && <Separator />}
@@ -289,27 +388,9 @@ export default function CoursePage({ id }: { id: string }) {
           <Card>
             <CardHeader>
               <div className="flex items-start justify-between">
-                <div className="flex flex-col gap-2">
-                  <h2 className="font-bold text-xl">
-                    $
-                    {course?.discount
-                      ? course?.discountePrice
-                      : course?.realPrice}{" "}
-                    {course?.discount && (
-                      <span className="text-muted-foreground line-through text-sm">
-                        ${course?.realPrice}
-                      </span>
-                    )}
-                  </h2>
-                  {course?.discount && (
-                    <p className="flex text-red-600 gap-2 items-center text-xs">
-                      <Clock className="h-4 w-4" /> 2 days left at this price!
-                    </p>
-                  )}
-                </div>
-                {course?.discount && (
-                  <div className="p-2 bg-primary-foreground text-sm rounded-lg font-bold">{`${course?.discountPercentage}% OFF`}</div>
-                )}
+                <h2 className="font-bold w-full text-6xl text-center">
+                  {course?.realPrice !== "0" ? `${course?.realPrice}` : "Free"}
+                </h2>
               </div>
             </CardHeader>
             <Separator />
@@ -342,10 +423,11 @@ export default function CoursePage({ id }: { id: string }) {
             <Separator />
             <CardContent>
               <div className="pt-5 flex flex-col gap-4">
-                {course?.availability === "SUBSCRIPTION REQUIRED" && (
-                  <Button>Buy Course</Button>
+                {course?.realPrice !== "0" ? (
+                  <Button size="lg">Buy Now</Button>
+                ) : (
+                  <Button size="lg">Enroll Now</Button>
                 )}
-                {course?.availability === "OPEN" && <Button>Enroll Now</Button>}
                 <div className="grid grid-cols-2 gap-3">
                   <Button size="xs" variant="outline">
                     Add To Wishlist
