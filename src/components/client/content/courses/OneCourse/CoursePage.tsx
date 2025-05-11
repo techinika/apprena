@@ -1,6 +1,5 @@
 "use client";
 
-import { Metadata } from "next";
 import { useAuth } from "@/lib/AuthContext";
 import AuthNav from "@/components/client/navigation/AuthNav";
 import Nav from "@/components/client/navigation/Nav";

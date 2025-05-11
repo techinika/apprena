@@ -293,10 +293,12 @@ export default function SessionPage({ id }: { id: string }) {
             <Separator />
             <CardContent>
               <div className="pt-5 flex flex-col gap-4">
-                {course?.availability === "SUBSCRIPTION REQUIRED" && (
+                {course?.visibility === "private" && (
                   <Button>Buy Course</Button>
                 )}
-                {course?.availability === "OPEN" && <Button>Enroll Now</Button>}
+                {course?.visibility === "private" && (
+                  <Button>Enroll Now</Button>
+                )}
                 <div className="grid grid-cols-2 gap-3">
                   <Button size="xs" variant="outline">
                     Add To Wishlist
