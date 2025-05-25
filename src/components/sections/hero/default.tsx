@@ -17,9 +17,15 @@ export default function Hero() {
       <div className="mx-auto flex max-w-container flex-col gap-12 sm:gap-24">
         <div className="flex flex-col items-center gap-6 text-center sm:gap-12">
           <Badge variant="outline" className="animate-appear">
-            <span className="text-muted-foreground">We are launching soon</span>
-            <Link href="/register" className="flex items-center gap-1">
-              Learn More
+            <span className="text-muted-foreground">
+              Check us on Product Hunt
+            </span>
+            <Link
+              href="https://www.producthunt.com/posts/apprena"
+              className="flex items-center gap-1"
+              target="_blank"
+            >
+              Check here
               <ArrowRightIcon className="h-3 w-3" />
             </Link>
           </Badge>
@@ -36,7 +42,10 @@ export default function Hero() {
                 <Link href={!user ? "/register" : "/home"}>Get Started</Link>
               </Button>
               <Button variant="glow" size="lg" asChild>
-                <Link href="https://calendly.com/techinika" target="_blank">
+                <Link
+                  href="https://forms.gle/Dzcfv9skixRXDCuS6"
+                  target="_blank"
+                >
                   <CalendarCheck className="mr-2 h-4 w-4" /> Book a Demo
                 </Link>
               </Button>
