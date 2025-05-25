@@ -49,11 +49,9 @@ import {
 } from "firebase/firestore";
 import { db } from "@/db/firebase";
 import { Badge } from "@/components/ui/badge";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 function CoursesList({ institutionId }: { institutionId: string }) {
-  const router = useRouter();
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []

@@ -21,7 +21,7 @@ export default function Hero() {
               Check us on Product Hunt
             </span>
             <Link
-              href="https://www.producthunt.com/posts/apprena"
+              href="https://www.producthunt.com/products/apprena"
               className="flex items-center gap-1"
               target="_blank"
             >
