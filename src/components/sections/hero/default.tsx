@@ -39,7 +39,16 @@ export default function Hero() {
           <div className="relative flex animate-appear justify-center gap-4 opacity-100 delay-300">
             <div className="relative flex animate-appear justify-center gap-4 opacity-100 delay-300">
               <Button variant="default" size="lg" asChild>
-                <Link href={!user ? "/register" : "/home"}>Get Started</Link>
+                <Link
+                  href={
+                    !user
+                      ? "https://forms.gle/d4ddxEBvWdAczJUF9"
+                      : "https://forms.gle/d4ddxEBvWdAczJUF9"
+                  }
+                  target="_blank"
+                >
+                  Get Started
+                </Link>
               </Button>
               <Button variant="glow" size="lg" asChild>
                 <Link

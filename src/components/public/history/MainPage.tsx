@@ -3,7 +3,6 @@
 import AuthNav from "@/components/client/navigation/AuthNav";
 import Nav from "@/components/client/navigation/Nav";
 import { useAuth } from "@/lib/AuthContext";
-import { Metadata } from "next";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { AlbumArtwork } from "./album-artwork";
@@ -33,11 +32,6 @@ import { db } from "@/db/firebase";
 import { History } from "@/types/History";
 import Loading from "@/app/loading";
 import { CustomUser } from "../discussions/OneDiscussionPage";
-
-export const metadata: Metadata = {
-  title: "Music App",
-  description: "Example music app using the components.",
-};
 
 export default function MainPage() {
   const { user } = useAuth();
