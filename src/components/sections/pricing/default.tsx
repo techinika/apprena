@@ -102,8 +102,14 @@ export default function Pricing() {
                       size="lg"
                       asChild
                     >
-                      <Link href={plan?.price == 0 ? "/register" : "/start"}>
-                        {" "}
+                      <Link
+                        href={
+                          plan?.price == 0
+                            ? "/register"
+                            : "https://forms.gle/Dzcfv9skixRXDCuS6"
+                        }
+                        target={`${plan?.price == 0 ? "" : "_blank"}`}
+                      >
                         {plan?.price == 0
                           ? "Get Started For Free"
                           : "Get Started"}

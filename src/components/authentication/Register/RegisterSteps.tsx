@@ -49,7 +49,89 @@ export function RegisterSteps({
 
   const handleRegister = async (data: LoginFormValues) => {
     try {
-      await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const userData = await createUserWithEmailAndPassword(
+        auth,
+        data.email,
+        data.password
+      );
+
+      const user = userData?.user;
+      const userRef = doc(db, "profile", user?.uid ?? "");
+
+      const userProfile = {
+        uid: user?.uid,
+        displayName: user.displayName || "Anonymous User",
+        email: user.email,
+        photoURL: user.photoURL || "",
+        phoneNumber: user.phoneNumber || "",
+        dateOfBirth: null,
+        gender: null,
+        bio: "",
+        score: 0,
+        scoreInLastHour: 0,
+        referrals: 0,
+        referralsInLastMonth: 0,
+        badges: 0,
+        badgesInLastMonth: 0,
+        communityContributions: 0,
+        communityContributionsInLastMonth: 0,
+        institutionMemberships: 0,
+        institutionMembershipsInLastMonth: 0,
+        coursesTaken: 0,
+        coursesTakenInLastMonth: 0,
+        blogsRead: 0,
+        blogsReadInLastMonth: 0,
+        mostActiveTimes: "NA",
+        nationality: "",
+        preferredLanguage: "English",
+
+        // Account Details
+        role: "user",
+        createdAt: serverTimestamp(),
+        lastLogin: serverTimestamp(),
+        status: "active",
+
+        // Contact & Address
+        address: {
+          country: "",
+          city: "",
+          state: "",
+          zipCode: "",
+          physicalAddress: "",
+        },
+
+        // Social & Online Presence
+        socialLinks: {
+          linkedin: "",
+          github: "",
+          twitter: "",
+          website: "",
+        },
+
+        // Preferences & Interests
+        interests: [],
+        preferredNotificationMethod: "email",
+
+        // Security & Authentication
+        twoFactorAuthEnabled: false,
+
+        // Subscription & Financials (if applicable)
+        subscriptionPlan: "free",
+        billingInfo: {
+          address: "",
+          paymentMethod: "",
+          transactionHistory: [],
+        },
+      };
+
+      setDoc(userRef, userProfile)
+        .then(async () => {
+          console.log("User profile created with ID: ", user?.uid);
+        })
+        .catch((error) => {
+          console.error("Error creating user profile:", error);
+        });
+
       router.push("/login");
     } catch (error: unknown) {
       if (typeof error === "object" && error !== null && "code" in error) {
@@ -82,10 +164,10 @@ export function RegisterSteps({
               } else {
                 const userProfile = {
                   uid,
-                  displayName: user.displayName || "Anonymous User",
+                  displayName: user.displayName ?? "Anonymous User",
                   email: user.email,
-                  photoURL: user.photoURL || "",
-                  phoneNumber: user.phoneNumber || "",
+                  photoURL: user.photoURL ?? "",
+                  phoneNumber: user.phoneNumber ?? "",
                   dateOfBirth: null,
                   gender: null,
                   bio: "",

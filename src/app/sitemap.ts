@@ -7,6 +7,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const discussionsRef = collection(db, "discussions");
   const snapshot = await getDocs(discussionsRef);
+  const eventsRef = collection(db, "historyEvents");
+  const eventsSnap = await getDocs(eventsRef);
   const articlesRef = collection(db, "articles");
   const q = query(articlesRef, where("status", "==", "published"));
 
@@ -18,6 +20,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${BASE_URL}/discussions/${doc?.id}`,
       lastModified:
         data.updatedAt?.toDate?.().toISOString?.() ?? new Date().toISOString(),
+      changeFrequency: "always",
+      priority: 0.7,
+    };
+  });
+
+  const eventsLinks: MetadataRoute.Sitemap = eventsSnap.docs.map((doc) => {
+    const data = doc.data();
+    return {
+      url: `${BASE_URL}/history/${doc?.id}`,
+      lastModified:
+        data.createdAt?.toDate?.().toISOString?.() ?? new Date().toISOString(),
       changeFrequency: "always",
       priority: 0.7,
     };
@@ -102,5 +115,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     ...discussionLinks,
     ...articleLinks,
+    ...eventsLinks,
   ];
 }

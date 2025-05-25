@@ -49,6 +49,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/db/firebase";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
 function CoursesList({ institutionId }: { institutionId: string }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -187,7 +188,7 @@ function CoursesList({ institutionId }: { institutionId: string }) {
       id: "actions",
       enableHiding: false,
       cell: ({ row }) => {
-        const payment = row.original;
+        const item = row.original;
 
         return (
           <DropdownMenu>
@@ -199,8 +200,11 @@ function CoursesList({ institutionId }: { institutionId: string }) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <Link href={`/org/${institutionId}/courses/${item?.id}`}>
+                <DropdownMenuItem>Manage the course</DropdownMenuItem>
+              </Link>
               <DropdownMenuItem
-                onClick={() => navigator.clipboard.writeText(payment.id)}
+                onClick={() => navigator.clipboard.writeText(item.id)}
               >
                 Edit the post
               </DropdownMenuItem>
