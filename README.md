@@ -1,3 +1,3 @@
-# UNANMED PROJECT
+# APPRENA
 
-To be named soon.
+Operating System for Educational Organizations.
