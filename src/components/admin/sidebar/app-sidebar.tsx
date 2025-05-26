@@ -2,14 +2,21 @@
 
 import * as React from "react";
 import {
+  Bell,
   Building2,
   CalendarDays,
+  CircleHelp,
+  Component,
   Database,
+  GraduationCap,
   Library,
   Lightbulb,
+  LocateIcon,
+  Logs,
   Mail,
   MailQuestion,
   MessageCircle,
+  Notebook,
   Paperclip,
   Rss,
   Settings2,
@@ -32,6 +39,8 @@ import { redirect } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
 import { Institution } from "@/types/Institution";
 import { NavCommunity } from "./app-community";
+import { NavTraining } from "./nav-training";
+import { NavOrg } from "./nav-org";
 // import { db } from "@/db/firebase";
 // import { doc } from "firebase/firestore";
 
@@ -135,7 +144,7 @@ export function AppSidebar({
         ],
       },
       {
-        title: "Media",
+        title: "Knowledge Base",
         url: "#",
         icon: Paperclip,
         items: [
@@ -162,15 +171,90 @@ export function AppSidebar({
         ],
       },
     ],
+    navTraining: [
+      {
+        title: "Training",
+        url: "#",
+        icon: GraduationCap,
+        isActive: false,
+        items: [
+          {
+            title: "All Posts",
+            url: `/org/${institutionId}/blog`,
+          },
+          {
+            title: "Add New Post",
+            url: `/org/${institutionId}/blog/new`,
+          },
+          {
+            title: "Drafts",
+            url: `/org/${institutionId}/blog/drafts`,
+          },
+        ],
+      },
+      {
+        title: "Locations & Rooms",
+        url: "#",
+        icon: LocateIcon,
+        isActive: false,
+        items: [
+          {
+            title: "All Events",
+            url: `/org/${institutionId}/events`,
+          },
+          {
+            title: "Add New Event",
+            url: `/org/${institutionId}/events/new`,
+          },
+        ],
+      },
+      {
+        title: "Training Calendar",
+        url: "#",
+        icon: CalendarDays,
+        isActive: false,
+        items: [
+          {
+            title: "All Courses",
+            url: `/org/${institutionId}/courses`,
+          },
+          {
+            title: "New Course",
+            url: `/org/${institutionId}/courses/new`,
+          },
+          {
+            title: "Knowledge Base",
+            url: "#",
+          },
+          {
+            title: "Knowledge Checks",
+            url: "#",
+          },
+          {
+            title: "Live Online Courses",
+            url: "#",
+          },
+          {
+            title: "Certifications",
+            url: "#",
+          },
+        ],
+      },
+    ],
     communication: [
       {
-        name: "Comments",
-        url: `/org/${institutionId}/comments`,
+        name: "Announcements",
+        url: `/org/${institutionId}/announcements`,
+        icon: Bell,
+      },
+      {
+        name: "Teams Chat",
+        url: `/org/${institutionId}/team-chat`,
         icon: MessageCircle,
       },
       {
         name: "Emails",
-        url: "#",
+        url: `/org/${institutionId}/emails`,
         icon: Mail,
       },
     ],
@@ -184,6 +268,100 @@ export function AppSidebar({
         name: "Discussions",
         url: `/org/${institutionId}/discussions`,
         icon: MailQuestion,
+      },
+    ],
+    navOrg: [
+      {
+        title: "People",
+        url: "#",
+        isActive: false,
+        icon: Users,
+        items: [
+          {
+            title: "Employees",
+            url: `/org/${institutionId}/institutions`,
+          },
+          {
+            title: "Learners",
+            url: "#",
+          },
+        ],
+      },
+      {
+        title: "Custom Roles",
+        url: "#",
+        isActive: false,
+        icon: Notebook,
+        items: [
+          {
+            title: "FAQs",
+            url: `/org/${institutionId}/faqs`,
+          },
+          {
+            title: "Subscription Plans",
+            url: `/org/${institutionId}/plans`,
+          },
+          {
+            title: "System Features",
+            url: `/org/${institutionId}/features`,
+          },
+          {
+            title: "Permissions",
+            url: `/org/${institutionId}/permissions`,
+          },
+        ],
+      },
+      {
+        title: "Departments",
+        url: "#",
+        isActive: false,
+        icon: Component,
+        items: [
+          {
+            title: "Personal Settings",
+            url: `/org/${institutionId}/profile`,
+          },
+          {
+            title: "Team Settings",
+            url: "#",
+          },
+          {
+            title: "Billing Settings",
+            url: "#",
+          },
+        ],
+      },
+      {
+        title: "Org Settings",
+        url: "#",
+        isActive: false,
+        icon: Settings2,
+        items: [
+          {
+            title: "Users List",
+            url: `/org/${institutionId}/users`,
+          },
+          {
+            title: "Subscribers",
+            url: `/org/${institutionId}/subscribers`,
+          },
+          {
+            title: "Contributors",
+            url: `/org/${institutionId}/contributors`,
+          },
+          {
+            title: "Contributors",
+            url: `/org/${institutionId}/employees`,
+          },
+          {
+            title: "Subscribers",
+            url: `/org/${institutionId}/users/new`,
+          },
+          {
+            title: "User Roles",
+            url: `/org/${institutionId}/users/roles`,
+          },
+        ],
       },
     ],
     management: [
@@ -248,10 +426,62 @@ export function AppSidebar({
         ],
       },
       {
+        title: "Audit Logs",
+        url: "#",
+        isActive: false,
+        icon: Logs,
+        items: [
+          {
+            title: "Personal Settings",
+            url: `/org/${institutionId}/profile`,
+          },
+          {
+            title: "Team Settings",
+            url: "#",
+          },
+          {
+            title: "Billing Settings",
+            url: "#",
+          },
+        ],
+      },
+      {
         title: "Users",
         url: "#",
         isActive: false,
         icon: Users,
+        items: [
+          {
+            title: "Users List",
+            url: `/org/${institutionId}/users`,
+          },
+          {
+            title: "Subscribers",
+            url: `/org/${institutionId}/subscribers`,
+          },
+          {
+            title: "Contributors",
+            url: `/org/${institutionId}/contributors`,
+          },
+          {
+            title: "Contributors",
+            url: `/org/${institutionId}/employees`,
+          },
+          {
+            title: "Subscribers",
+            url: `/org/${institutionId}/users/new`,
+          },
+          {
+            title: "User Roles",
+            url: `/org/${institutionId}/users/roles`,
+          },
+        ],
+      },
+      {
+        title: "Support Center",
+        url: "#",
+        isActive: false,
+        icon: CircleHelp,
         items: [
           {
             title: "Users List",
@@ -293,8 +523,10 @@ export function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
+        <NavTraining items={data.navTraining} />
         <NavCommunication communication={data.communication} />
         <NavCommunity communication={data.community} />
+        <NavOrg items={data.navOrg} />
         <NavManagement items={data.management} />
       </SidebarContent>
       <SidebarFooter>
