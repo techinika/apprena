@@ -27,7 +27,7 @@ function TrainingSessionCard({ item }: { item: Training | null }) {
   return (
     <Card className="overflow-hidden cursor-pointer relative">
       <div className="absolute top-0 left-0 z-50 bg-yellow-600 p-1 text-xs font-bold">
-        {item?.availability}
+        {/* {item?.availability} */}
       </div>
       <Image
         src={item?.coverImage ?? "/placeholder.jpg"}
@@ -47,7 +47,7 @@ function TrainingSessionCard({ item }: { item: Training | null }) {
         <Button size="sm" onClick={() => router.push(`/training/${item?.id}`)}>
           Learn More
         </Button>
-        <p
+        {/* <p
           className={`${
             item?.status === "Completed"
               ? "text-green-600"
@@ -57,7 +57,7 @@ function TrainingSessionCard({ item }: { item: Training | null }) {
           } font-bold text-sm`}
         >
           {item?.status}
-        </p>
+        </p> */}
       </CardFooter>
     </Card>
   );
