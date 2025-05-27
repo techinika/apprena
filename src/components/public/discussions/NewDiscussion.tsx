@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
 import { cn, generateSlug } from "@/lib/utils";
 import Loading from "@/app/loading";
 import {
@@ -43,6 +42,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { redirect } from "next/navigation";
+import { showToast } from "@/lib/MessageToast";
 
 const formSchema = z.object({
   title: z.string(),
@@ -119,12 +119,14 @@ function NewDiscussion() {
         createdBy: userRef,
         createdAt: new Date(),
       });
-      toast(
-        "Discussion submitted for approval! You will received an email with the status of your request!"
+      showToast(
+        "Discussion submitted for approval! You will received an email with the status of your request!",
+        "success"
       );
       form.reset();
       redirect("/discussions");
     } catch (error) {
+      showToast("Error adding discussion. Please try again.", "error");
       console.error("Error adding item:", error);
     } finally {
       setLoading(false);

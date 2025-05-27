@@ -26,12 +26,12 @@ import {
 } from "@/components/ui/file-uploader";
 import { FileSvgDraw } from "../blog/AddNewPost";
 import { Paperclip } from "lucide-react";
-import { toast } from "sonner";
 import { collection, doc, setDoc } from "firebase/firestore";
 import { generateSlug } from "@/lib/utils";
 import { db } from "@/db/firebase";
 import Loading from "@/app/loading";
 import Editor from "../blog/Editor";
+import { showToast } from "@/lib/MessageToast";
 
 const formSchema = z.object({
   title: z.string(),
@@ -102,7 +102,7 @@ function NewEvent({ institutionId }: { institutionId: string }) {
         createdAt: new Date(),
         updatedAt: new Date(),
       });
-      toast.success("New event added successfully!");
+      showToast("New event added successfully!", "success");
       form.reset();
     } catch (error) {
       console.log(error);
@@ -130,12 +130,14 @@ function NewEvent({ institutionId }: { institutionId: string }) {
       if (response.ok) {
         setCover(result.url);
         setFiles(null);
-        toast.success("Image uploaded successfully!");
+        showToast("Image uploaded successfully!", "success");
         form.setValue("cover", result.url);
       } else {
+        showToast("Image upload failed: ", "error");
         console.error("Image upload failed", result.message);
       }
     } catch (error) {
+      showToast("Error uploading image: ", "error");
       console.error("Error uploading image:", error);
     }
   };

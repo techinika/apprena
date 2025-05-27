@@ -22,8 +22,12 @@ export default function CourseLayout({
 }: SettingsLayoutProps) {
   const sidebarNavItems = [
     {
-      title: "Course Summary",
+      title: "Course Overview",
       href: `${courseid}`,
+    },
+    {
+      title: "Curriculum",
+      href: `${courseid}/curriculum`,
     },
     {
       title: "Modules",
@@ -34,8 +38,24 @@ export default function CourseLayout({
       href: `${courseid}/lessons`,
     },
     {
-      title: "Learners",
-      href: `${courseid}/learners`,
+      title: "Assessments",
+      href: `${courseid}/assessments`,
+    },
+    {
+      title: "People",
+      href: `${courseid}/people`,
+    },
+    {
+      title: "Certification",
+      href: `${courseid}/certification`,
+    },
+    {
+      title: "Resources",
+      href: `${courseid}/resources`,
+    },
+    {
+      title: "Reviews",
+      href: `${courseid}/reviews`,
     },
   ];
 
@@ -43,10 +63,8 @@ export default function CourseLayout({
     <div className="hidden space-y-6 py-10 md:block">
       <div className="space-y-0.5 size flex items-center justify-between flex-wrap">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Profile</h2>
-          <p className="text-muted-foreground">
-            Manage your account settings and set e-mail preferences.
-          </p>
+          <h2 className="text-2xl font-bold tracking-tight">Course Details</h2>
+          <p className="text-muted-foreground">Manage the course details.</p>
         </div>
         <Link href={`/courses/${courseid}`}>
           <Button>View Course</Button>

@@ -38,8 +38,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { toast } from "sonner";
 import { useAuth } from "@/lib/AuthContext";
+import { showToast } from "@/lib/MessageToast";
 
 const formSchema = z.object({
   name: z.string(),
@@ -82,7 +82,7 @@ const NewInstitution = ({
       await updateDoc(userRef, {
         institutionMemberships: increment(1),
       });
-      toast("Item added successfully!");
+      showToast("Item added successfully!", "success");
       form.reset();
       setOpen(false);
     } catch (error) {

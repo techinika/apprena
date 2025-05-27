@@ -15,12 +15,12 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { db } from "@/db/firebase";
 import { useAuth } from "@/lib/AuthContext";
+import { showToast } from "@/lib/MessageToast";
 import { generateSlug } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { collection, doc, setDoc } from "firebase/firestore";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 
 const formSchema = z.object({
@@ -63,9 +63,10 @@ function AddTopic({ institutionId }: { institutionId: string }) {
         createdBy: userRef,
         createdAt: new Date(),
       });
-      toast("Item added successfully!");
+      showToast("Item added successfully!", "success");
       form.reset();
     } catch (error) {
+      showToast("Error adding item:", "error");
       console.error("Error adding item:", error);
     } finally {
       setLoading(false);

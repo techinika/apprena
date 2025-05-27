@@ -31,26 +31,7 @@ export default function MainPage() {
 
   useEffect(() => {
     const getData = async () => {
-      setTrainingSession([
-        {
-          id: "hvhy",
-          availability: "public",
-          createdAt: new Date().toString(),
-          updatedAt: new Date().toString(),
-          title: "Training 1",
-          coverImage: "/placeholder.jpg",
-          description: "Description of training 1",
-          startDate: new Date().toString(),
-          endDate: new Date().toString(),
-          upvotes: [
-            {
-              userId: "user1",
-              createdAt: new Date().toString(),
-            },
-          ],
-          status: "Enrolled",
-        },
-      ]);
+      setTrainingSession([]);
     };
     getData();
     setLoading(false);

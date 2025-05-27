@@ -49,8 +49,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ConfirmAction } from "../../general/ConfirmDelete";
-import { toast } from "sonner";
 import { useAuth } from "@/lib/AuthContext";
+import { showToast } from "@/lib/MessageToast";
 
 function Discussions({ institutionId }: { institutionId: string }) {
   const { user } = useAuth();
@@ -297,7 +297,7 @@ function Discussions({ institutionId }: { institutionId: string }) {
       discussion: discussionRef,
       createdAt: new Date(),
     });
-    await toast("Item approved successfully!");
+    showToast("Item approved successfully!", "success");
     setOpenApprove(false);
   };
 
@@ -313,7 +313,7 @@ function Discussions({ institutionId }: { institutionId: string }) {
       discussion: discussionRef,
       createdAt: new Date(),
     });
-    toast("Item rejected successfully!");
+    showToast("Item rejected successfully!", "success");
     setOpenReject(false);
   };
 
@@ -329,7 +329,7 @@ function Discussions({ institutionId }: { institutionId: string }) {
       discussion: discussionRef,
       createdAt: new Date(),
     });
-    toast("Item hidden successfully!");
+    showToast("Item hidden successfully!", "success");
     setOpenHide(false);
   };
 
@@ -345,7 +345,7 @@ function Discussions({ institutionId }: { institutionId: string }) {
       discussion: discussionRef,
       createdAt: new Date(),
     });
-    toast("Item unhidden successfully!");
+    showToast("Item unhidden successfully!", "success");
     setOpenUnhide(false);
   };
 
@@ -361,7 +361,7 @@ function Discussions({ institutionId }: { institutionId: string }) {
       discussion: discussionRef,
       createdAt: new Date(),
     });
-    toast("Item unapproved successfully!");
+    showToast("Item unapproved successfully!", "success");
     setOpenUnapprove(false);
   };
 

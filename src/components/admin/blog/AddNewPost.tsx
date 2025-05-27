@@ -48,12 +48,12 @@ import {
   setDoc,
   where,
 } from "firebase/firestore";
-import { toast } from "sonner";
 import { db } from "@/db/firebase";
 import { Topic } from "@/types/Discussion";
 import { User } from "@/types/Users";
 import Loading from "@/app/loading";
 import { useAuth } from "@/lib/AuthContext";
+import { showToast } from "@/lib/MessageToast";
 
 export const FileSvgDraw = () => {
   return (
@@ -210,10 +210,11 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
         status: data?.status === "draft" ? "draft" : "published",
         createdAt: new Date(),
       });
-      toast("Article created successfully");
+      showToast("Article created successfully", "success");
       form.reset();
     } catch (error) {
-      console.error("Error processing article creation:", error);
+      showToast("Error processing article creation:", "error");
+      console.log(error);
     }
   };
 
@@ -267,7 +268,7 @@ const AddNewPost = ({ institutionId }: { institutionId: string }) => {
       if (response.ok) {
         setCover(result.url);
         setFiles(null);
-        toast.success("Image uploaded successfully!");
+        showToast("Image uploaded successfully!", "success");
         form.setValue("photoURL", result.url);
       } else {
         console.error("Image upload failed", result.message);

@@ -35,23 +35,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Article } from "@/types/Article";
-import { Badge } from "../../ui/badge";
-import PageHeader from "../main/PageHeader";
-import {
-  collection,
-  doc,
-  DocumentData,
-  DocumentReference,
-  getDoc,
-  onSnapshot,
-  query,
-  where,
-} from "firebase/firestore";
+import { User } from "@/types/Users";
+import { deleteDoc, doc, getDoc } from "firebase/firestore";
 import { db } from "@/db/firebase";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import ConfirmDelete from "../../general/ConfirmDelete";
+import PageHeader from "../../main/PageHeader";
+import { Badge } from "@/components/ui/badge";
 import Loading from "@/app/loading";
+import { showToast } from "@/lib/MessageToast";
 
-export default function Drafts({ institutionId }: { institutionId: string }) {
+export function EmployeesList({ institutionId }: { institutionId: string }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -59,71 +54,57 @@ export default function Drafts({ institutionId }: { institutionId: string }) {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
-  const [articles, setArticles] = React.useState<Article[]>([]);
-  const [loading, setLoading] = React.useState(true);
-  const institutionRef = doc(db, "institutions", institutionId);
+  const [usersData, setUsersData] = React.useState<User[]>([]);
+  const [openDelete, setOpenDelete] = React.useState(false);
+  const [idToDelete, setIdToDelete] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
+  const router = useRouter();
 
   React.useEffect(() => {
-    if (!institutionId) return;
+    const fetchAdmins = async () => {
+      try {
+        const institutionDocRef = doc(db, "institutions", institutionId);
+        const institutionSnapshot = await getDoc(institutionDocRef);
 
-    setLoading(true);
+        if (institutionSnapshot.exists()) {
+          const institutionData = institutionSnapshot.data();
+          const adminRefs = institutionData?.organizationAdmins;
 
-    const articlesRef = collection(db, "articles");
-    const q = query(
-      articlesRef,
-      where("institutionOwning", "==", institutionRef),
-      where("status", "==", "draft")
-    );
+          if (Array.isArray(adminRefs)) {
+            const adminPromises = adminRefs.map((adminRef) => getDoc(adminRef));
+            const adminSnapshots = await Promise.all(adminPromises);
 
-    const unsubscribe = onSnapshot(
-      q,
-      async (snapshot) => {
-        const articlesWithWriters: Article[] = await Promise.all(
-          snapshot.docs.map(async (doc) => {
-            const data = doc.data();
+            const adminProfiles: User[] = adminSnapshots
+              .filter((snapshot) => snapshot.exists())
+              .map((snapshot) => ({
+                id: snapshot.id,
+                ...(snapshot.data() as Omit<User, "id">),
+              }));
 
-            let userData: DocumentData | null = null;
-
-            if (data.writtenBy) {
-              const userRef =
-                data?.createdBy as DocumentReference<DocumentData>;
-
-              try {
-                const writerSnap = await getDoc(userRef);
-                userData = writerSnap.exists()
-                  ? {
-                      id: writerSnap.id,
-                      displayName: writerSnap.data().displayName,
-                      email: writerSnap.data().email,
-                      uid: writerSnap.data().uid,
-                    }
-                  : null;
-              } catch (err) {
-                console.warn("Error fetching writer for article:", err);
-              }
-            }
-
-            return {
-              id: doc.id,
-              ...data,
-              writtenBy: userData,
-            } as Article;
-          })
-        );
-
-        setArticles(articlesWithWriters);
-        setLoading(false);
-      },
-      (err) => {
-        console.error("Error fetching articles:", err);
+            setUsersData(adminProfiles);
+          } else {
+            showToast("Institutions Admin field is not an array.", "warning");
+            console.warn("institutionsAdmin field is not an array.");
+            setUsersData([]);
+          }
+        } else {
+          showToast("Institution document does not exist.", "error");
+          console.warn("Institution document does not exist.");
+          setUsersData([]);
+        }
+      } catch (error) {
+        showToast("Error fetching admin profiles.", "error");
+        console.error("Error fetching admin profiles:", error);
+        setUsersData([]);
+      } finally {
         setLoading(false);
       }
-    );
+    };
 
-    return () => unsubscribe();
+    fetchAdmins();
   }, [institutionId]);
 
-  const columns: ColumnDef<Article>[] = [
+  const columns: ColumnDef<User>[] = [
     {
       id: "select",
       header: ({ table }) => (
@@ -147,45 +128,39 @@ export default function Drafts({ institutionId }: { institutionId: string }) {
       enableHiding: false,
     },
     {
-      accessorKey: "title",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Title
-            <ArrowUpDown />
-          </Button>
-        );
-      },
-    },
-    {
-      accessorKey: "visibility",
-      header: "Visibility",
+      accessorKey: "displayName",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Display Name
+          <ArrowUpDown />
+        </Button>
+      ),
       cell: ({ row }) => (
-        <Badge className="capitalize">{row.getValue("visibility")}</Badge>
+        <Link href={`/org/${institutionId}/users/${row?.original?.id}`}>
+          {row.getValue("displayName")}
+        </Link>
       ),
     },
     {
-      accessorKey: "availability",
-      header: "Availability",
-      cell: ({ row }) => (
-        <div className="capitalize">{row.getValue("availability")}</div>
-      ),
+      accessorKey: "email",
+      header: "Email",
+      cell: ({ row }) => <div>{row.getValue("email")}</div>,
     },
     {
-      accessorKey: "writtenBy",
-      header: "Author",
+      accessorKey: "role",
+      header: "Role",
       cell: ({ row }) => (
-        <div className="capitalize">{row?.original.writtenBy?.displayName}</div>
+        <Badge className="capitalize">{row.getValue("role")}</Badge>
       ),
     },
     {
       id: "actions",
       enableHiding: false,
       cell: ({ row }) => {
-        const payment = row.original;
+        const subscriber = row.original;
 
         return (
           <DropdownMenu>
@@ -197,14 +172,18 @@ export default function Drafts({ institutionId }: { institutionId: string }) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
+
               <DropdownMenuItem
-                onClick={() => navigator.clipboard.writeText(payment.id)}
+                onClick={() => navigator.clipboard.writeText(subscriber.id)}
               >
-                Edit the post
+                Change User Role
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Preview post</DropdownMenuItem>
-              <DropdownMenuItem color="danger">Delete Post</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => router.push(`/org/users/${subscriber?.id}`)}
+              >
+                Preview User
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         );
@@ -213,7 +192,7 @@ export default function Drafts({ institutionId }: { institutionId: string }) {
   ];
 
   const table = useReactTable({
-    data: articles,
+    data: usersData,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -231,23 +210,44 @@ export default function Drafts({ institutionId }: { institutionId: string }) {
     },
   });
 
+  const handleDeleteItem = () => {
+    deleteDoc(doc(db, "profile", idToDelete))
+      .then(() => {
+        setIdToDelete("");
+        setOpenDelete(false);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
   if (loading) return <Loading />;
 
   return (
     <div className="w-full space-y-4 p-8 pt-6">
       <PageHeader
-        title="Post Drafts"
+        title="Employees List"
         newItem={false}
         onExport={() => null}
         onPublish={() => null}
         saveDraft={() => null}
       />
+      <ConfirmDelete
+        action={() => handleDeleteItem()}
+        cancel={() => {
+          setIdToDelete("");
+          setOpenDelete(false);
+        }}
+        open={openDelete}
+      ></ConfirmDelete>
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter posts..."
-          value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
+          placeholder="Filter employees..."
+          value={
+            (table.getColumn("displayName")?.getFilterValue() as string) ?? ""
+          }
           onChange={(event) =>
-            table.getColumn("title")?.setFilterValue(event.target.value)
+            table.getColumn("displayName")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />

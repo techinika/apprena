@@ -13,11 +13,11 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { db } from "@/db/firebase";
+import { showToast } from "@/lib/MessageToast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import React from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 
 const profileFormSchema = z.object({
@@ -49,9 +49,10 @@ function AddPlan() {
         perks: "Access to Education",
         createdAt: serverTimestamp(),
       });
-      toast("Item added successfully!");
+      showToast("Item added successfully!", "success");
       form.reset();
     } catch (error) {
+      showToast("Error adding item. Please try again.", "error");
       console.error("Error adding item:", error);
     }
   }

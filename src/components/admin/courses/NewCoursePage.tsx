@@ -34,7 +34,6 @@ import {
 } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 import PageHeader from "../main/PageHeader";
 import { Input } from "@/components/ui/input";
@@ -62,6 +61,7 @@ import { TagInput } from "@/components/ui/TagInput";
 import TagSelect from "@/components/ui/TagSelect";
 import Image from "next/image";
 import { useAuth } from "@/lib/AuthContext";
+import { showToast } from "@/lib/MessageToast";
 
 const formSchema = z.object({
   title: z.string(),
@@ -221,9 +221,10 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
         upvotes: [],
         rating: null,
       });
-      toast("Course created successfully");
+      showToast("Course created successfully", "success");
       form.reset();
     } catch (error) {
+      showToast("Error processing course creation", "error");
       console.error("Error processing course creation:", error);
     }
   };
@@ -278,7 +279,7 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
       if (response.ok) {
         setCover(result.url);
         setFiles(null);
-        toast.success("Image uploaded successfully!");
+        showToast("Image uploaded successfully!", "success");
         form.setValue("coverImage", result.url);
       } else {
         console.error("Image upload failed", result.message);

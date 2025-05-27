@@ -17,6 +17,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { db } from "@/db/firebase";
 import { useAuth } from "@/lib/AuthContext";
+import { showToast } from "@/lib/MessageToast";
 import { User } from "@/types/Users";
 import { format } from "date-fns";
 import { doc, getDoc, Timestamp } from "firebase/firestore";
@@ -25,7 +26,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import React, { useEffect } from "react";
-import { toast } from "sonner";
 
 function UserProfile({ id }: { id: string }) {
   const { user } = useAuth();
@@ -55,7 +55,7 @@ function UserProfile({ id }: { id: string }) {
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(globalThis.location.href);
-      toast("Link copied to clipboard!");
+      showToast("Link copied to clipboard!", "success");
     } catch (err) {
       console.error("Failed to copy: ", err);
     }

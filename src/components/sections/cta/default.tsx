@@ -10,8 +10,8 @@ import { AuthError, createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/db/firebase";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import React from "react";
+import { showToast } from "@/lib/MessageToast";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email format"),
@@ -44,15 +44,15 @@ export default function Cta() {
       if (typeof error === "object" && error !== null && "code" in error) {
         const firebaseError = error as AuthError;
         if (firebaseError.message === "auth/email-already-in-use") {
-          toast("Email already in use.");
+          showToast("Email already in use.", "warning");
         } else if (firebaseError.message === "auth/weak-password") {
-          toast("Password is too weak.");
+          showToast("Password is too weak.", "warning");
         } else {
-          toast("An error occurred. Please try again later.");
+          showToast("An error occurred. Please try again later.", "error");
           console.error("Registration error:", error);
         }
       } else {
-        toast("An unexpected error occurred.");
+        showToast("An unexpected error occurred.", "error");
       }
     }
   };

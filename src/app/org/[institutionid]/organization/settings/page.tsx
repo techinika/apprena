@@ -1,4 +1,4 @@
-import Drafts from "@/components/admin/blog/Drafts";
+import MainSettings from "@/components/admin/settings/MainSettings";
 import React from "react";
 
 async function page({
@@ -10,7 +10,7 @@ async function page({
 
   return (
     <div>
-      <Drafts institutionId={institutionid} />
+      <MainSettings institutionId={institutionid} />
     </div>
   );
 }
