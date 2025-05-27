@@ -21,7 +21,7 @@ import {
   checkActionCode,
   confirmPasswordReset,
 } from "firebase/auth";
-import { toast } from "sonner";
+import { showToast } from "@/lib/MessageToast";
 
 const loginSchema = z.object({
   newPassword: z.string().min(6, "Password must be at least 6 characters long"),
@@ -49,7 +49,7 @@ export function ResetForm({
 
   const handleReset = async (data: LoginFormValues) => {
     if (data.newPassword !== data.confirmPassword) {
-      toast("Passwords do not match.");
+      showToast("Passwords do not match.", "error");
       return;
     }
 
@@ -60,16 +60,19 @@ export function ResetForm({
         await confirmPasswordReset(auth, token, data.newPassword);
         redirect("/login");
       } else {
-        toast("Invalid token or link. Please request a new password reset.");
+        showToast(
+          "Invalid token or link. Please request a new password reset.",
+          "error"
+        );
       }
     } catch (error: unknown) {
       if (typeof error === "object" && error !== null && "code" in error) {
         const firebaseError = error as AuthError;
 
-        toast(firebaseError?.message);
+        showToast(firebaseError?.message, "error");
         console.error("Password reset error:", error);
       } else {
-        toast("An unexpected error occurred.");
+        showToast("An unexpected error occurred.", "error");
       }
     }
   };

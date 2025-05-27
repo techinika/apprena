@@ -19,9 +19,9 @@ import {
   FileRejection,
   DropzoneOptions,
 } from "react-dropzone";
-import { toast } from "sonner";
 import { Trash2 as RemoveIcon } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
+import { showToast } from "@/lib/MessageToast";
 
 type DirectionOptions = "rtl" | "ltr" | undefined;
 
@@ -161,7 +161,7 @@ export const FileUploader = forwardRef<
         const files = acceptedFiles;
 
         if (!files) {
-          toast.error("file error , probably too big");
+          showToast("file error , probably too big", "error");
           return;
         }
 
@@ -182,13 +182,14 @@ export const FileUploader = forwardRef<
         if (rejectedFiles.length > 0) {
           for (let i = 0; i < rejectedFiles.length; i++) {
             if (rejectedFiles[i].errors[0]?.code === "file-too-large") {
-              toast.error(
-                `File is too large. Max size is ${maxSize / 1024 / 1024}MB`
+              showToast(
+                `File is too large. Max size is ${maxSize / 1024 / 1024}MB`,
+                "error"
               );
               break;
             }
             if (rejectedFiles[i].errors[0]?.message) {
-              toast.error(rejectedFiles[i].errors[0].message);
+              showToast(rejectedFiles[i].errors[0].message, "error");
               break;
             }
           }

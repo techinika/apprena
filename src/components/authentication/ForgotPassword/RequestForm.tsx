@@ -17,8 +17,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { AuthError, sendPasswordResetEmail } from "firebase/auth";
-import { toast } from "sonner";
 import { auth } from "@/db/firebase";
+import { showToast } from "@/lib/MessageToast";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email format"),
@@ -46,7 +46,7 @@ export function RequestForm({
       };
 
       await sendPasswordResetEmail(auth, data.email, actionCodeSettings);
-      toast("Password reset email sent. Check your inbox.");
+      showToast("Password reset email sent. Check your inbox.", "success");
       // Optionally, redirect to login after sending the email:
       redirect("/login");
     } catch (error: unknown) {
@@ -54,15 +54,15 @@ export function RequestForm({
         const firebaseError = error as AuthError;
 
         if (firebaseError.message === "auth/invalid-email") {
-          toast("Invalid email address.");
+          showToast("Invalid email address.", "warning");
         } else if (firebaseError.message === "auth/user-not-found") {
-          toast("User not found.");
+          showToast("User not found.", "error");
         } else {
-          toast("An error occurred. Please try again later.");
+          showToast("An error occurred. Please try again later.", "error");
           console.error("Forgot Password error:", error);
         }
       } else {
-        toast("An unexpected error occurred.");
+        showToast("An unexpected error occurred.", "error");
       }
     }
   };

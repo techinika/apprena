@@ -44,7 +44,7 @@ import ConfirmPayment from "./ConfirmPayment";
 import { useRouter } from "next/navigation";
 import { InvoiceData } from "@/types/Payment";
 import useIremboPay from "@/hooks/use-irembo-pay";
-import { toast } from "sonner";
+import { showToast } from "@/lib/MessageToast";
 
 const formSchema = z.object({
   name: z
@@ -292,7 +292,7 @@ function MainInfoPage() {
               paidAt: new Date(),
             });
 
-            toast("Payment successful!");
+            showToast("Payment successful!", "success");
             setLoading(false);
 
             globalThis.location.href = `/start/payment/${invoiceData?.invoiceNumber}`;

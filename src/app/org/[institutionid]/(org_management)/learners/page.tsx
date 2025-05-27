@@ -1,4 +1,4 @@
-import Drafts from "@/components/admin/blog/Drafts";
+import { LearnersList } from "@/components/admin/people/OrgPeople/LearnersList";
 import React from "react";
 
 async function page({
@@ -7,10 +7,9 @@ async function page({
   params: Promise<{ institutionid: string }>;
 }) {
   const { institutionid } = await params;
-
   return (
     <div>
-      <Drafts institutionId={institutionid} />
+      <LearnersList institutionId={institutionid} />
     </div>
   );
 }

@@ -77,11 +77,11 @@ const formSchema = z.object({
   discount: z.boolean(),
   discountPercentage: z.string(),
   level: z.string(),
-  courseLanguage: z.string(),
+  trainingLanguage: z.string(),
   status: z.string(),
   tags: z.string(),
   institutionOwning: z.string(),
-  courseRequirements: z
+  trainingRequirements: z
     .array(z.string())
     .nonempty("Please add at least one requirement."),
   keyLessons: z
@@ -92,16 +92,16 @@ const formSchema = z.object({
     .nonempty("Please specify at least one target audience."),
   instructors: z
     .array(z.string())
-    .nonempty("The course needs at least one instructor"),
+    .nonempty("The training needs at least one instructor"),
 });
 
 type formValues = z.infer<typeof formSchema>;
 
-function NewCoursePage({ institutionId }: { institutionId: string }) {
+function NewTrainingPage({ institutionId }: { institutionId: string }) {
   const { user } = useAuth();
   const [date, setDate] = React.useState<Date>();
   const [files, setFiles] = useState<File[] | null>(null);
-  const courseCollection = collection(db, "courses");
+  const trainingCollection = collection(db, "trainings");
   const [topics, setTopics] = useState<Topic[]>([]);
   const [loading, setLoading] = useState(false);
   const [cover, setCover] = React.useState<string | null>(null);
@@ -115,6 +115,7 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
         const institutionSnap = await getDoc(institutionDocRef);
 
         if (!institutionSnap.exists()) {
+          showToast("Institution not found", "error");
           console.warn("Institution not found");
           return;
         }
@@ -149,6 +150,7 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
         );
         setContributors(contributorData);
       } catch (error) {
+        showToast("Error fetching institution data", "error");
         console.error("Error fetching institution data:", error);
       } finally {
         setLoading(false);
@@ -178,7 +180,7 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
       topic: "",
       institutionOwning: institutionId,
       keyLessons: [],
-      courseRequirements: [],
+      trainingRequirements: [],
       targetAudience: [],
       detailedSummary: "",
       instructors: [],
@@ -197,7 +199,7 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
 
       const slug = generateSlug(data?.title);
 
-      await setDoc(doc(courseCollection, slug), {
+      await setDoc(doc(trainingCollection, slug), {
         title: data?.title,
         description: data?.description ?? "",
         coverImage: data?.coverImage ?? "/placeholder.jpg",
@@ -212,7 +214,7 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
         realPrice: data?.realPrice,
         status: data?.status === "draft" ? "draft" : "published",
         createdAt: new Date(),
-        courseRequirements: data?.courseRequirements ?? [],
+        trainingRequirements: data?.trainingRequirements ?? [],
         keyLessons: data?.keyLessons ?? [],
         targetAudience: data?.targetAudience ?? [],
         curriculum: null,
@@ -221,11 +223,11 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
         upvotes: [],
         rating: null,
       });
-      showToast("Course created successfully", "success");
+      showToast("Training created successfully", "success");
       form.reset();
     } catch (error) {
-      showToast("Error processing course creation", "error");
-      console.error("Error processing course creation:", error);
+      showToast("Error processing training creation", "error");
+      console.error("Error processing training creation:", error);
     }
   };
 
@@ -300,7 +302,7 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
   return (
     <div className="space-y-4 p-8 pt-6">
       <PageHeader
-        title="Add New Course"
+        title="Add New Training"
         newItem={true}
         onPublish={() => {
           handlePublish(form.getValues());
@@ -319,7 +321,7 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
                   <FormLabel className="font-bold">Title</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="This is the title of the course"
+                      placeholder="This is the title of the training"
                       className="text-4xl font-bold py-5 mb-3 w-full"
                       {...field}
                     />
@@ -336,7 +338,7 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
                   <FormLabel className="font-bold">Description</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Provide a brief description of the course"
+                      placeholder="Provide a brief description of the training"
                       className="font-bold w-full"
                       {...field}
                     />
@@ -361,7 +363,7 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
                   </FormControl>
                   <FormDescription>
                     Share a detailed explanation to help learners understand the
-                    course better and what to expect from it.
+                    training better and what to expect from it.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -372,7 +374,9 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
               name="realPrice"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="font-bold">Course Price ($)</FormLabel>
+                  <FormLabel className="font-bold">
+                    Training Price ($)
+                  </FormLabel>
                   <FormControl>
                     <Input
                       placeholder="0"
@@ -382,7 +386,7 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
                   </FormControl>
                   <FormMessage />
                   <FormDescription>
-                    If your course if free, add 0 on the price.
+                    If your training if free, add 0 on the price.
                   </FormDescription>
                 </FormItem>
               )}
@@ -395,14 +399,14 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
                   <FormLabel className="font-bold">Target Audience</FormLabel>
                   <FormControl>
                     <TagInput
-                      placeholder="Who is this course for?"
+                      placeholder="Who is this training for?"
                       className="font-bold w-full"
                       {...field}
                     />
                   </FormControl>
                   <FormMessage />
                   <FormDescription>
-                    Add ideal learners for this course. After one sentence,
+                    Add ideal learners for this training. After one sentence,
                     click enter to add another one.
                   </FormDescription>
                 </FormItem>
@@ -410,22 +414,22 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
             />
             <FormField
               control={form.control}
-              name="courseRequirements"
+              name="trainingRequirements"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="font-bold">
-                    Course Requirements
+                    Training Requirements
                   </FormLabel>
                   <FormControl>
                     <TagInput
-                      placeholder="What are the requirements to take this course?"
+                      placeholder="What are the requirements to take this training?"
                       className="font-bold w-full"
                       {...field}
                     />
                   </FormControl>
                   <FormMessage />
                   <FormDescription>
-                    Add requirements to take this course. After one sentence,
+                    Add requirements to take this training. After one sentence,
                     click enter to add another one.
                   </FormDescription>
                 </FormItem>
@@ -439,15 +443,15 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
                   <FormLabel className="font-bold">Key Lessons</FormLabel>
                   <FormControl>
                     <TagInput
-                      placeholder="What will learners learn from this course?"
+                      placeholder="What will learners learn from this training?"
                       className="font-bold w-full"
                       {...field}
                     />
                   </FormControl>
                   <FormMessage />
                   <FormDescription>
-                    Add key outcomes from this course. After one sentence, click
-                    enter to add another one.
+                    Add key outcomes from this training. After one sentence,
+                    click enter to add another one.
                   </FormDescription>
                 </FormItem>
               )}
@@ -567,14 +571,14 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
                   <FormItem>
                     <FormControl>
                       <div className="flex items-center space-x-2">
-                        <Switch id="feature-course" {...field} />
-                        <Label htmlFor="feature-course">
-                          Feature the course
+                        <Switch id="feature-training" {...field} />
+                        <Label htmlFor="feature-training">
+                          Feature the training
                         </Label>
                       </div>
                     </FormControl>
                     <FormDescription>
-                      Featured Courses will appear on the top
+                      Featured Trainings will appear on the top
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -699,4 +703,4 @@ function NewCoursePage({ institutionId }: { institutionId: string }) {
   );
 }
 
-export default NewCoursePage;
+export default NewTrainingPage;

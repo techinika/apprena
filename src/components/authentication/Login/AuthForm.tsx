@@ -20,7 +20,6 @@ import {
 } from "firebase/auth";
 import { auth, db, googleProvider } from "@/db/firebase";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,6 +33,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { use } from "react";
+import { showToast } from "@/lib/MessageToast";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email format"),
@@ -186,15 +186,15 @@ export function UserAuthForm({
         const firebaseError = error as AuthError;
 
         if (firebaseError.message === "auth/user-not-found") {
-          toast("User not found");
+          showToast("User not found", "error");
         } else if (firebaseError.message === "INVALID_LOGIN_CREDENTIALS") {
-          toast("Incorrect credentials");
+          showToast("Incorrect credentials", "error");
         } else {
-          toast("An error occurred. Please try again later.");
+          showToast("An error occurred. Please try again later.", "error");
           console.error("Login error:", error);
         }
       } else {
-        toast("An unexpected error occurred.");
+        showToast("An unexpected error occurred.", "error");
       }
     }
   };

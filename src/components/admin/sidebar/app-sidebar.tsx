@@ -3,8 +3,10 @@
 import * as React from "react";
 import {
   Bell,
+  BookText,
   Building2,
   CalendarDays,
+  ChartNoAxesColumn,
   CircleHelp,
   Component,
   Database,
@@ -20,6 +22,7 @@ import {
   Paperclip,
   Rss,
   Settings2,
+  Sparkles,
   Users,
 } from "lucide-react";
 
@@ -41,8 +44,7 @@ import { Institution } from "@/types/Institution";
 import { NavCommunity } from "./app-community";
 import { NavTraining } from "./nav-training";
 import { NavOrg } from "./nav-org";
-// import { db } from "@/db/firebase";
-// import { doc } from "firebase/firestore";
+import { NavReporting } from "./nav-reporting";
 
 export function AppSidebar({
   activeInstitution,
@@ -89,10 +91,6 @@ export function AppSidebar({
             title: "Add New Post",
             url: `/org/${institutionId}/blog/new`,
           },
-          {
-            title: "Drafts",
-            url: `/org/${institutionId}/blog/drafts`,
-          },
         ],
       },
       {
@@ -126,20 +124,8 @@ export function AppSidebar({
             url: `/org/${institutionId}/courses/new`,
           },
           {
-            title: "Knowledge Base",
-            url: "#",
-          },
-          {
-            title: "Knowledge Checks",
-            url: "#",
-          },
-          {
-            title: "Live Online Courses",
-            url: "#",
-          },
-          {
             title: "Certifications",
-            url: "#",
+            url: `/org/${institutionId}/courses/certifications`,
           },
         ],
       },
@@ -149,7 +135,7 @@ export function AppSidebar({
         icon: Paperclip,
         items: [
           {
-            title: "Media Gallery",
+            title: "Gallery",
             url: "#",
           },
           {
@@ -157,7 +143,7 @@ export function AppSidebar({
             url: "#",
           },
           {
-            title: "Documents (PDFs)",
+            title: "Documents",
             url: "#",
           },
           {
@@ -179,16 +165,16 @@ export function AppSidebar({
         isActive: false,
         items: [
           {
-            title: "All Posts",
-            url: `/org/${institutionId}/blog`,
+            title: "All Trainings",
+            url: `/org/${institutionId}/training`,
           },
           {
-            title: "Add New Post",
-            url: `/org/${institutionId}/blog/new`,
+            title: "Add New Training",
+            url: `/org/${institutionId}/training/new`,
           },
           {
-            title: "Drafts",
-            url: `/org/${institutionId}/blog/drafts`,
+            title: "Certifications",
+            url: `/org/${institutionId}/training/certifications`,
           },
         ],
       },
@@ -199,12 +185,12 @@ export function AppSidebar({
         isActive: false,
         items: [
           {
-            title: "All Events",
-            url: `/org/${institutionId}/events`,
+            title: "All Facilities",
+            url: `/org/${institutionId}/facilities`,
           },
           {
             title: "Add New Event",
-            url: `/org/${institutionId}/events/new`,
+            url: `/org/${institutionId}/facilities/new`,
           },
         ],
       },
@@ -215,28 +201,12 @@ export function AppSidebar({
         isActive: false,
         items: [
           {
-            title: "All Courses",
-            url: `/org/${institutionId}/courses`,
+            title: "All Trainings",
+            url: `/org/${institutionId}/training/calendar`,
           },
           {
-            title: "New Course",
+            title: "Past Trainings",
             url: `/org/${institutionId}/courses/new`,
-          },
-          {
-            title: "Knowledge Base",
-            url: "#",
-          },
-          {
-            title: "Knowledge Checks",
-            url: "#",
-          },
-          {
-            title: "Live Online Courses",
-            url: "#",
-          },
-          {
-            title: "Certifications",
-            url: "#",
           },
         ],
       },
@@ -279,11 +249,11 @@ export function AppSidebar({
         items: [
           {
             title: "Employees",
-            url: `/org/${institutionId}/institutions`,
+            url: `/org/${institutionId}/employees`,
           },
           {
             title: "Learners",
-            url: "#",
+            url: `/org/${institutionId}/learners`,
           },
         ],
       },
@@ -294,20 +264,12 @@ export function AppSidebar({
         icon: Notebook,
         items: [
           {
-            title: "FAQs",
-            url: `/org/${institutionId}/faqs`,
-          },
-          {
-            title: "Subscription Plans",
-            url: `/org/${institutionId}/plans`,
-          },
-          {
-            title: "System Features",
-            url: `/org/${institutionId}/features`,
+            title: "Roles",
+            url: `/org/${institutionId}/custom-roles`,
           },
           {
             title: "Permissions",
-            url: `/org/${institutionId}/permissions`,
+            url: `/org/${institutionId}/custom-permissions`,
           },
         ],
       },
@@ -318,16 +280,12 @@ export function AppSidebar({
         icon: Component,
         items: [
           {
-            title: "Personal Settings",
-            url: `/org/${institutionId}/profile`,
+            title: "Departments",
+            url: `/org/${institutionId}/departments`,
           },
           {
-            title: "Team Settings",
-            url: "#",
-          },
-          {
-            title: "Billing Settings",
-            url: "#",
+            title: "Add New Department",
+            url: `/org/${institutionId}/departments/new`,
           },
         ],
       },
@@ -338,30 +296,49 @@ export function AppSidebar({
         icon: Settings2,
         items: [
           {
-            title: "Users List",
-            url: `/org/${institutionId}/users`,
+            title: "Branding Settings",
+            url: `/org/${institutionId}/branding`,
           },
           {
-            title: "Subscribers",
-            url: `/org/${institutionId}/subscribers`,
+            title: "Accessibility Settings",
+            url: `/org/${institutionId}/accessibility`,
           },
           {
-            title: "Contributors",
-            url: `/org/${institutionId}/contributors`,
+            title: "Integrations",
+            url: `/org/${institutionId}/integrations`,
           },
           {
-            title: "Contributors",
-            url: `/org/${institutionId}/employees`,
-          },
-          {
-            title: "Subscribers",
-            url: `/org/${institutionId}/users/new`,
-          },
-          {
-            title: "User Roles",
-            url: `/org/${institutionId}/users/roles`,
+            title: "Billing & Subscription",
+            url: `/org/${institutionId}/integrations`,
           },
         ],
+      },
+    ],
+    reporting: [
+      {
+        name: "Analytics",
+        url: `/org/${institutionId}/analytics`,
+        icon: ChartNoAxesColumn,
+      },
+      {
+        name: "User Reports",
+        url: `/org/${institutionId}/user-reports`,
+        icon: BookText,
+      },
+      {
+        name: "Content Reports",
+        url: `/org/${institutionId}/content-reports`,
+        icon: BookText,
+      },
+      {
+        name: "Training Reports",
+        url: `/org/${institutionId}/training-reports`,
+        icon: BookText,
+      },
+      {
+        name: "AI Insights",
+        url: `/org/${institutionId}/insights`,
+        icon: Sparkles,
       },
     ],
     management: [
@@ -377,7 +354,7 @@ export function AppSidebar({
           },
           {
             title: "Add new Institution",
-            url: "#",
+            url: `/org/${institutionId}/institutions/new`,
           },
         ],
       },
@@ -412,7 +389,7 @@ export function AppSidebar({
         icon: Settings2,
         items: [
           {
-            title: "Personal Settings",
+            title: "Default Settings",
             url: `/org/${institutionId}/profile`,
           },
           {
@@ -527,6 +504,7 @@ export function AppSidebar({
         <NavCommunication communication={data.communication} />
         <NavCommunity communication={data.community} />
         <NavOrg items={data.navOrg} />
+        <NavReporting communication={data.reporting} />
         <NavManagement items={data.management} />
       </SidebarContent>
       <SidebarFooter>

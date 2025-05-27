@@ -1,22 +1,21 @@
 "use client";
 
-import * as React from "react";
+import { Button } from "@/components/ui/button";
+import React from "react";
+import PageHeader from "../main/PageHeader";
+import Loading from "@/app/loading";
 import {
   ColumnDef,
   ColumnFiltersState,
-  SortingState,
-  VisibilityState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  SortingState,
   useReactTable,
+  VisibilityState,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -26,6 +25,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -35,9 +36,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Article } from "@/types/Article";
-import { Badge } from "../../ui/badge";
-import PageHeader from "../main/PageHeader";
 import {
   collection,
   doc,
@@ -49,9 +47,12 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "@/db/firebase";
-import Loading from "@/app/loading";
+import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+import { Training } from "@/types/Training";
+import { showToast } from "@/lib/MessageToast";
 
-export default function Drafts({ institutionId }: { institutionId: string }) {
+function TrainingList({ institutionId }: { institutionId: string }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -59,7 +60,7 @@ export default function Drafts({ institutionId }: { institutionId: string }) {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
-  const [articles, setArticles] = React.useState<Article[]>([]);
+  const [trainings, setTrainings] = React.useState<Training[]>([]);
   const [loading, setLoading] = React.useState(true);
   const institutionRef = doc(db, "institutions", institutionId);
 
@@ -68,23 +69,22 @@ export default function Drafts({ institutionId }: { institutionId: string }) {
 
     setLoading(true);
 
-    const articlesRef = collection(db, "articles");
+    const trainingRef = collection(db, "trainings");
     const q = query(
-      articlesRef,
-      where("institutionOwning", "==", institutionRef),
-      where("status", "==", "draft")
+      trainingRef,
+      where("institutionOwning", "==", institutionRef)
     );
 
     const unsubscribe = onSnapshot(
       q,
       async (snapshot) => {
-        const articlesWithWriters: Article[] = await Promise.all(
+        const trainingWithWriters: Training[] = await Promise.all(
           snapshot.docs.map(async (doc) => {
             const data = doc.data();
 
             let userData: DocumentData | null = null;
 
-            if (data.writtenBy) {
+            if (data.createdBy) {
               const userRef =
                 data?.createdBy as DocumentReference<DocumentData>;
 
@@ -99,23 +99,25 @@ export default function Drafts({ institutionId }: { institutionId: string }) {
                     }
                   : null;
               } catch (err) {
-                console.warn("Error fetching writer for article:", err);
+                showToast("Error fetching writer for training", "error");
+                console.warn("Error fetching writer for training:", err);
               }
             }
 
             return {
               id: doc.id,
               ...data,
-              writtenBy: userData,
-            } as Article;
+              createdBy: userData,
+            } as Training;
           })
         );
 
-        setArticles(articlesWithWriters);
+        setTrainings(trainingWithWriters);
         setLoading(false);
       },
       (err) => {
-        console.error("Error fetching articles:", err);
+        showToast("Error fetching trainings", "error");
+        console.error("Error fetching trainings:", err);
         setLoading(false);
       }
     );
@@ -123,7 +125,7 @@ export default function Drafts({ institutionId }: { institutionId: string }) {
     return () => unsubscribe();
   }, [institutionId]);
 
-  const columns: ColumnDef<Article>[] = [
+  const columns: ColumnDef<Training>[] = [
     {
       id: "select",
       header: ({ table }) => (
@@ -168,24 +170,28 @@ export default function Drafts({ institutionId }: { institutionId: string }) {
       ),
     },
     {
-      accessorKey: "availability",
-      header: "Availability",
+      accessorKey: "realPrice",
+      header: "Price",
       cell: ({ row }) => (
-        <div className="capitalize">{row.getValue("availability")}</div>
+        <div className="capitalize">
+          {row?.original?.realPrice !== "0" ? row?.original?.realPrice : "Free"}
+        </div>
       ),
     },
     {
       accessorKey: "writtenBy",
       header: "Author",
       cell: ({ row }) => (
-        <div className="capitalize">{row?.original.writtenBy?.displayName}</div>
+        <div className="capitalize">
+          {row?.original?.createdBy?.displayName}
+        </div>
       ),
     },
     {
       id: "actions",
       enableHiding: false,
       cell: ({ row }) => {
-        const payment = row.original;
+        const item = row.original;
 
         return (
           <DropdownMenu>
@@ -197,14 +203,19 @@ export default function Drafts({ institutionId }: { institutionId: string }) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <Link href={`/org/${institutionId}/training/${item?.id}`}>
+                <DropdownMenuItem>Manage the training</DropdownMenuItem>
+              </Link>
               <DropdownMenuItem
-                onClick={() => navigator.clipboard.writeText(payment.id)}
+                onClick={() => navigator.clipboard.writeText(item.id)}
               >
-                Edit the post
+                Edit the training
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Preview post</DropdownMenuItem>
-              <DropdownMenuItem color="danger">Delete Post</DropdownMenuItem>
+              <DropdownMenuItem>Preview training</DropdownMenuItem>
+              <DropdownMenuItem color="danger">
+                Delete training
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         );
@@ -213,7 +224,7 @@ export default function Drafts({ institutionId }: { institutionId: string }) {
   ];
 
   const table = useReactTable({
-    data: articles,
+    data: trainings,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -236,7 +247,7 @@ export default function Drafts({ institutionId }: { institutionId: string }) {
   return (
     <div className="w-full space-y-4 p-8 pt-6">
       <PageHeader
-        title="Post Drafts"
+        title="Trainings"
         newItem={false}
         onExport={() => null}
         onPublish={() => null}
@@ -244,7 +255,7 @@ export default function Drafts({ institutionId }: { institutionId: string }) {
       />
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter posts..."
+          placeholder="Filter trainings..."
           value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn("title")?.setFilterValue(event.target.value)
@@ -355,3 +366,5 @@ export default function Drafts({ institutionId }: { institutionId: string }) {
     </div>
   );
 }
+
+export default TrainingList;
