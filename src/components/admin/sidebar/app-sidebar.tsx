@@ -296,20 +296,24 @@ export function AppSidebar({
         icon: Settings2,
         items: [
           {
+            title: "Main Settings",
+            url: `/org/${institutionId}/settings/`,
+          },
+          {
             title: "Branding Settings",
-            url: `/org/${institutionId}/branding`,
+            url: `/org/${institutionId}/settings/branding`,
           },
           {
             title: "Accessibility Settings",
-            url: `/org/${institutionId}/accessibility`,
+            url: `/org/${institutionId}/settings/accessibility`,
           },
           {
             title: "Integrations",
-            url: `/org/${institutionId}/integrations`,
+            url: `/org/${institutionId}/settings/integrations`,
           },
           {
             title: "Billing & Subscription",
-            url: `/org/${institutionId}/integrations`,
+            url: `/org/${institutionId}/settings/billing`,
           },
         ],
       },
@@ -317,12 +321,12 @@ export function AppSidebar({
     reporting: [
       {
         name: "Analytics",
-        url: `/org/${institutionId}/analytics`,
+        url: `/org/${institutionId}/reporting/analytics`,
         icon: ChartNoAxesColumn,
       },
       {
         name: "User Reports",
-        url: `/org/${institutionId}/user-reports`,
+        url: `/org/${institutionId}/reporting/user-reports`,
         icon: BookText,
       },
       {
@@ -332,12 +336,12 @@ export function AppSidebar({
       },
       {
         name: "Training Reports",
-        url: `/org/${institutionId}/training-reports`,
+        url: `/org/${institutionId}/reporting/training-reports`,
         icon: BookText,
       },
       {
         name: "AI Insights",
-        url: `/org/${institutionId}/insights`,
+        url: `/org/${institutionId}/reporting/insights`,
         icon: Sparkles,
       },
     ],
