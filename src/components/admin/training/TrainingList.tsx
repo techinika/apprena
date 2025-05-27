@@ -203,6 +203,15 @@ function TrainingList({ institutionId }: { institutionId: string }) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem
+                onClick={() =>
+                  navigator.clipboard.writeText(
+                    `${process.env.NEXT_PUBLIC_BASE_URL}/training/${item.id}`
+                  )
+                }
+              >
+                Copy public link
+              </DropdownMenuItem>
               <Link href={`/org/${institutionId}/training/${item?.id}`}>
                 <DropdownMenuItem>Manage the training</DropdownMenuItem>
               </Link>

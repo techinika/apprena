@@ -136,23 +136,7 @@ export function AppSidebar({
         items: [
           {
             title: "Gallery",
-            url: "#",
-          },
-          {
-            title: "Images",
-            url: "#",
-          },
-          {
-            title: "Documents",
-            url: "#",
-          },
-          {
-            title: "Videos",
-            url: "#",
-          },
-          {
-            title: "Audios",
-            url: "#",
+            url: `/org/${institutionId}/gallery`,
           },
         ],
       },
@@ -186,11 +170,7 @@ export function AppSidebar({
         items: [
           {
             title: "All Facilities",
-            url: `/org/${institutionId}/facilities`,
-          },
-          {
-            title: "Add New Event",
-            url: `/org/${institutionId}/facilities/new`,
+            url: `/org/${institutionId}/training/facilities`,
           },
         ],
       },
@@ -249,11 +229,15 @@ export function AppSidebar({
         items: [
           {
             title: "Employees",
-            url: `/org/${institutionId}/employees`,
+            url: `/org/${institutionId}/organization/employees`,
           },
           {
             title: "Learners",
-            url: `/org/${institutionId}/learners`,
+            url: `/org/${institutionId}/organization/learners`,
+          },
+          {
+            title: "Add New Person",
+            url: `/org/${institutionId}/organization/new-person`,
           },
         ],
       },
@@ -265,11 +249,11 @@ export function AppSidebar({
         items: [
           {
             title: "Roles",
-            url: `/org/${institutionId}/custom-roles`,
+            url: `/org/${institutionId}/organization/custom-roles`,
           },
           {
             title: "Permissions",
-            url: `/org/${institutionId}/custom-permissions`,
+            url: `/org/${institutionId}/organization/custom-permissions`,
           },
         ],
       },
@@ -281,11 +265,11 @@ export function AppSidebar({
         items: [
           {
             title: "Departments",
-            url: `/org/${institutionId}/departments`,
+            url: `/org/${institutionId}/organization/departments`,
           },
           {
             title: "Add New Department",
-            url: `/org/${institutionId}/departments/new`,
+            url: `/org/${institutionId}/organization/departments/new`,
           },
         ],
       },
@@ -297,23 +281,23 @@ export function AppSidebar({
         items: [
           {
             title: "Main Settings",
-            url: `/org/${institutionId}/settings/`,
+            url: `/org/${institutionId}/organization/settings/`,
           },
           {
             title: "Branding Settings",
-            url: `/org/${institutionId}/settings/branding`,
+            url: `/org/${institutionId}/organization/settings/branding`,
           },
           {
             title: "Accessibility Settings",
-            url: `/org/${institutionId}/settings/accessibility`,
+            url: `/org/${institutionId}/organization/settings/accessibility`,
           },
           {
             title: "Integrations",
-            url: `/org/${institutionId}/settings/integrations`,
+            url: `/org/${institutionId}/organization/settings/integrations`,
           },
           {
             title: "Billing & Subscription",
-            url: `/org/${institutionId}/settings/billing`,
+            url: `/org/${institutionId}/organization/settings/billing`,
           },
         ],
       },

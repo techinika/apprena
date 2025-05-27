@@ -7,55 +7,47 @@ import { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Course",
-  description: "View and Edit Course.",
+  title: "Training",
+  description: "View and Edit Training.",
 };
 
 interface SettingsLayoutProps {
   children: React.ReactNode;
-  courseid: string;
+  trainingId: string;
 }
 
-export default function CourseLayout({
+export default function TrainingLayout({
   children,
-  courseid,
+  trainingId,
 }: SettingsLayoutProps) {
   const sidebarNavItems = [
     {
-      title: "Course Overview",
-      href: `${courseid}`,
-    },
-    {
-      title: "Curriculum",
-      href: `${courseid}/curriculum`,
+      title: "Details",
+      href: `${trainingId}`,
     },
     {
       title: "Modules",
-      href: `${courseid}/modules`,
+      href: `${trainingId}/modules`,
     },
     {
       title: "Lessons",
-      href: `${courseid}/lessons`,
-    },
-    {
-      title: "Assessments",
-      href: `${courseid}/assessments`,
+      href: `${trainingId}/lessons`,
     },
     {
       title: "People",
-      href: `${courseid}/people`,
-    },
-    {
-      title: "Certification",
-      href: `${courseid}/certification`,
+      href: `${trainingId}/people`,
     },
     {
       title: "Resources",
-      href: `${courseid}/resources`,
+      href: `${trainingId}/resources`,
+    },
+    {
+      title: "Attendance",
+      href: `${trainingId}/attendance`,
     },
     {
       title: "Reviews",
-      href: `${courseid}/reviews`,
+      href: `${trainingId}/reviews`,
     },
   ];
 
@@ -63,11 +55,13 @@ export default function CourseLayout({
     <div className="hidden space-y-6 py-10 md:block">
       <div className="space-y-0.5 size flex items-center justify-between flex-wrap">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Course Details</h2>
-          <p className="text-muted-foreground">Manage the course details.</p>
+          <h2 className="text-2xl font-bold tracking-tight">
+            Training Details
+          </h2>
+          <p className="text-muted-foreground">Manage this training.</p>
         </div>
-        <Link href={`/courses/${courseid}`}>
-          <Button>View Course</Button>
+        <Link href={`/training/${trainingId}`}>
+          <Button>View Training</Button>
         </Link>
       </div>
       <Separator className="my-6 size" />
