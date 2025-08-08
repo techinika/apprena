@@ -1,3 +1,4 @@
+// app/org/[institutionId]/courses/[courseId]/layout.tsx
 "use client";
 
 import { SidebarNav } from "@/components/client/profile/sidebar-nav";
@@ -11,51 +12,51 @@ export const metadata: Metadata = {
   description: "View and Edit Course.",
 };
 
-interface SettingsLayoutProps {
-  children: React.ReactNode;
-  courseid: string;
-}
-
 export default function CourseLayout({
+  courseId,
+  institutionId,
   children,
-  courseid,
-}: SettingsLayoutProps) {
+}: {
+  courseId: string;
+  institutionId: string;
+  children: React.ReactNode;
+}) {
   const sidebarNavItems = [
     {
       title: "Course Overview",
-      href: `${courseid}`,
+      href: `/org/${institutionId}/courses/${courseId}`,
     },
     {
       title: "Curriculum",
-      href: `${courseid}/curriculum`,
+      href: `/org/${institutionId}/courses/${courseId}/curriculum`,
     },
     {
       title: "Modules",
-      href: `${courseid}/modules`,
+      href: `/org/${institutionId}/courses/${courseId}/modules`,
     },
     {
       title: "Lessons",
-      href: `${courseid}/lessons`,
+      href: `/org/${institutionId}/courses/${courseId}/lessons`,
     },
     {
       title: "Assessments",
-      href: `${courseid}/assessments`,
+      href: `/org/${institutionId}/courses/${courseId}/assessments`,
     },
     {
       title: "People",
-      href: `${courseid}/people`,
+      href: `/org/${institutionId}/courses/${courseId}/people`,
     },
     {
       title: "Certification",
-      href: `${courseid}/certification`,
+      href: `/org/${institutionId}/courses/${courseId}/certification`,
     },
     {
       title: "Resources",
-      href: `${courseid}/resources`,
+      href: `/org/${institutionId}/courses/${courseId}/resources`,
     },
     {
       title: "Reviews",
-      href: `${courseid}/reviews`,
+      href: `/org/${institutionId}/courses/${courseId}/reviews`,
     },
   ];
 
@@ -66,7 +67,7 @@ export default function CourseLayout({
           <h2 className="text-2xl font-bold tracking-tight">Course Details</h2>
           <p className="text-muted-foreground">Manage the course details.</p>
         </div>
-        <Link href={`/courses/${courseid}`}>
+        <Link href={`/courses/${courseId}`}>
           <Button>View Course</Button>
         </Link>
       </div>

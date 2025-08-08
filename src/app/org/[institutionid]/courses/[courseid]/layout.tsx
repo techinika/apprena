@@ -9,13 +9,17 @@ export const metadata: Metadata = {
 
 interface SettingsLayoutProps {
   children: React.ReactNode;
-  params: Promise<{ courseid: string }>;
+  params: Promise<{ courseid: string; institutionid: string }>;
 }
 
 export default function SettingsLayout({
   children,
   params,
 }: SettingsLayoutProps) {
-  const { courseid } = use(params);
-  return <CourseLayout courseid={courseid}>{children}</CourseLayout>;
+  const { courseid, institutionid } = use(params);
+  return (
+    <CourseLayout institutionId={institutionid} courseId={courseid}>
+      {children}
+    </CourseLayout>
+  );
 }

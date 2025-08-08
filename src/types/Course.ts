@@ -13,7 +13,7 @@ export interface Course {
   coverImage: string;
   status: "draft" | "published";
   duration: string;
-  modules: string;
+  modules: Module[];
   lessons: string;
   visibility: "public" | "private";
   topic: Topic | null;
@@ -57,19 +57,24 @@ export interface Instructor {
   bio: string;
 }
 
-export type LessonType = "video" | "file";
+export type LessonType = "video" | "audio" | "document";
 
 export interface Lesson {
+  id: string; // Needed for routing
   type: LessonType;
   title: string;
-  duration?: string;
-  size?: string;
+  duration?: string; // e.g., "7m 31s"
+  size?: string; // e.g., "5MB"
+  url?: string; // link to media/document file
+  unlocked: boolean; // to track if user can open this lesson
+  completed: boolean;
 }
 
 export interface Module {
+  id: string;
   moduleTitle: string;
-  lectures: number;
-  duration: string;
+  lectures: number; // number of lessons
+  duration: string; // total duration of the module
   lessons: Lesson[];
 }
 
