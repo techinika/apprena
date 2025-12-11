@@ -15,7 +15,7 @@ function RegisterPage() {
           <Link
             href="/"
             className="relative z-20 flex items-center text-lg font-medium"
-          >
+            legacyBehavior>
             <Image
               src="/black-logo.png"
               width={150}

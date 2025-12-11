@@ -30,9 +30,7 @@ function FeaturedCard({ item }: { item: Article }) {
           </CardTitle>
           <CardDescription className="flex gap-6 items-center">
             <Badge className="text-xs">Featured</Badge>
-            <Link
-              href={`/articles/category/${item?.category}`}
-            >{`${item?.category}`}</Link>
+            <Link href={`/articles/category/${item?.category}`} legacyBehavior>{`${item?.category}`}</Link>
           </CardDescription>
         </div>
       </CardHeader>

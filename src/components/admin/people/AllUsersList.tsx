@@ -123,7 +123,7 @@ export function AllUsersList() {
         </Button>
       ),
       cell: ({ row }) => (
-        <Link href={`/org/users/${row?.original?.id}`}>
+        <Link href={`/org/users/${row?.original?.id}`} legacyBehavior>
           {row.getValue("displayName")}
         </Link>
       ),
@@ -137,7 +137,7 @@ export function AllUsersList() {
       accessorKey: "role",
       header: "Role",
       cell: ({ row }) => (
-        <Link href={`/org/users/roles`} className="capitalize">
+        <Link href={`/org/users/roles`} className="capitalize" legacyBehavior>
           {row.getValue("role")}
         </Link>
       ),

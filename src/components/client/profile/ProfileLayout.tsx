@@ -61,7 +61,7 @@ export default function ProfileLayout({ children }: SettingsLayoutProps) {
             Manage your account settings and set e-mail preferences.
           </p>
         </div>
-        <Link href={`/u/${user?.uid}`}>
+        <Link href={`/u/${user?.uid}`} legacyBehavior>
           <Button>View Profile</Button>
         </Link>
       </div>

@@ -68,28 +68,28 @@ function OneUserPage() {
                 href={user?.socialLinks?.linkedin || "#"}
                 target="_blank"
                 rel="noopener noreferrer"
-              >
+                legacyBehavior>
                 <Linkedin className="text-blue-600 text-2xl" />
               </Link>
               <Link
                 href={user?.socialLinks?.github || "#"}
                 target="_blank"
                 rel="noopener noreferrer"
-              >
+                legacyBehavior>
                 <Github className="text-gray-800 text-2xl" />
               </Link>
               <Link
                 href={user?.socialLinks?.twitter || "#"}
                 target="_blank"
                 rel="noopener noreferrer"
-              >
+                legacyBehavior>
                 <Twitter className="text-blue-400 text-2xl" />
               </Link>
               <Link
                 href={user?.socialLinks?.website || "#"}
                 target="_blank"
                 rel="noopener noreferrer"
-              >
+                legacyBehavior>
                 <Globe className="text-green-600 text-2xl" />
               </Link>
             </div>

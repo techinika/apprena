@@ -20,31 +20,28 @@ function Socials({ socialLinks }: { socialLinks: SocialLinks }) {
         href={socialLinks.linkedin ?? "#"}
         target={socialLinks?.linkedin ? "_blank" : undefined}
         rel="noopener noreferrer"
-      >
+        legacyBehavior>
         <FaLinkedin className={iconClass} />
       </Link>
-
       <Link
         href={socialLinks?.github ?? "#"}
         target={socialLinks?.github ? "_blank" : undefined}
         rel="noopener noreferrer"
-      >
+        legacyBehavior>
         <FaGithub className={iconClass} />
       </Link>
-
       <Link
         href={socialLinks.twitter ?? "#"}
         target={socialLinks?.twitter ? "_blank" : undefined}
         rel="noopener noreferrer"
-      >
+        legacyBehavior>
         <FaTwitter className={iconClass} />
       </Link>
-
       <Link
         href={socialLinks.website ?? "#"}
         target={socialLinks?.website ? "_blank" : undefined}
         rel="noopener noreferrer"
-      >
+        legacyBehavior>
         <FaGlobe className={iconClass} />
       </Link>
     </div>

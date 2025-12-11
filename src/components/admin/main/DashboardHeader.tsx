@@ -26,7 +26,7 @@ function DashboardHeader({
           <Link
             href={`/org/${activeInstitution?.id}`}
             className="font-semibold"
-          >
+            legacyBehavior>
             {activeInstitution?.name || "Select Institution"}
           </Link>
         </div>

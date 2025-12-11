@@ -12,7 +12,7 @@ function ArticleCard({ item }: { item: Article | null }) {
   const { user } = useAuth();
 
   return (
-    <Link href={`/articles/${item?.id}`}>
+    <Link href={`/articles/${item?.id}`} legacyBehavior>
       <div className="cursor-pointer">
         <Card className="max-w-md mx-auto h-full cursor-pointer shadow-lg rounded-lg">
           <Image

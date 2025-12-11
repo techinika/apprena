@@ -72,7 +72,7 @@ function UserProfile({ id }: { id: string }) {
             <h1 className="text-3xl font-bold">{profileData?.displayName}</h1>
             <div className="flex items-center gap-4">
               {user?.uid === id && (
-                <Link href="/profile">
+                <Link href="/profile" legacyBehavior>
                   <Button variant="outline">
                     <FilePenLine className="w-4 h-4" />
                     &nbsp; Edit Profile

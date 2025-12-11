@@ -89,7 +89,7 @@ function CourseCard({ item }: { item: Course | null }) {
         </div>
       </CardContent>
       <CardFooter className="flex justify-between items-center">
-        <Link href={`/courses/${item?.id}`}>
+        <Link href={`/courses/${item?.id}`} legacyBehavior>
           <Button size="sm">Start Learning</Button>
         </Link>
         {(() => {

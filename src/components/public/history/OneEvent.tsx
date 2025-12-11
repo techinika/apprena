@@ -96,7 +96,7 @@ export default function OneEvent({ eventId }: { eventId: string }) {
                       __html: event?.description ?? "",
                     }}
                   ></p>
-                  <Link href="/history">
+                  <Link href="/history" legacyBehavior>
                     <Button>View All Events</Button>
                   </Link>
                 </div>

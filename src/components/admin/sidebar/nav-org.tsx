@@ -57,7 +57,7 @@ export function NavOrg({
                   {item.items?.map((subItem) => (
                     <SidebarMenuSubItem key={subItem.title}>
                       <SidebarMenuSubButton asChild>
-                        <Link href={subItem.url}>{subItem.title}</Link>
+                        <Link href={subItem.url} legacyBehavior>{subItem.title}</Link>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   ))}

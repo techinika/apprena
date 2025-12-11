@@ -67,7 +67,7 @@ export default function CourseLayout({
           <h2 className="text-2xl font-bold tracking-tight">Course Details</h2>
           <p className="text-muted-foreground">Manage the course details.</p>
         </div>
-        <Link href={`/courses/${courseId}`}>
+        <Link href={`/courses/${courseId}`} legacyBehavior>
           <Button>View Course</Button>
         </Link>
       </div>

@@ -19,7 +19,7 @@ function SectionHeader({
       <div className="py-4 flex justify-between items-center">
         <h2 className="font-bold text-xl">{title}</h2>
         {buttonText && link && (
-          <Link href={link}>
+          <Link href={link} legacyBehavior>
             <Button variant="default" className="font-bold">
               {buttonText}
             </Button>

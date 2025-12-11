@@ -60,7 +60,7 @@ export default function TrainingLayout({
           </h2>
           <p className="text-muted-foreground">Manage this training.</p>
         </div>
-        <Link href={`/training/${trainingId}`}>
+        <Link href={`/training/${trainingId}`} legacyBehavior>
           <Button>View Training</Button>
         </Link>
       </div>

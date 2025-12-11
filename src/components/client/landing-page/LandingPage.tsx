@@ -1,26 +1,24 @@
 "use client";
 
 import React from "react";
-import Nav from "../navigation/Nav";
-import Hero from "@/components/sections/hero/default";
-import Faq from "@/components/sections/faq/default";
-import Pricing from "@/components/sections/pricing/default";
-import FooterSection from "@/components/sections/footer/default";
-import Cta from "@/components/sections/cta/default";
-import { Testimonials } from "@/components/sections/testimonials/default";
-import { Benefits } from "@/components/sections/benefits/learners";
+import Navbar from "../navigation/Nav";
+import ProblemSolution from "@/components/sections/ProblemSolution";
+import HowItWorks from "@/components/sections/HowItWorks";
+import Features from "@/components/sections/Features";
+import CTASection from "@/components/sections/CTASection";
+import Footer from "@/components/sections/Footer";
+import Hero from "@/components/sections/Hero";
 
 function LandingPage() {
   return (
     <div>
-      <Nav />
+      <Navbar />
       <Hero />
-      <Benefits />
-      <Pricing />
-      <Faq />
-      <Testimonials />
-      <Cta />
-      <FooterSection />
+      <ProblemSolution />
+      <HowItWorks />
+      <Features />
+      <CTASection />
+      <Footer />
     </div>
   );
 }

@@ -142,7 +142,7 @@ export function LearnersList({ institutionId }: { institutionId: string }) {
         </Button>
       ),
       cell: ({ row }) => (
-        <Link href={`/org/${institutionId}/users/${row?.original?.id}`}>
+        <Link href={`/org/${institutionId}/users/${row?.original?.id}`} legacyBehavior>
           {row.getValue("displayName")}
         </Link>
       ),

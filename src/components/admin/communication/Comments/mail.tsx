@@ -34,6 +34,7 @@ export function MailH({ mails, defaultLayout = [70, 30] }: MailProps) {
 
   return (
     // <TooltipProvider delayDuration={0}>
+    // </TooltipProvider>
     <ResizablePanelGroup
       direction="horizontal"
       onLayout={(sizes: number[]) => {
@@ -87,6 +88,5 @@ export function MailH({ mails, defaultLayout = [70, 30] }: MailProps) {
         />
       </ResizablePanel>
     </ResizablePanelGroup>
-    // </TooltipProvider>
   );
 }

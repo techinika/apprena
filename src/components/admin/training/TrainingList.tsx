@@ -212,7 +212,7 @@ function TrainingList({ institutionId }: { institutionId: string }) {
               >
                 Copy public link
               </DropdownMenuItem>
-              <Link href={`/org/${institutionId}/training/${item?.id}`}>
+              <Link href={`/org/${institutionId}/training/${item?.id}`} legacyBehavior>
                 <DropdownMenuItem>Manage the training</DropdownMenuItem>
               </Link>
               <DropdownMenuItem

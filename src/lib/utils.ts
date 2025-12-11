@@ -14,7 +14,7 @@ export const generateSlug = (str: string) => {
     .trim();
 };
 
-export const getDeviceInfo = async () => {
+export const getDeviceInfo = () => {
   const parser = new UAParser();
   const result = parser.getResult();
 

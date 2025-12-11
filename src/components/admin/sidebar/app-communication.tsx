@@ -27,7 +27,7 @@ export function NavCommunication({
         {communication.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild>
-              <Link href={item.url}>
+              <Link href={item.url} legacyBehavior>
                 <item.icon />
                 <span>{item.name}</span>
               </Link>

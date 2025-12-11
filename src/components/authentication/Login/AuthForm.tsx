@@ -32,7 +32,6 @@ import {
   setDoc,
   updateDoc,
 } from "firebase/firestore";
-import { use } from "react";
 import { showToast } from "@/lib/MessageToast";
 
 const loginSchema = z.object({
@@ -48,7 +47,7 @@ export function UserAuthForm({
 }: React.ComponentPropsWithoutRef<"div">) {
   const router = useRouter();
   const loginCollection = collection(db, "logins");
-  const { device, browser, os } = use(getDeviceInfo());
+  const { device, browser, os } = getDeviceInfo();
 
   const {
     register,

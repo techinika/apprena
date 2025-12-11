@@ -57,7 +57,7 @@ export function NavTraining({
                   {item.items?.map((subItem) => (
                     <SidebarMenuSubItem key={subItem.title}>
                       <SidebarMenuSubButton asChild>
-                        <Link href={subItem.url}>
+                        <Link href={subItem.url} legacyBehavior>
                           <span>{subItem.title}</span>
                         </Link>
                       </SidebarMenuSubButton>

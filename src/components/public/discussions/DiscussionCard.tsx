@@ -23,7 +23,10 @@ function DiscussionCard({ item }: { item: Discussion | null }) {
       </div>
       <Separator orientation="vertical" className="mx-2" />
       <div className="w-[85%]">
-        <Link href={`/discussions/${item?.id}`} className="font-bold text-xl">
+        <Link
+          href={`/discussions/${item?.id}`}
+          className="font-bold text-xl"
+          legacyBehavior>
           {item?.title}
         </Link>
         <p className="text-sm">{item?.description}</p>
@@ -37,7 +40,7 @@ function DiscussionCard({ item }: { item: Discussion | null }) {
           </div>
           <div className="text-xs">
             Created by{" "}
-            <Link href={`/u/${item?.createdBy?.id}`}>
+            <Link href={`/u/${item?.createdBy?.id}`} legacyBehavior>
               {item?.createdBy?.displayName}
             </Link>{" "}
             in{" "}

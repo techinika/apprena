@@ -200,7 +200,7 @@ function CoursesList({ institutionId }: { institutionId: string }) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <Link href={`/org/${institutionId}/courses/${item?.id}`}>
+              <Link href={`/org/${institutionId}/courses/${item?.id}`} legacyBehavior>
                 <DropdownMenuItem>Manage the course</DropdownMenuItem>
               </Link>
               <DropdownMenuItem
