@@ -1,14 +1,11 @@
 "use client";
 
 import { CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import FooterSection from "../sections/footer/default";
-import Nav from "../client/navigation/Nav";
 import { Section } from "../ui/section";
 
 export default function PrivacyPolicy() {
   return (
     <div>
-      <Nav />
       <Section>
         <CardHeader>
           <CardTitle>
@@ -97,7 +94,6 @@ export default function PrivacyPolicy() {
           </section>
         </CardContent>
       </Section>
-      <FooterSection />
     </div>
   );
 }
