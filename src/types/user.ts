@@ -5,5 +5,4 @@ export interface UserProfile {
   baseCredits: number;
   purchasedCredits: number;
   totalUsed: number;
-  subscriptionActive: boolean;
 }

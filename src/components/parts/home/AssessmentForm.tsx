@@ -3,8 +3,11 @@
 import React, { useState, useRef } from "react";
 import { ChevronRight, ShieldCheck, Upload, X, FileText } from "lucide-react";
 import LoadingAnalysis from "@/app/loading-analysis";
+import { handleGoogleLoginOnActivity } from "@/db/operations/GoogleLogin";
+import { useRouter } from "next/navigation";
 
 export const AssessmentForm = () => {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     status: "",
     goal: "",
@@ -13,8 +16,10 @@ export const AssessmentForm = () => {
   });
 
   const [files, setFiles] = useState<File[]>([]);
-  const [submitting] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [result, setResult] = useState<any>(null);
+  const [showLoginGate, setShowLoginGate] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -35,15 +40,36 @@ export const AssessmentForm = () => {
     setFiles(files.filter((_, i) => i !== index));
   };
 
-  // 4. Final Submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const submissionPayload = {
-      ...formData,
-      attachments: files, // This is your object of values
-    };
-    console.log("Final Object of Responses:", submissionPayload);
+    setSubmitting(true);
+
+    const formDataPayload = new FormData();
+    files.forEach((file) => formDataPayload.append("file", file));
+    formDataPayload.append("answers", JSON.stringify(formData));
+
+    try {
+      const res = await fetch("/api/analyze", {
+        method: "POST",
+        body: formDataPayload,
+      });
+      const data = await res.json();
+
+      if (res.status === 429) {
+        alert("Free limit reached. Please log in to continue.");
+        setShowLoginGate(true);
+      } else {
+        setResult(data);
+        setShowLoginGate(true);
+      }
+      console.log(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSubmitting(false);
+    }
   };
+
   return (
     <div className="relative -mt-56 z-20 px-4">
       <form
@@ -51,7 +77,7 @@ export const AssessmentForm = () => {
         className="max-w-5xl mx-auto bg-white p-8 md:p-16 rounded-[3.5rem] shadow-[0_40px_80px_-15px_rgba(0,0,0,0.3)] border border-slate-100"
       >
         {submitting && <LoadingAnalysis />}
-        {!submitting && (
+        {!submitting && !result && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               <div className="space-y-3">
@@ -190,6 +216,47 @@ export const AssessmentForm = () => {
               analyses remaining for your IP
             </p>
           </>
+        )}
+        {result && (
+          <div className="max-w-5xl mx-auto bg-white rounded-[3.5rem] overflow-hidden shadow-2xl relative">
+            <div className="p-12 border-b border-slate-100">
+              <h2 className="text-3xl font-black mb-2">
+                Analysis Preview: {result?.title}
+              </h2>
+              <p className="text-emerald-600 font-bold">
+                Confidence Score: {result?.confidenceScore}%
+              </p>
+            </div>
+
+            <div className="relative p-12 h-[400px] overflow-hidden">
+              <div className="filter blur-xl opacity-30 select-none pointer-events-none">
+                <div className="space-y-8">
+                  <div className="h-20 bg-slate-200 rounded-2xl w-full" />
+                  <div className="h-20 bg-slate-200 rounded-2xl w-3/4" />
+                  <div className="h-20 bg-slate-200 rounded-2xl w-full" />
+                </div>
+              </div>
+
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-10 bg-white/40 backdrop-blur-md">
+                <div className="bg-white p-10 rounded-[2.5rem] shadow-xl border border-slate-100 text-center max-w-sm">
+                  <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <ShieldCheck size={32} />
+                  </div>
+                  <h3 className="text-xl font-black mb-3">Roadmap Ready!</h3>
+                  <p className="text-slate-500 text-sm mb-8 leading-relaxed">
+                    Your personalized strategy is calculated. Log in to save it
+                    to your profile and unlock the full learning path.
+                  </p>
+                  <button
+                    onClick={() => handleGoogleLoginOnActivity(result, router)}
+                    className="w-full bg-slate-900 text-white font-bold py-4 rounded-2xl hover:bg-amber-600 transition-all flex items-center justify-center gap-3"
+                  >
+                    Continue with Google
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </form>
     </div>

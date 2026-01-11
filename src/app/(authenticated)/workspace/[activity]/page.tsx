@@ -1,10 +1,11 @@
 import AnalysisDetail from "@/components/pages/OneActivityPage";
 import React from "react";
 
-function page() {
+async function page({ params }: { params: Promise<{ activity: string }> }) {
+  const { activity } = await params;
   return (
     <div>
-      <AnalysisDetail />
+      <AnalysisDetail activityId={activity} />
     </div>
   );
 }

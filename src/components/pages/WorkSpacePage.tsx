@@ -10,100 +10,38 @@ import {
   CreditCard,
   AlertCircle,
   TrendingUp,
-  X,
-  Zap,
-  ChevronRight,
 } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 import Link from "next/link";
 import { getUserActivities } from "@/db/operations/GetActivities";
 import { Activity } from "@/types/activity";
 import Loading from "@/app/loading";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import PaymentSuccessOverlay from "../parts/workspace/PaymentOverlay";
-
-const CreateActivityModal = ({ isOpen, onClose, onSubmit }: any) => {
-  const [title, setTitle] = useState("");
-  const [goal, setGoal] = useState("");
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div
-        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
-        onClick={onClose}
-      />
-
-      <div className="relative bg-white w-full max-w-lg rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95 duration-200">
-        <button
-          onClick={onClose}
-          className="absolute top-6 right-6 text-slate-400 hover:text-slate-600"
-        >
-          <X size={24} />
-        </button>
-
-        <div className="mb-8">
-          <div className="bg-amber-100 w-12 h-12 rounded-2xl flex items-center justify-center mb-4">
-            <Zap className="text-amber-600 fill-amber-600" size={24} />
-          </div>
-          <h2 className="text-2xl font-black text-slate-900">New Roadmap</h2>
-          <p className="text-slate-500 text-sm">
-            Define your next 10-year ascent.
-          </p>
-        </div>
-
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            onSubmit({ title, goal });
-          }}
-          className="space-y-6"
-        >
-          <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-widest text-slate-400">
-              Roadmap Name
-            </label>
-            <input
-              required
-              placeholder="e.g. Fintech Founder Path"
-              className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-amber-500 outline-none font-bold"
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-widest text-slate-400">
-              The North Star Goal
-            </label>
-            <input
-              required
-              placeholder="e.g. CTO at a Tier-1 Startup"
-              className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-amber-500 outline-none font-bold"
-              onChange={(e) => setGoal(e.target.value)}
-            />
-          </div>
-
-          <button className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-amber-600 transition-all">
-            Generate Intelligence <ChevronRight size={18} />
-          </button>
-        </form>
-      </div>
-    </div>
-  );
-};
+import { formatDate } from "../../lib/functions";
+import SuccessPage from "../parts/workspace/SuccessfulAnalysis";
 
 const Workspace = () => {
+  const router = useRouter();
+
   const { user, profile } = useAuth();
   const searchParams = useSearchParams();
   const payment = searchParams.get("payment");
+  const analysis = searchParams.get("analysis");
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const totalCredits =
+  const remainingCredits =
     (profile?.baseCredits ?? 0) + (profile?.purchasedCredits ?? 0);
+  const totalAllocatedCredits = remainingCredits + (profile?.totalUsed ?? 0);
+
   const isLimitReached =
-    profile?.accountType === "free" && profile?.totalUsed >= 2;
+    profile?.accountType === "free" && remainingCredits <= 0;
+
+  const usagePercentage =
+    totalAllocatedCredits > 0
+      ? Math.min(((profile?.totalUsed ?? 0) / totalAllocatedCredits) * 100, 100)
+      : 0;
 
   useEffect(() => {
     if (user) {
@@ -114,27 +52,15 @@ const Workspace = () => {
     }
   }, [user]);
 
-  const handleCreateActivity = async (data: never) => {
-    console.log("Creating new roadmap with data:", data);
-
-    setIsModalOpen(false);
-  };
-
   if (loading) return <Loading />;
-
-  if (payment && payment === "success") return <PaymentSuccessOverlay />;
+  if (payment === "success") return <PaymentSuccessOverlay />;
+  if (analysis === "success") return <SuccessPage />;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900">
-      <CreateActivityModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleCreateActivity}
-      />
-
       <main className="max-w-7xl mx-auto px-6 py-10">
         <section className="mb-10">
-          <div className="bg-white border border-slate-200 rounded-[2rem] p-8 shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="bg-white border border-slate-200 rounded-4xl p-8 shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-6">
               <div className="bg-amber-50 p-4 rounded-2xl">
                 <TrendingUp className="text-amber-600" size={32} />
@@ -152,22 +78,21 @@ const Workspace = () => {
             <div className="flex items-center gap-8 bg-slate-50 px-6 py-4 flex-wrap rounded-2xl border border-slate-100">
               <div>
                 <div className="flex justify-between text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-                  <span>Usage</span>
-                  <span className={isLimitReached ? "text-orange-500" : ""}>
-                    {profile?.totalUsed}/{totalCredits}
+                  <span>Usage Capacity</span>
+                  <span
+                    className={
+                      isLimitReached ? "text-orange-500" : "text-slate-700"
+                    }
+                  >
+                    {profile?.totalUsed} / {totalAllocatedCredits}
                   </span>
                 </div>
                 <div className="w-48 h-2 bg-slate-200 rounded-full overflow-hidden">
                   <div
-                    className={`h-full transition-all ${
+                    className={`h-full transition-all duration-700 ${
                       isLimitReached ? "bg-orange-500" : "bg-amber-600"
                     }`}
-                    style={{
-                      width: `${Math.min(
-                        (profile?.totalUsed ?? 0 / totalCredits) * 100,
-                        100
-                      )}%`,
-                    }}
+                    style={{ width: `${usagePercentage}%` }}
                   />
                 </div>
               </div>
@@ -185,10 +110,11 @@ const Workspace = () => {
             <div className="bg-orange-500 p-2 rounded-lg text-white">
               <AlertCircle size={20} />
             </div>
-            <div className="flex-grow">
-              <h3 className="font-bold text-orange-900">Trial Limit Reached</h3>
+            <div className="grow">
+              <h3 className="font-bold text-orange-900">Credits Depleted</h3>
               <p className="text-orange-700 text-sm">
-                You have used your 2 free analyses. Upgrade to continue.
+                You have used all available credits. Upgrade your plan to
+                generate more intelligence.
               </p>
             </div>
           </div>
@@ -196,8 +122,9 @@ const Workspace = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <button
-            onClick={() => !isLimitReached && setIsModalOpen(true)}
-            className={`group relative flex flex-col items-center justify-center h-[280px] rounded-[2rem] border-2 border-dashed transition-all
+            onClick={() => router.push("/workspace/create")}
+            disabled={isLimitReached}
+            className={`group relative flex flex-col items-center justify-center py-12 rounded-4xl border-2 border-dashed transition-all
               ${
                 isLimitReached
                   ? "bg-slate-50 border-slate-200 cursor-not-allowed opacity-60"
@@ -205,8 +132,8 @@ const Workspace = () => {
               }`}
           >
             {isLimitReached && (
-              <div className="absolute top-4 right-4 text-slate-400">
-                <Lock size={16} />
+              <div className="absolute top-6 right-6 text-slate-400">
+                <Lock size={20} />
               </div>
             )}
             <div
@@ -223,14 +150,14 @@ const Workspace = () => {
                 isLimitReached ? "text-slate-400" : "text-slate-900"
               }`}
             >
-              Create New Activity
+              Create New Roadmap
             </span>
           </button>
 
           {activities.map((activity) => (
             <div
               key={activity.id}
-              className="group bg-white border border-slate-200 rounded-[2rem] p-8 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col justify-between"
+              className="group bg-white border border-slate-200 rounded-4xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col justify-between"
             >
               <div>
                 <div className="flex justify-between items-start mb-6">
@@ -238,14 +165,14 @@ const Workspace = () => {
                     <Clock size={24} />
                   </div>
                   <span className="text-[10px] font-black uppercase tracking-widest text-amber-500 bg-amber-50 px-3 py-1 rounded-full">
-                    {activity.status || "Active"}
+                    {activity.status || "Claimed"}
                   </span>
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-amber-600 transition-colors">
+                <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-amber-600 transition-colors line-clamp-2">
                   {activity.title}
                 </h3>
                 <p className="text-slate-400 text-sm">
-                  Created on {new Date(activity.createdAt).toLocaleDateString()}
+                  Created {formatDate(activity?.createdAt)}
                 </p>
               </div>
               <Link

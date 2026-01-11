@@ -1,4 +1,12 @@
-import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  orderBy,
+  doc,
+  getDoc,
+} from "firebase/firestore";
 import { db } from "../firebase";
 import { Activity } from "@/types/activity";
 
@@ -7,7 +15,7 @@ export const getUserActivities = async (userId: string) => {
   const q = query(
     activitiesRef,
     where("userId", "==", userId),
-    orderBy("priority", "desc")
+    orderBy("createdAt", "desc")
   );
 
   const querySnapshot = await getDocs(q);
@@ -15,4 +23,31 @@ export const getUserActivities = async (userId: string) => {
     id: doc.id,
     ...doc.data(),
   })) as Activity[];
+};
+
+export const fetchActivityById = async (activityId: string) => {
+  try {
+    const docRef = doc(db, "activities", activityId);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+
+      if (data.status !== "claimed") {
+        console.warn("Attempted to access an unclaimed activity.");
+        return null;
+      }
+
+      return {
+        id: docSnap.id,
+        ...data,
+      } as Activity;
+    } else {
+      console.error("No such activity document!");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching activity:", error);
+    throw error;
+  }
 };

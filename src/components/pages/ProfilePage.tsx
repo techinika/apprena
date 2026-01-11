@@ -172,8 +172,8 @@ const ProfilePage = () => {
                 <div className="space-y-10 animate-in fade-in slide-in-from-right-4 duration-300">
                   <div className="flex items-center gap-6">
                     <img
-                      src={user?.photoURL || "/placeholder.png"}
-                      className="w-24 h-24 rounded-[2rem] border-4 border-slate-50 shadow-sm"
+                      src={user?.photoURL || ""}
+                      className="w-24 h-24 rounded-4xl border-4 border-slate-50 shadow-sm"
                       alt="Profile"
                     />
                     <div>
@@ -325,7 +325,6 @@ const ProfilePage = () => {
                 </div>
               )}
 
-              {/* --- SECURITY TAB --- */}
               {activeTab === "security" && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
                   <div className="flex items-start gap-6 p-6 bg-slate-50 rounded-3xl">

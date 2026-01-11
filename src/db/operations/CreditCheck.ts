@@ -7,6 +7,8 @@ import {
   getDoc,
   updateDoc,
   increment,
+  setDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../firebase";
 
@@ -29,6 +31,19 @@ export const verifyAndDeductCredit = async (userId: string) => {
   const profileRef = doc(db, "profiles", userId);
   const profileSnap = await getDoc(profileRef);
   const data = profileSnap.data();
+
+  if (!profileSnap.exists()) {
+    await setDoc(profileRef, {
+      uid: userId,
+      baseCredits: 1,
+      accountType: "free",
+      purchasedCredits: 0,
+      totalUsed: 1,
+      lastLogin: serverTimestamp(),
+      joinedAt: serverTimestamp(),
+    });
+    return { allowed: true, type: "base" };
+  }
 
   if (data?.baseCredits > 0) {
     await updateDoc(profileRef, {
