@@ -1,13 +1,19 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { APP } from "@/variables/globals";
+import { Nunito } from "next/font/google";
 import { AuthProvider } from "@/lib/AuthContext";
-import { ToastContainer } from "react-toastify";
 
 export const metadata: Metadata = {
   title: `${APP?.NAME} — ${APP?.SLOGAN}`,
   description: APP?.DESCRIPTION,
 };
+
+const Font = Nunito({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-main",
+});
 
 export default function RootLayout({
   children,
@@ -16,11 +22,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={` antialiased`}>
-        <AuthProvider>
-          {children}
-          <ToastContainer />
-        </AuthProvider>
+      <body className={`${Font.variable} antialiased`}>
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );
