@@ -38,10 +38,10 @@ export default function HomePage() {
             {APP?.NAME || "PathAI"}
           </div>
           <div className="flex justify-center gap-10 text-slate-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-12">
-            <Link href="#" className="hover:text-amber-600 transition">
+            <Link href="/terms" className="hover:text-amber-600 transition">
               Terms
             </Link>
-            <Link href="#" className="hover:text-amber-600 transition">
+            <Link href="/privacy" className="hover:text-amber-600 transition">
               Privacy
             </Link>
             <Link href="#" className="hover:text-amber-600 transition">

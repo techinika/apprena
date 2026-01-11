@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -322,7 +323,7 @@ const NetworkSection = () => (
             </span>
             <h4 className="text-lg font-bold">{person.name}</h4>
             <p className="text-sm text-slate-400 mb-3">{person.role}</p>
-            <p className="text-sm text-slate-600 italic">" {person.reason} "</p>
+            <p className="text-sm text-slate-600 italic">{person.reason}</p>
           </div>
         </div>
       ))}
