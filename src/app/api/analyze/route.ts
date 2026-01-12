@@ -1,16 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { PDFParse } from "pdf-parse";
 import { NextResponse } from "next/server";
 import {
   collection,
   addDoc,
   serverTimestamp,
   doc,
-  getDoc,
   updateDoc,
   increment,
-  setDoc,
 } from "firebase/firestore";
 import { db } from "@/db/firebase";
 import { verifyAndDeductCredit } from "@/db/operations/CreditCheck";
@@ -18,42 +15,31 @@ import { verifyAndDeductCredit } from "@/db/operations/CreditCheck";
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 export async function POST(req: Request) {
-  try {
-    const formData = await req.formData();
-    const files = formData.getAll("file") as File[];
-    const assessmentAnswers = formData.get("answers") as string;
-    const userId = formData.get("userId") as string;
-    const ip = req.headers.get("x-forwarded-for") || "anonymous";
+  const formData = await req.formData();
+  const files = formData.getAll("file") as File[];
+  const assessmentAnswers = formData.get("answers") as string;
+  const userId = formData.get("userId") as string;
+  const ip = req.headers.get("x-forwarded-for") || "anonymous";
 
-    // let combinedPdfText = "";
-    // for (const file of files) {
-    //   // const parser = new PDFParse({ url: file?.webkitRelativePath });
-    //   const result = await parser.getText();
+  // let combinedPdfText = "";
+  // for (const file of files) {
+  //   // const parser = new PDFParse({ url: file?.webkitRelativePath });
+  //   const result = await parser.getText();
 
-    //   combinedPdfText += result + "\n";
-    // }
+  //   combinedPdfText += result + "\n";
+  // }
 
-    if (userId) {
-      const verification = await verifyAndDeductCredit(userId);
-      if (!verification.allowed) {
-        return NextResponse.json(
-          { error: "Insufficient credits" },
-          { status: 403 }
-        );
-      }
+  if (userId) {
+    const verification = await verifyAndDeductCredit(userId);
+    if (!verification.allowed) {
+      return NextResponse.json(
+        { error: "Insufficient credits" },
+        { status: 403 }
+      );
     }
+  }
 
-    // const ipLimitRef = doc(db, "rate_limits", ip.replace(/\./g, "_"));
-    // const ipSnap = await getDoc(ipLimitRef);
-    // const ipData = ipSnap.data();
-
-    // if (ipData && ipData.count >= 2) {
-    //   return NextResponse.json(
-    //     { error: "Free limit reached. Please log in to continue." },
-    //     { status: 429 }
-    //   );
-    // }
-
+  try {
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash",
       generationConfig: {
@@ -107,12 +93,6 @@ export async function POST(req: Request) {
     const result = await model.generateContent(prompt);
     const aiResponse = JSON.parse(result.response.text());
 
-    // if (ipSnap.exists()) {
-    //   await updateDoc(ipLimitRef, { count: increment(1) });
-    // } else {
-    //   await setDoc(ipLimitRef, { count: 1, firstUsed: serverTimestamp() });
-    // }
-
     const docRef = await addDoc(collection(db, "activities"), {
       ...aiResponse,
       status: userId ? "claimed" : "unclaimed",
@@ -128,9 +108,28 @@ export async function POST(req: Request) {
     });
   } catch (error: any) {
     console.error("AI Analysis Error:", error);
+    if (userId) {
+      try {
+        const userRef = doc(db, "profiles", userId);
+        await updateDoc(userRef, {
+          purchasedCredits: increment(1),
+        });
+        console.log(`Credit refunded to user: ${userId}`);
+      } catch (refundError) {
+        console.error("Refund failed:", refundError);
+      }
+    }
+
+    const isOverloaded =
+      error.message?.includes("503") || error.message?.includes("overloaded");
+
     return NextResponse.json(
-      { error: error.message || "Analysis failed" },
-      { status: 500 }
+      {
+        error: isOverloaded
+          ? "The Apprena AI is currently busy. Your credit has been refunded. Please try again in a few seconds."
+          : error.message,
+      },
+      { status: isOverloaded ? 503 : 500 }
     );
   }
 }
