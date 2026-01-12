@@ -54,8 +54,8 @@ export const ProcessAnimation = () => {
   };
 
   return (
-    <div className="relative -mt-56 z-20 px-4">
-      <div className="max-w-5xl mx-auto bg-white rounded-[3.5rem] shadow-[0_40px_80px_-15px_rgba(0,0,0,0.15)] border border-slate-100 p-8 md:p-16 min-h-[500px] flex flex-col justify-center overflow-hidden">
+    <div className="relative -mt-40 z-20 px-4">
+      <div className="max-w-5xl mx-auto bg-white rounded-[3.5rem] shadow-[0_40px_80px_-15px_rgba(0,0,0,0.15)] border border-slate-100 p-8 md:p-16 min-h-125 flex flex-col justify-center overflow-hidden">
         <AnimatePresence mode="wait">
           {phase === "typing" && (
             <motion.div
@@ -79,7 +79,7 @@ export const ProcessAnimation = () => {
                 <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400">
                   <Search size={24} />
                 </div>
-                <div className="w-full bg-slate-50 border-2 border-slate-100 rounded-[2rem] px-16 py-8 text-2xl font-bold text-slate-800 shadow-inner overflow-hidden flex items-center">
+                <div className="w-full bg-slate-50 border-2 border-slate-100 rounded-4xl px-16 py-8 text-2xl font-bold text-slate-800 shadow-inner overflow-hidden flex items-center">
                   <motion.span
                     animate={{ opacity: [1, 0] }}
                     transition={{ repeat: Infinity, duration: 0.8 }}
@@ -91,7 +91,6 @@ export const ProcessAnimation = () => {
             </motion.div>
           )}
 
-          {/* Phase 2: Analyzing Pulse */}
           {phase === "analyzing" && (
             <motion.div
               key="analyzing"

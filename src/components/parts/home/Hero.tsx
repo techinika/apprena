@@ -10,9 +10,10 @@ export const Hero = () => (
         Architecture
       </div>
       <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-8 text-white leading-[0.9]">
-        Stop Wandering. <br />
-        <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-white to-amber-100">
-          Build Your Legacy.
+        Stop Wandering.
+        <br />
+        <span className="text-transparent bg-clip-text bg-linear-to-r from-amber-300 via-white to-amber-100">
+          Follow the Map.
         </span>
       </h1>
       <p className="text-amber-100/70 text-lg md:text-2xl max-w-3xl mx-auto mb-10 leading-relaxed font-medium">

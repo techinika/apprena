@@ -7,8 +7,8 @@ export async function getBadgeData(badgeId: string) {
   const q = query(profilesRef, where("badges", "!=", null));
 
   const querySnapshot = await getDocs(q);
-  let foundBadge = null;
-  let userData = null;
+  let foundBadge: any = null;
+  let userData: any = null;
 
   querySnapshot.forEach((doc) => {
     const profile = doc.data();
@@ -23,7 +23,7 @@ export async function getBadgeData(badgeId: string) {
   });
 
   if (foundBadge && userData) {
-    return { ...foundBadge, ...userData } as any;
+    return { ...foundBadge, ...userData };
   }
   return null;
 }

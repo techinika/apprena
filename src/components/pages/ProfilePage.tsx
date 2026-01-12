@@ -46,7 +46,7 @@ const ProfilePage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [badgeTitle, setBadgeTitle] = useState("");
+  const [badgeData, setBadgeData] = useState<{ id: string; title: string }>();
 
   const fetchTransactions = async (isLoadMore = false) => {
     if (!user?.uid) return;
@@ -108,8 +108,9 @@ const ProfilePage = () => {
     <div className="min-h-screen bg-slate-50/50">
       {showSuccess && (
         <SuccessModal
-          planTitle={badgeTitle}
+          planTitle={badgeData?.title ?? ""}
           onClose={() => setShowSuccess(false)}
+          badgeId={badgeData?.id ?? ""}
         />
       )}
       {isModalOpen && (
@@ -247,7 +248,10 @@ const ProfilePage = () => {
                           <button
                             key={index + 1}
                             onClick={() => {
-                              setBadgeTitle(badge?.title);
+                              setBadgeData({
+                                title: badge?.title,
+                                id: badge?.id,
+                              });
                               setShowSuccess(true);
                             }}
                             className="group flex items-center gap-4 p-4 bg-white border border-slate-100 rounded-2xl hover:border-amber-500 hover:shadow-md transition-all cursor-pointer"
