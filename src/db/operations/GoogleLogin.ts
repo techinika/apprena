@@ -5,14 +5,18 @@ import { syncUserProfile } from "./Profile";
 import { doc, updateDoc } from "firebase/firestore";
 import { verifyAndDeductCredit } from "./CreditCheck";
 
-export const handleGoogleLogin = async (setLoading: any, router: any) => {
+export const handleGoogleLogin = async (
+  setLoading: any,
+  router: any,
+  ref: any
+) => {
   setLoading(true);
   try {
     const result = await signInWithPopup(auth, googleProvider);
 
     if (result.user) {
       await syncUserProfile(result.user);
-      router.push("/workspace");
+      router.push(ref === "upgrade" ? "/upgrade" : "/workspace");
     }
   } catch (error: any) {
     console.error("Auth Error:", error.message);

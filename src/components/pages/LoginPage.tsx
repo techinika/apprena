@@ -5,11 +5,13 @@ import { Zap, ShieldCheck, Loader2 } from "lucide-react";
 import { APP } from "@/variables/globals";
 import Link from "next/link";
 import { handleGoogleLogin } from "@/db/operations/GoogleLogin";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const LoginPage = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const ref = searchParams.get("ref");
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2 bg-white">
@@ -74,7 +76,7 @@ const LoginPage = () => {
 
           <div className="space-y-4">
             <button
-              onClick={() => handleGoogleLogin(setLoading, router)}
+              onClick={() => handleGoogleLogin(setLoading, router, ref)}
               disabled={loading}
               className="w-full group relative flex items-center justify-center gap-3 bg-white border-2 border-slate-100 py-4 rounded-2xl font-bold text-slate-700 hover:border-amber-600 hover:bg-amber-50/30 transition-all active:scale-[0.98] disabled:opacity-50"
             >
@@ -82,7 +84,6 @@ const LoginPage = () => {
                 <Loader2 className="animate-spin text-amber-600" size={20} />
               ) : (
                 <>
-                  {/* Custom Google G-Logo Icon */}
                   <svg
                     width="20"
                     height="20"
