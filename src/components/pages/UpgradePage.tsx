@@ -17,7 +17,7 @@ const UpgradePage = () => {
     if (!user) return;
 
     setLoading(true);
-    const amount = selectedPlan === PLANS?.sprint ? 0.99 : 10;
+    const amount = selectedPlan === PLANS?.sprint ? 0.99 : 9.99;
 
     try {
       await createOrGetOrder(user.uid, selectedPlan, amount);
@@ -114,11 +114,8 @@ const UpgradePage = () => {
               For students and pros actively building their future.
             </p>
             <div className="text-4xl font-black mb-8">
-              $10
-              <span className="text-sm text-slate-500 font-normal">
-                {" "}
-                /month
-              </span>
+              $9.99
+              <span className="text-sm text-slate-500 font-normal">/month</span>
             </div>
 
             <ul className="space-y-4 mb-10">
@@ -138,7 +135,6 @@ const UpgradePage = () => {
           </div>
         </div>
 
-        {/* 3. CHECKOUT SUMMARY */}
         <div className="mt-16 max-w-md mx-auto bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
           <h4 className="font-bold text-slate-900 mb-6 flex items-center gap-2">
             <ShieldCheck className="text-emerald-500" /> Secure Checkout
@@ -151,13 +147,13 @@ const UpgradePage = () => {
                 : "Architect Subscription"}
             </span>
             <span className="font-bold text-slate-900">
-              {selectedPlan === "sprint" ? "$0.99" : "$10.00"}
+              {selectedPlan === "sprint" ? "$0.99" : "$9.99"}
             </span>
           </div>
           <div className="border-t border-slate-50 pt-4 mb-8 flex justify-between items-center">
             <span className="font-bold">Total Due</span>
             <span className="text-2xl font-black text-amber-600">
-              {selectedPlan === "sprint" ? "$0.99" : "$10.00"}
+              {selectedPlan === "sprint" ? "$0.99" : "$9.99"}
             </span>
           </div>
 

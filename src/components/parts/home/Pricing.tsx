@@ -92,9 +92,9 @@ export const Pricing = () => {
             Architect
           </h3>
           <div className="text-5xl font-black mb-8">
-            $10<span className="text-sm text-slate-500 font-normal"> /mo</span>
+            $9.99<span className="text-sm text-slate-500 font-normal"> /mo</span>
           </div>
-          <ul className="space-y-4 mb-10 flex-grow">
+          <ul className="space-y-4 mb-10 grow">
             {[
               "Unlimited Roadmaps",
               "Real-time Trend Tracking",
