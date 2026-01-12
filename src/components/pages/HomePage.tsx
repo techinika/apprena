@@ -4,24 +4,24 @@ import React from "react";
 import { Zap } from "lucide-react";
 import { APP } from "@/variables/globals";
 import MainNav from "../parts/MainNav";
-import { AssessmentForm } from "../parts/home/AssessmentForm";
 import Link from "next/link";
 import { Pricing } from "../parts/home/Pricing";
 import { Features } from "../parts/home/Features";
 import { Hero } from "../parts/home/Hero";
+import { ProcessAnimation } from "../parts/home/ProcessAnimation";
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-white selection:bg-amber-100">
       <div className="bg-slate-900 relative">
-        <div className="absolute inset-0 bg-gradient-to-br from-amber-950 via-slate-950 to-black pointer-events-none" />
+        <div className="absolute inset-0 bg-linear-to-br from-amber-950 via-slate-950 to-black pointer-events-none" />
         <div className="relative z-50 border-b border-white/5">
           <MainNav />
         </div>
         <Hero />
       </div>
 
-      <AssessmentForm />
+      <ProcessAnimation />
 
       <main>
         <Features />
