@@ -88,7 +88,7 @@ export const SuccessModal = ({
                 size={100}
                 level={"H"}
                 imageSettings={{
-                  src: "/white-logo.png",
+                  src: "/logo-short.png",
                   x: undefined,
                   y: undefined,
                   height: 20,

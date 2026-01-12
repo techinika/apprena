@@ -23,10 +23,13 @@ const LoginPage = () => {
             href="/"
             className="flex items-center gap-2 text-white font-black text-2xl tracking-tighter mb-12"
           >
-            {/* <div className="bg-amber-600 p-1.5 rounded-lg">
-              <Zap className="fill-white" size={20} />
-            </div> */}
-            {APP?.NAME || "Apprena"}
+            <div className="relative w-30 transition-transform group-hover:scale-105">
+              <img
+                src="/transparent-logo.png"
+                alt={`${APP?.NAME} Logo`}
+                className="object-contain w-full h-full"
+              />
+            </div>
           </Link>
 
           <h2 className="text-5xl font-black text-white leading-tight mb-6">
@@ -57,10 +60,13 @@ const LoginPage = () => {
         <div className="w-full max-w-sm">
           <div className="lg:hidden flex justify-center mb-12">
             <div className="flex items-center gap-2 text-slate-900 font-black text-3xl tracking-tighter">
-              <div className="bg-amber-600 p-2 rounded-xl">
-                <Zap className="text-white fill-white" size={24} />
+              <div className="relative w-30 transition-transform group-hover:scale-105">
+                <img
+                  src="/transparent-black.png"
+                  alt={`${APP?.NAME} Logo`}
+                  className="object-contain w-full h-full"
+                />
               </div>
-              {APP?.NAME}
             </div>
           </div>
 

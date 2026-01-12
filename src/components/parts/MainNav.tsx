@@ -2,20 +2,21 @@
 
 import { useAuth } from "@/lib/AuthContext";
 import { APP } from "@/variables/globals";
-import { Zap } from "lucide-react";
 import Link from "next/link";
-import React from "react";
 
 function MainNav() {
   const { user } = useAuth();
   return (
     <nav className="flex justify-between items-center py-6 px-8 max-w-7xl mx-auto w-full text-white">
-      <div className="text-2xl font-bold flex items-center gap-2">
-        {/* <div className="bg-white p-1 rounded-lg">
-          <Zap className="text-amber-600 fill-amber-600" size={20} />
-        </div> */}
-        <span>{APP?.NAME || "Apprena"}</span>
-      </div>
+      <Link href="/">
+        <div className="relative w-30 transition-transform group-hover:scale-105">
+          <img
+            src="/transparent-logo.png"
+            alt={`${APP?.NAME} Logo`}
+            className="object-contain w-full h-full"
+          />
+        </div>
+      </Link>
       <div className="space-x-8 font-medium hidden md:flex opacity-90">
         <Link
           href="#how-it-works"

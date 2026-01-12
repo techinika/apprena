@@ -35,14 +35,14 @@ function AuthNav() {
     <header className="bg-white border-b border-slate-200 sticky top-0 z-30">
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <Link
-            href="/workspace"
-            className="text-xl font-black text-amber-600 flex items-center gap-2"
-          >
-            {/* <div className="bg-amber-600 p-1.5 rounded-lg shadow-sm shadow-amber-100">
-              <LayoutDashboard className="text-white" size={18} />
-            </div> */}
-            {APP?.NAME}
+          <Link href="/workspace">
+            <div className="relative w-30 transition-transform group-hover:scale-105">
+              <img
+                src="/transparent-black.png"
+                alt={`${APP?.NAME} Logo`}
+                className="object-contain w-full h-full"
+              />
+            </div>
           </Link>
 
           <nav className="hidden md:flex items-center gap-6 text-sm font-bold text-slate-500">

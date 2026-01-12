@@ -5,12 +5,16 @@ import React from "react";
 function Footer() {
   return (
     <footer className="bg-white py-24 px-8 text-center border-t border-slate-100">
-      {/* Brand Name */}
-      <div className="text-2xl font-black text-slate-900 mb-8 tracking-tighter flex items-center justify-center gap-2">
-        {APP?.NAME || "PathAI"}
+      <div className="mb-8 flex items-center justify-center gap-2">
+        <div className="relative w-30 transition-transform group-hover:scale-105">
+          <img
+            src="/transparent-black.png"
+            alt={`${APP?.NAME} Logo`}
+            className="object-contain w-full h-full"
+          />
+        </div>
       </div>
 
-      {/* Navigation Links */}
       <div className="flex justify-center gap-10 text-slate-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-10">
         <Link href="/terms" className="hover:text-amber-600 transition">
           Terms
