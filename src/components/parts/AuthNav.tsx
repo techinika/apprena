@@ -39,9 +39,9 @@ function AuthNav() {
             href="/workspace"
             className="text-xl font-black text-amber-600 flex items-center gap-2"
           >
-            <div className="bg-amber-600 p-1.5 rounded-lg shadow-sm shadow-amber-100">
+            {/* <div className="bg-amber-600 p-1.5 rounded-lg shadow-sm shadow-amber-100">
               <LayoutDashboard className="text-white" size={18} />
-            </div>
+            </div> */}
             {APP?.NAME}
           </Link>
 

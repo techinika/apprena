@@ -23,10 +23,10 @@ const LoginPage = () => {
             href="/"
             className="flex items-center gap-2 text-white font-black text-2xl tracking-tighter mb-12"
           >
-            <div className="bg-amber-600 p-1.5 rounded-lg">
+            {/* <div className="bg-amber-600 p-1.5 rounded-lg">
               <Zap className="fill-white" size={20} />
-            </div>
-            {APP?.NAME || "PathAI"}
+            </div> */}
+            {APP?.NAME || "Apprena"}
           </Link>
 
           <h2 className="text-5xl font-black text-white leading-tight mb-6">
@@ -43,13 +43,12 @@ const LoginPage = () => {
           <div className="flex items-center gap-4 text-slate-300">
             <div className="h-px w-12 bg-amber-500/50" />
             <span className="text-xs font-black uppercase tracking-[0.2em]">
-              Trusted By Pros At
+              Trusted By Pros In
             </span>
           </div>
           <div className="flex gap-8 opacity-30 grayscale invert">
-            <div className="font-black text-xl italic">Google</div>
-            <div className="font-black text-xl italic">Meta</div>
-            <div className="font-black text-xl italic">Stripe</div>
+            <div className="font-black text-xl italic">Education</div>
+            <div className="font-black text-xl italic">Career Growth</div>
           </div>
         </div>
       </div>
