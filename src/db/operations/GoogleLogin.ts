@@ -4,6 +4,7 @@ import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { syncUserProfile } from "./Profile";
 import { doc, updateDoc } from "firebase/firestore";
 import { verifyAndDeductCredit } from "./CreditCheck";
+import { toast } from "sonner";
 
 export const handleGoogleLogin = async (
   setLoading: any,
@@ -20,7 +21,7 @@ export const handleGoogleLogin = async (
     }
   } catch (error: any) {
     console.error("Auth Error:", error.message);
-    alert("Failed to sign in. Please try again.");
+    toast.error("Failed to sign in. Please try again.");
   } finally {
     setLoading(false);
   }
@@ -53,6 +54,6 @@ export const handleGoogleLoginOnActivity = async (result: any, router: any) => {
     }
   } catch (e) {
     console.error("Login or Credit deduction failed", e);
-    alert("Something went wrong during verification.");
+    toast.error("Something went wrong during verification.");
   }
 };

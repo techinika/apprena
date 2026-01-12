@@ -5,6 +5,7 @@ import { ChevronRight, ShieldCheck, Upload, X, FileText } from "lucide-react";
 import LoadingAnalysis from "@/app/loading-analysis";
 import { handleGoogleLoginOnActivity } from "@/db/operations/GoogleLogin";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export const AssessmentForm = () => {
   const router = useRouter();
@@ -29,7 +30,7 @@ export const AssessmentForm = () => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
       if (files.length + newFiles.length > 5) {
-        alert("You can only upload a maximum of 5 documents.");
+        toast.error("You can only upload a maximum of 5 documents.");
         return;
       }
       setFiles([...files, ...newFiles]);
@@ -56,7 +57,7 @@ export const AssessmentForm = () => {
       const data = await res.json();
 
       if (res.status === 429) {
-        alert("Free limit reached. Please log in to continue.");
+        toast.info("Free limit reached. Please log in to continue.");
         setShowLoginGate(true);
       } else {
         setResult(data);

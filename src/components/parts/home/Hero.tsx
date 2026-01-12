@@ -18,7 +18,7 @@ export const Hero = () => (
       </h1>
       <p className="text-amber-100/70 text-lg md:text-2xl max-w-3xl mx-auto mb-10 leading-relaxed font-medium">
         The precision engine that turns your skills and background into a
-        step-by-step roadmap for your 10-year career ascent.
+        step-by-step roadmap that guides your learning.
       </p>
     </div>
   </div>
