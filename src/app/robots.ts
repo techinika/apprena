@@ -1,16 +1,12 @@
-import type { MetadataRoute } from "next";
+import { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
-  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
-
   return {
-    rules: [
-      {
-        userAgent: "*",
-        allow: "/",
-        disallow: ["/org/", "/profile/"],
-      },
-    ],
-    sitemap: `${BASE_URL}/sitemap.xml`,
+    rules: {
+      userAgent: "*",
+      allow: "/",
+      disallow: ["/workspace/", "/learning/"],
+    },
+    sitemap: process.env.NEXT_PUBLIC_BASE_URL + "/sitemap.xml",
   };
 }

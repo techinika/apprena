@@ -36,12 +36,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
 
   useEffect(() => {
-    const publicRoutes = ["/", "/login", "/terms", "/privacy"];
+    // Define routes that don't require login
+    const isPublicRoute =
+      pathname === "/" ||
+      pathname === "/login" ||
+      pathname === "/terms" ||
+      pathname === "/privacy" ||
+      pathname.startsWith("/verify/");
+
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setLoading(false);
 
-      if (!currentUser && !publicRoutes.includes(pathname)) {
+      if (!currentUser && !isPublicRoute) {
         router.push("/login");
       }
 
@@ -55,13 +62,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           if (docSnap.exists()) {
             setProfile(docSnap.data() as UserProfile);
           }
-          setLoading(false);
         });
-
         return () => unsubscribeProfile();
       } else {
         setProfile(null);
-        setLoading(false);
       }
     });
 

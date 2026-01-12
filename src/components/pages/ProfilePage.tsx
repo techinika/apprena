@@ -32,6 +32,7 @@ import { db } from "@/db/firebase";
 import { deleteUserAccountPermanently } from "@/db/operations/Profile";
 import { useRouter } from "next/navigation";
 import { SuccessModal } from "../parts/learning/SuccessOverlay";
+import { toast } from "sonner";
 
 const ProfilePage = () => {
   const router = useRouter();
@@ -95,7 +96,9 @@ const ProfilePage = () => {
       router.push("/");
     } catch (error: any) {
       console.error("Deletion failed:", error);
-      alert(error.message || "Failed to delete account. Please try again.");
+      toast.error(
+        error.message || "Failed to delete account. Please try again."
+      );
       setIsDeleting(false);
       setIsModalOpen(false);
     }

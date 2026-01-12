@@ -11,9 +11,11 @@ import {
   Mail,
 } from "lucide-react";
 import MainNav from "../parts/MainNav";
+import { APP } from "@/variables/globals";
+import Footer from "../parts/Footer";
 
 const PrivacyPolicy = () => {
-  const lastUpdated = "October 24, 2025";
+  const lastUpdated = "January 12, 2026";
 
   const sections = [
     { id: "collection", title: "Information We Collect" },
@@ -26,7 +28,7 @@ const PrivacyPolicy = () => {
   return (
     <div className="min-h-screen bg-[#FDFDFF] text-slate-900 pb-20">
       <div className="bg-slate-900 relative">
-        <div className="absolute inset-0 bg-gradient-to-br from-amber-950 via-slate-950 to-black pointer-events-none" />
+        <div className="absolute inset-0 bg-linear-to-br from-amber-950 via-slate-950 to-black pointer-events-none" />
         <div className="relative z-50 border-b border-white/5">
           <MainNav />
         </div>
@@ -45,7 +47,7 @@ const PrivacyPolicy = () => {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-6 pt-16">
+      <div className="max-w-4xl mx-auto px-6 pt-16 mb-4">
         <div className="mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-widest mb-4">
             <ShieldCheck size={12} /> Privacy Verified
@@ -179,13 +181,13 @@ const PrivacyPolicy = () => {
                 You have the right to access, export, or delete your data at any
                 time through your Profile dashboard. You may also revoke Google
                 Account access through your{" "}
-                <a
+                <Link
                   href="https://myaccount.google.com/permissions"
                   className="text-emerald-600 font-bold hover:underline"
                   target="_blank"
                 >
                   Google Security Settings
-                </a>
+                </Link>
                 .
               </p>
             </section>
@@ -193,12 +195,13 @@ const PrivacyPolicy = () => {
             <div className="pt-12 border-t border-slate-100 text-center">
               <p className="text-xs text-slate-400">
                 Last Updated: {lastUpdated} • {new Date().getFullYear()} ©
-                YourApp Platform
+                {APP?.NAME} Platform
               </p>
             </div>
           </main>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

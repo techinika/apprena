@@ -6,6 +6,7 @@ import { createOrGetOrder } from "@/db/operations/HandleOrders";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
 import { PLANS } from "@/types/plan";
+import { toast } from "sonner";
 
 const UpgradePage = () => {
   const [loading, setLoading] = useState(false);
@@ -24,6 +25,7 @@ const UpgradePage = () => {
       router.push(`/upgrade/checkout`);
     } catch (error) {
       console.error("Order creation failed", error);
+      toast.error("Failed to create an order.");
       setLoading(false);
     }
   };

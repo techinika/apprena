@@ -4,9 +4,11 @@ import React from "react";
 import Link from "next/link";
 import { ArrowLeft, ShieldCheck, Scale, ScrollText, Globe } from "lucide-react";
 import MainNav from "../parts/MainNav";
+import { APP } from "@/variables/globals";
+import Footer from "../parts/Footer";
 
 const TermsOfService = () => {
-  const lastUpdated = "October 24, 2025";
+  const lastUpdated = "January 12, 2026";
 
   const sections = [
     { id: "acceptance", title: "Acceptance of Terms" },
@@ -21,7 +23,7 @@ const TermsOfService = () => {
   return (
     <div className="min-h-screen bg-[#FDFDFF] text-slate-900 pb-20">
       <div className="bg-slate-900 relative">
-        <div className="absolute inset-0 bg-gradient-to-br from-amber-950 via-slate-950 to-black pointer-events-none" />
+        <div className="absolute inset-0 bg-linear-to-br from-amber-950 via-slate-950 to-black pointer-events-none" />
         <div className="relative z-50 border-b border-white/5">
           <MainNav />
         </div>
@@ -40,7 +42,7 @@ const TermsOfService = () => {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-6 pt-16">
+      <div className="max-w-4xl mx-auto px-6 pt-16 mb-4">
         <div className="mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-50 text-amber-600 rounded-full text-[10px] font-black uppercase tracking-widest mb-4">
             <ScrollText size={12} /> Effective Date: {lastUpdated}
@@ -172,12 +174,13 @@ const TermsOfService = () => {
             <div className="pt-12 border-t border-slate-100">
               <p className="text-xs text-slate-400 italic">
                 Questions about our Terms? Contact our legal team at{" "}
-                <strong>legal@yourapp.com</strong>
+                <strong>{APP?.EMAIL}</strong>
               </p>
             </div>
           </main>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
