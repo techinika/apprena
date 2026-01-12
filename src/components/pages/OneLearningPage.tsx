@@ -33,6 +33,7 @@ export default function SingleLearningPlan({ id }: { id: string }) {
   const [plan, setPlan] = useState<LearningPlan | null>(null);
   const [loading, setLoading] = useState(true);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [badgeData, setBadgeData] = useState<{ id: string; title: string }>();
 
   useEffect(() => {
     if (!user || !id) return;
@@ -117,6 +118,10 @@ export default function SingleLearningPlan({ id }: { id: string }) {
             }),
           });
           setShowSuccess(true);
+          setBadgeData({
+            title: plan?.title,
+            id: `badge-${id}`,
+          });
         }
       }
     } catch (error) {
@@ -139,6 +144,7 @@ export default function SingleLearningPlan({ id }: { id: string }) {
         <SuccessModal
           planTitle={plan.title}
           onClose={() => setShowSuccess(false)}
+          badgeId={badgeData?.id ?? ""}
         />
       )}
 
