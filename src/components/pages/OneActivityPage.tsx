@@ -157,6 +157,9 @@ const AnalysisDetail = ({ activityId }: { activityId: string }) => {
             <LearningSection
               learningGaps={activity?.learningGaps}
               curriculum={activity?.curriculum || []}
+              activityId={activityId}
+              title={activity?.title}
+              goal={activity?.userInput?.goal ?? ""}
             />
           )}
           {activeTab === "habits" && (
@@ -168,7 +171,9 @@ const AnalysisDetail = ({ activityId }: { activityId: string }) => {
               reason={activity?.networkReason}
             />
           )}
-          {activeTab === "achievements" && <AchievementsSection achievements={activity?.achievements} />}
+          {activeTab === "achievements" && (
+            <AchievementsSection achievements={activity?.achievements} />
+          )}
         </div>
       </main>
     </div>

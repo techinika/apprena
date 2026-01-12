@@ -5,4 +5,5 @@ export interface UserProfile {
   baseCredits: number;
   purchasedCredits: number;
   totalUsed: number;
+  badges: any[];
 }

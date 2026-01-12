@@ -52,9 +52,6 @@ function AuthNav() {
             <Link href="/learning" className="hover:text-slate-800 transition">
               My Learning
             </Link>
-            <Link href="/mentors" className="hover:text-slate-800 transition">
-              Mentors
-            </Link>
           </nav>
         </div>
 

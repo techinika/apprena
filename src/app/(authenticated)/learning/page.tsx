@@ -1,10 +1,10 @@
-import MentorsPage from "@/components/pages/MentorsPage";
+import LearningPage from "@/components/pages/LearningPage";
 import React from "react";
 
 function page() {
   return (
     <div>
-      <MentorsPage />
+      <LearningPage />
     </div>
   );
 }

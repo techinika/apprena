@@ -3,6 +3,7 @@ import "./globals.css";
 import { APP } from "@/variables/globals";
 import { Nunito } from "next/font/google";
 import { AuthProvider } from "@/lib/AuthContext";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: `${APP?.NAME} — ${APP?.SLOGAN}`,
@@ -23,7 +24,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${Font.variable} antialiased`}>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <Toaster position="top-center" expand={true} richColors/>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

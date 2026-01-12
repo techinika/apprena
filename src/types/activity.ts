@@ -15,6 +15,9 @@ export interface Activity {
   networkReason: string;
   network: NetworkPerson[];
   achievements: AchievementItem[];
+  userInput: {
+    goal: string;
+  };
 }
 
 export interface RoadmapStep {
@@ -63,4 +66,5 @@ export interface CurriculumItem {
 export interface LearningSectionProps {
   learningGaps: LearningGaps;
   curriculum: CurriculumItem[];
+  goal: string;
 }

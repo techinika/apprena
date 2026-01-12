@@ -29,6 +29,8 @@ export const handleGoogleLoginOnActivity = async (result: any, router: any) => {
     const user = cred.user;
 
     if (user && result) {
+      await syncUserProfile(result.user);
+
       const verification = await verifyAndDeductCredit(user.uid);
 
       if (!verification.allowed) {

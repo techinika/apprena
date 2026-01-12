@@ -15,6 +15,8 @@ import {
   Trash2,
   Loader2,
   ShieldAlert,
+  Award,
+  Medal,
 } from "lucide-react";
 import Link from "next/link";
 import { getTransactionHistory } from "@/db/operations/Transactions";
@@ -29,6 +31,7 @@ import {
 import { db } from "@/db/firebase";
 import { deleteUserAccountPermanently } from "@/db/operations/Profile";
 import { useRouter } from "next/navigation";
+import { SuccessModal } from "../parts/learning/SuccessOverlay";
 
 const ProfilePage = () => {
   const router = useRouter();
@@ -41,6 +44,8 @@ const ProfilePage = () => {
   const [expiryDate, setExpiryDate] = useState<Date | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [badgeTitle, setBadgeTitle] = useState("");
 
   const fetchTransactions = async (isLoadMore = false) => {
     if (!user?.uid) return;
@@ -98,6 +103,12 @@ const ProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-slate-50/50">
+      {showSuccess && (
+        <SuccessModal
+          planTitle={badgeTitle}
+          onClose={() => setShowSuccess(false)}
+        />
+      )}
       {isModalOpen && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm">
           <div className="bg-white rounded-[2.5rem] p-10 max-w-md w-full shadow-2xl">
@@ -218,6 +229,59 @@ const ProfilePage = () => {
                         {expiryDate ? formatDate(expiryDate) : "No active sub"}
                       </span>
                     </div>
+                  </div>
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xl font-black text-slate-900 flex items-center gap-2">
+                        <Award className="text-amber-500" size={24} />
+                        Unlocked Milestones
+                      </h3>
+                    </div>
+
+                    {profile?.badges && profile.badges.length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {profile.badges.map((badge: any, index: number) => (
+                          <button
+                            key={index + 1}
+                            onClick={() => {
+                              setBadgeTitle(badge?.title);
+                              setShowSuccess(true);
+                            }}
+                            className="group flex items-center gap-4 p-4 bg-white border border-slate-100 rounded-2xl hover:border-amber-500 hover:shadow-md transition-all cursor-pointer"
+                          >
+                            <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600 group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                              <Medal size={24} />
+                            </div>
+                            <div className="overflow-hidden">
+                              <h4 className="font-black text-slate-900 text-sm truncate uppercase tracking-tight">
+                                {badge.title}
+                              </h4>
+                              <p className="text-[10px] text-slate-400 font-bold uppercase">
+                                {badge.unlockedAt
+                                  ? formatDate(new Date(badge.unlockedAt))
+                                  : "Recently"}
+                              </p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12 bg-slate-50 rounded-4xl border border-dashed border-slate-200">
+                        <Award
+                          className="mx-auto text-slate-200 mb-3"
+                          size={40}
+                        />
+                        <p className="text-slate-400 font-bold text-sm">
+                          No badges yet. Finish a learning path to earn one!
+                        </p>
+                        <Link
+                          href="/learning"
+                          className="text-amber-600 text-xs font-black uppercase tracking-widest mt-2 inline-block hover:underline"
+                        >
+                          Start Learning
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
