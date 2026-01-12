@@ -1,3 +1,4 @@
+import SupportPage from "@/components/pages/SupportPage";
 import { APP } from "@/variables/globals";
 import React from "react";
 
@@ -8,7 +9,11 @@ export const metadata = {
 };
 
 function page() {
-  return <div></div>;
+  return (
+    <div>
+      <SupportPage />
+    </div>
+  );
 }
 
 export default page;
