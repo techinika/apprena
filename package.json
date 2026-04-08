@@ -19,6 +19,7 @@
     "firebase": "^12.7.0",
     "framer-motion": "^12.25.0",
     "html2canvas-pro": "^1.6.4",
+    "jspdf": "^4.2.1",
     "lucide-react": "^0.562.0",
     "mermaid": "^11.12.2",
     "next": "^16.1.1",

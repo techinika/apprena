@@ -1,16 +1,15 @@
 "use client";
 
 import React from "react";
-import { Zap } from "lucide-react";
 import { APP } from "@/variables/globals";
 import MainNav from "../parts/MainNav";
-import Link from "next/link";
 import { Pricing } from "../parts/home/Pricing";
 import { Features } from "../parts/home/Features";
 import { Hero } from "../parts/home/Hero";
 import { ProcessAnimation } from "../parts/home/ProcessAnimation";
 import Footer from "../parts/Footer";
 import { FAQSection } from "../parts/home/FAQ";
+import { AssessmentForm } from "../parts/home/AssessmentForm";
 
 export default function HomePage() {
   return (

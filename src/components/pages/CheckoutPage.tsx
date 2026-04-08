@@ -401,7 +401,7 @@ const CheckoutPage = () => {
                           : "The Architect"}
                       </p>
                       <p className="font-bold text-white">
-                        ${ord.amount.toFixed(2)}
+                        {ord.amount.toLocaleString()} RWF
                       </p>
                     </div>
                     <button
@@ -422,7 +422,7 @@ const CheckoutPage = () => {
                     Total Due
                   </p>
                   <p className="text-3xl font-black text-amber-400">
-                    ${totalAmount.toFixed(2)}
+                    {totalAmount.toLocaleString()} RWF
                   </p>
                 </div>
               </div>

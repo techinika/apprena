@@ -175,7 +175,7 @@ export const AssessmentForm = () => {
                     Upload Resume or Certifications
                   </p>
                   <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-widest font-black">
-                    {files.length} of 3 files uploaded
+                    {files.length} of 5 files uploaded
                   </p>
                 </div>
 

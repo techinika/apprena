@@ -1,10 +1,15 @@
 import { HabitItem } from "@/types/activity";
+import { SectionFeedback } from "./SectionFeedback";
+
+interface HabitsSectionProps {
+  habits: HabitItem[] | undefined;
+  activityId?: string;
+}
 
 export const HabitsSection = ({
   habits,
-}: {
-  habits: HabitItem[] | undefined;
-}) => {
+  activityId,
+}: HabitsSectionProps) => {
   if (!habits || habits.length === 0) {
     return (
       <div className="p-12 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 text-center">
@@ -22,9 +27,20 @@ export const HabitsSection = ({
           key={index + 1}
           className="bg-white border border-slate-100 p-8 rounded-3xl hover:border-amber-200 hover:shadow-xl hover:shadow-amber-500/5 transition-all group"
         >
-          <span className="text-4xl mb-4 block group-hover:scale-110 transition-transform duration-300">
-            {habit.icon || "✨"}
-          </span>
+          <div className="flex justify-between items-start mb-4">
+            <span className="text-4xl block group-hover:scale-110 transition-transform duration-300">
+              {habit.icon || "✨"}
+            </span>
+            {activityId && (
+              <SectionFeedback
+                activityId={activityId}
+                sectionType="habits"
+                sectionTitle="Action & Habits"
+                itemId={`habit-${index}`}
+                itemTitle={habit.title}
+              />
+            )}
+          </div>
           <h3 className="text-xl font-black mb-2 text-slate-900">
             {habit.title}
           </h3>

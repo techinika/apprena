@@ -8,6 +8,9 @@ import { useAuth } from "@/lib/AuthContext";
 import { PLANS } from "@/types/plan";
 import { toast } from "sonner";
 
+const SPRINT_PRICE_RWF = 1200;
+const ARCHITECT_PRICE_RWF = 12000;
+
 const UpgradePage = () => {
   const [loading, setLoading] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState("sprint");
@@ -18,7 +21,7 @@ const UpgradePage = () => {
     if (!user) return;
 
     setLoading(true);
-    const amount = selectedPlan === PLANS?.sprint ? 0.99 : 9.99;
+    const amount = selectedPlan === PLANS?.sprint ? SPRINT_PRICE_RWF : ARCHITECT_PRICE_RWF;
 
     try {
       await createOrGetOrder(user.uid, selectedPlan, amount);
@@ -68,7 +71,7 @@ const UpgradePage = () => {
               Perfect for a quick pivot or a specific career check-in.
             </p>
             <div className="text-4xl font-black text-slate-900 mb-8">
-              $0.99
+              1,200 RWF
               <span className="text-sm text-slate-400 font-normal">
                 /analysis
               </span>
@@ -116,7 +119,7 @@ const UpgradePage = () => {
               For students and pros actively building their future.
             </p>
             <div className="text-4xl font-black mb-8">
-              $9.99
+              12,000 RWF
               <span className="text-sm text-slate-500 font-normal">/month</span>
             </div>
 
@@ -149,13 +152,13 @@ const UpgradePage = () => {
                 : "Architect Subscription"}
             </span>
             <span className="font-bold text-slate-900">
-              {selectedPlan === "sprint" ? "$0.99" : "$9.99"}
+              {selectedPlan === "sprint" ? "1,200 RWF" : "12,000 RWF"}
             </span>
           </div>
           <div className="border-t border-slate-50 pt-4 mb-8 flex justify-between items-center">
             <span className="font-bold">Total Due</span>
             <span className="text-2xl font-black text-amber-600">
-              {selectedPlan === "sprint" ? "$0.99" : "$9.99"}
+              {selectedPlan === "sprint" ? "1,200 RWF" : "12,000 RWF"}
             </span>
           </div>
 
