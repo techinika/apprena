@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useEffect, useState, lazy, Suspense } from "react";
-import { Map, BookOpen, Repeat, Users, Trophy, FileText, Eye, ExternalLink, TrendingUp, Share2, Link, Globe, Lock, Loader2, Copy, Check } from "lucide-react";
+import { Map, BookOpen, Repeat, Users, Trophy, FileText, Eye, ExternalLink, TrendingUp, Share2, Link, Globe, Lock, Loader2, Copy, Check, Trash2 } from "lucide-react";
 import { RoadmapSection } from "../parts/activity/RoadmapView";
 import { RoadmapProgress } from "../parts/activity/RoadmapProgress";
 import { fetchActivityById } from "@/db/operations/GetActivities";
@@ -15,6 +15,9 @@ import { HabitsSection } from "../parts/activity/Habitview";
 import { NetworkSection } from "../parts/activity/NetworkView";
 import { AchievementsSection } from "../parts/activity/AchievementSection";
 import { toast } from "sonner";
+import { doc, deleteDoc } from "firebase/firestore";
+import { db } from "@/db/firebase";
+import { ConfirmModal } from "../parts/ConfirmModal";
 
 const FlowchartView = lazy(() =>
   import("../parts/activity/FlowchartView").then((mod) => ({ default: mod.FlowchartView }))
@@ -39,6 +42,7 @@ const AnalysisDetail = ({ activityId }: { activityId: string }) => {
   const [sharing, setSharing] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const navItems = [
     { id: "roadmap", label: "Roadmap", icon: Map },
@@ -129,6 +133,17 @@ const AnalysisDetail = ({ activityId }: { activityId: string }) => {
     }
   };
 
+  const handleDeleteRoadmap = async () => {
+    if (!activity?.id) return;
+    try {
+      await deleteDoc(doc(db, "activities", activity.id));
+      toast.success("Roadmap deleted");
+      router.push("/workspace");
+    } catch (error) {
+      toast.error("Failed to delete roadmap");
+    }
+  };
+
   if (loading) return <Loading />;
 
   if (error) {
@@ -179,6 +194,13 @@ const AnalysisDetail = ({ activityId }: { activityId: string }) => {
           >
             <Share2 size={18} />
             {activity?.isPublic ? "Public" : "Share Analysis"}
+          </button>
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="w-full mt-2 bg-red-50 text-red-600 p-4 rounded-2xl text-sm font-bold hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
+          >
+            <Trash2 size={18} />
+            Delete Roadmap
           </button>
           
           {showShareMenu && (
@@ -347,6 +369,16 @@ const AnalysisDetail = ({ activityId }: { activityId: string }) => {
           )}
         </div>
       </main>
+
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDeleteRoadmap}
+        title="Delete Roadmap"
+        message="Are you sure you want to delete this roadmap? This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
+      />
     </div>
   );
 };

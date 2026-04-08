@@ -1,17 +1,13 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { generateWithFallback } from "@/lib/ai";
 import {
   collection,
   addDoc,
   serverTimestamp,
   doc,
   updateDoc,
-  increment,
 } from "firebase/firestore";
 import { db } from "@/db/firebase";
-import { verifyAndDeductCredit } from "@/db/operations/CreditCheck";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 interface GenerateCurriculumRequest {
   userId: string;
@@ -41,22 +37,6 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-
-    const verification = await verifyAndDeductCredit(userId);
-    if (!verification.allowed) {
-      return NextResponse.json(
-        { error: "Insufficient credits" },
-        { status: 403 }
-      );
-    }
-
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
-      generationConfig: {
-        responseMimeType: "application/json",
-        temperature: 0.6,
-      },
-    });
 
     const technicalSkills = roadmapData.learningGaps?.technical
       ?.map((s) => s.skill)
@@ -96,9 +76,10 @@ Create a detailed curriculum with learning modules. Each module should have:
 
 {
   "title": "Mastering ${targetSkill}: A Complete Guide",
+  "totalHours": number (estimate total hours for completing the entire curriculum),
   "modules": [
     {
-      "course": "Module title",
+      "course": "Unique and descriptive module title (e.g., 'Fundamentals of React Hooks', 'Advanced State Management in Redux')",
       "provider": "Apprena AI",
       "isGenerated": true,
       "content": [
@@ -122,62 +103,20 @@ Create a detailed curriculum with learning modules. Each module should have:
 - Include a mix of lessons, readings, exercises, and quizzes
 - For EXERCISES ONLY: Include an "aiSolution" field with a model answer (100-300 words)
 - Make content practical and applicable to real scenarios
+- Provide a realistic totalHours estimate based on content volume (typically 10-50 hours)
 - Output ONLY valid JSON - do not include any markdown code blocks or extra text
 `;
 
     let aiResponse;
     try {
-      const result = await model.generateContent(prompt);
-      let responseText = result.response.text();
+      const result = await generateWithFallback(prompt);
+      aiResponse = result.parsed;
       
-      responseText = responseText.trim();
-      
-      const extractJson = (text: string): any => {
-        const cleanText = text
-          .replace(/```json\n?/g, '')
-          .replace(/```\n?/g, '')
-          .replace(/\\n/g, ' ')
-          .replace(/\\r/g, '')
-          .replace(/\\t/g, ' ')
-          .replace(/\\\\/g, '\\')
-          .replace(/,\s*}/g, '}')
-          .replace(/,\s*]/g, ']');
-        
-        try {
-          return JSON.parse(cleanText);
-        } catch {
-          const match = cleanText.match(/\{[\s\S]*\}/);
-          if (match) {
-            try {
-              return JSON.parse(match[0]);
-            } catch {}
-          }
-          
-          const lines = cleanText.split('\n').filter(l => l.trim());
-          let obj: any = {};
-          for (const line of lines) {
-            try {
-              const parsed = JSON.parse(line);
-              if (typeof parsed === 'object') {
-                obj = { ...obj, ...parsed };
-              }
-            } catch {}
-          }
-          if (Object.keys(obj).length > 0) return obj;
-          
-          throw new Error('Could not parse JSON');
-        }
-      };
-      
-      aiResponse = extractJson(responseText);
+      if (!aiResponse) {
+        throw new Error("No parsed response");
+      }
     } catch (parseError) {
       console.error("AI JSON parse error:", parseError);
-      try {
-        const userRef = doc(db, "profiles", userId);
-        await updateDoc(userRef, { purchasedCredits: increment(1) });
-      } catch (refundError) {
-        console.error("Refund failed:", refundError);
-      }
       return NextResponse.json(
         { error: "Failed to generate curriculum. Please try again." },
         { status: 502 }
@@ -208,6 +147,7 @@ Create a detailed curriculum with learning modules. Each module should have:
       await updateDoc(planRef, {
         modules: modules,
         isGenerated: true,
+        totalHours: aiResponse.totalHours || Math.round(modules.length * 3),
         lastUpdated: serverTimestamp(),
       });
       return NextResponse.json({ success: true, planId, modules });
@@ -220,6 +160,7 @@ Create a detailed curriculum with learning modules. Each module should have:
         isGenerated: true,
         isActive: true,
         roadmapData,
+        totalHours: aiResponse.totalHours || Math.round(modules.length * 3),
         createdAt: serverTimestamp(),
         lastUpdated: serverTimestamp(),
       });

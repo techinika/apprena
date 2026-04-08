@@ -8,6 +8,7 @@ import {
   ArrowRight,
   Trophy,
   Layout,
+  Trash2,
 } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 import Link from "next/link";
@@ -18,16 +19,26 @@ import {
   where,
   onSnapshot,
   orderBy,
+  doc,
+  deleteDoc,
 } from "firebase/firestore";
 import { db } from "@/db/firebase";
 import Loading from "@/app/loading";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { ConfirmModal } from "../parts/ConfirmModal";
+
+interface DeleteConfirmState {
+  planId: string;
+  planTitle: string;
+}
 
 const LearningPage = () => {
   const { user } = useAuth();
   const router = useRouter();
   const [plans, setPlans] = useState<LearningPlan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteConfirm, setDeleteConfirm] = useState<DeleteConfirmState | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -60,6 +71,17 @@ const LearningPage = () => {
 
   const activePlans = plans.filter((p) => p.isActive);
   const completedPlans = plans.filter((p) => !p.isActive);
+
+  const handleDelete = async () => {
+    if (!deleteConfirm) return;
+    try {
+      await deleteDoc(doc(db, "learningPlans", deleteConfirm.planId));
+      toast.success("Learning plan deleted");
+    } catch (error) {
+      toast.error("Failed to delete plan");
+    }
+    setDeleteConfirm(null);
+  };
 
   if (loading) {
     return <Loading />;
@@ -100,7 +122,11 @@ const LearningPage = () => {
         {activePlans.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {activePlans.map((plan) => (
-              <ActivePlanCard key={plan.id} plan={plan} />
+              <ActivePlanCard
+                key={plan.id}
+                plan={plan}
+                onDelete={() => setDeleteConfirm({ planId: plan.id, planTitle: plan.title })}
+              />
             ))}
           </div>
         ) : (
@@ -118,32 +144,65 @@ const LearningPage = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {completedPlans.map((plan) => (
-                <button
+                <div
                   key={plan.id}
-                  onClick={() => router.push(`/learning/${plan.id}`)}
-                  className="bg-white border border-slate-100 p-6 rounded-3xl opacity-70 hover:opacity-100 transition-opacity cursor-pointer text-left"
+                  className="bg-white border border-slate-100 p-6 rounded-3xl opacity-70 hover:opacity-100 transition-opacity cursor-pointer text-left relative group"
                 >
-                  <CheckCircle2 className="text-emerald-500 mb-3" />
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeleteConfirm({ planId: plan.id, planTitle: plan.title });
+                    }}
+                    className="absolute top-3 right-3 p-2 rounded-full bg-red-50 text-red-500 opacity-0 group-hover:opacity-100 hover:bg-red-100 transition-all z-10"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                  <Link href={`/learning/${plan.id}`} className="block">
+                    <CheckCircle2 className="text-emerald-500 mb-3" />
+                  </Link>
                   <h4 className="font-bold text-slate-900">{plan.title}</h4>
                   <p className="text-xs text-slate-500 mt-1">Goal Achieved</p>
-                </button>
+                </div>
               ))}
             </div>
           </section>
         )}
       </div>
+
+      <ConfirmModal
+        isOpen={!!deleteConfirm}
+        onClose={() => setDeleteConfirm(null)}
+        onConfirm={handleDelete}
+        title="Delete Learning Plan"
+        message={`Are you sure you want to delete "${deleteConfirm?.planTitle}"? This action cannot be undone.`}
+        confirmText="Delete"
+        variant="danger"
+      />
     </div>
   );
 };
 
-const ActivePlanCard = ({ plan }: { plan: LearningPlan }) => {
+interface ActivePlanCardProps {
+  plan: LearningPlan;
+  onDelete: () => void;
+}
+
+const ActivePlanCard = ({ plan, onDelete }: ActivePlanCardProps) => {
+  const router = useRouter();
   const completedCount =
     plan.modules?.filter((m) => m.status === "completed").length || 0;
   const totalCount = plan.modules?.length || 1;
   const progress = (completedCount / totalCount) * 100;
 
   return (
-    <div className="bg-white border border-slate-200 rounded-[3rem] p-10 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+    <div className="bg-white border border-slate-200 rounded-[3rem] p-10 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group relative">
+      <button
+        onClick={onDelete}
+        className="absolute top-6 right-6 p-3 rounded-full bg-red-50 text-red-500 opacity-0 group-hover:opacity-100 hover:bg-red-100 transition-all"
+        title="Delete learning plan"
+      >
+        <Trash2 size={18} />
+      </button>
       <div className="flex justify-between items-start mb-8">
         <div className="bg-amber-50 p-4 rounded-2xl text-amber-600 group-hover:bg-amber-600 group-hover:text-white transition-colors duration-500">
           <BookOpen size={32} />

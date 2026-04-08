@@ -37,6 +37,7 @@ export interface LearningPlan {
   passedAt?: string;
   attempts?: number;
   aiAnswerDetected?: boolean;
+  totalHours?: number;
   finalComparison?: {
     exerciseId: string;
     userAnswer: string;

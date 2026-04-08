@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { generateWithFallback } from "@/lib/ai";
 import { db } from "@/db/firebase";
 import {
   doc,
@@ -7,11 +7,7 @@ import {
   collection,
   addDoc,
   serverTimestamp,
-  updateDoc,
 } from "firebase/firestore";
-import { verifyAndDeductCredit } from "@/db/operations/CreditCheck";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 export async function POST(req: Request) {
   try {
@@ -21,14 +17,6 @@ export async function POST(req: Request) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
-      );
-    }
-
-    const verification = await verifyAndDeductCredit(userId);
-    if (!verification.allowed) {
-      return NextResponse.json(
-        { error: "Insufficient credits" },
-        { status: 403 }
       );
     }
 
@@ -48,11 +36,6 @@ export async function POST(req: Request) {
         { status: 403 }
       );
     }
-
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
-      generationConfig: { responseMimeType: "application/json", temperature: 0.5 },
-    });
 
     const personalizedPrompt = `
 You are personalizing a career roadmap for a new user based on an existing roadmap.
@@ -84,11 +67,9 @@ Provide a brief personalization summary in JSON:
     };
 
     try {
-      const result = await model.generateContent(personalizedPrompt);
-      const responseText = result.response.text().trim();
-      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        personalization = { ...personalization, ...JSON.parse(jsonMatch[0]) };
+      const result = await generateWithFallback(personalizedPrompt);
+      if (result.parsed) {
+        personalization = { ...personalization, ...result.parsed };
       }
     } catch (e) {
       console.log("Personalization skipped, using defaults");
@@ -98,14 +79,14 @@ Provide a brief personalization summary in JSON:
       userId,
       title: `${originalData.title} (Personalized)`,
       category: originalData.category || "career",
-      status: "todo",
+      status: "claimed",
       priority: 0,
       createdAt: serverTimestamp(),
       roadmap: originalData.roadmap,
       confidenceScore: originalData.confidenceScore,
       mermaidChart: originalData.mermaidChart,
       learningGaps: originalData.learningGaps,
-      curriculum: originalData.curriculum,
+      curriculum: [],
       habits: originalData.habits,
       networkReason: originalData.networkReason,
       network: originalData.network,
@@ -121,6 +102,7 @@ Provide a brief personalization summary in JSON:
       isActive: true,
       ownFeedbacks: [],
       personalizationNote: personalization.adaptations,
+      curriculumNeedsGeneration: true,
     });
 
     return NextResponse.json({

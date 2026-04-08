@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+import { generateWithFallback } from "@/lib/ai";
 
 interface Exercise {
   exerciseId: string;
@@ -17,11 +15,6 @@ export async function POST(req: Request) {
     if (!exercises || !Array.isArray(exercises) || exercises.length === 0) {
       return NextResponse.json({ error: "No exercises provided" }, { status: 400 });
     }
-
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
-      generationConfig: { responseMimeType: "application/json", temperature: 0.3 },
-    });
 
     const comparisons: any[] = [];
     let aiDetectedCount = 0;
@@ -53,22 +46,20 @@ Provide your response in JSON format:
 `;
 
       try {
-        const response = await model.generateContent(prompt);
-        const responseText = response.response.text().trim();
-        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-        const result = jsonMatch ? JSON.parse(jsonMatch[0]) : { similarity: 0, aiDetected: false, reason: "Analysis failed" };
+        const result = await generateWithFallback(prompt);
+        const parsed = result.parsed || { similarity: 0, aiDetected: false, reason: "Analysis failed" };
 
         comparisons.push({
           exerciseId: exercise.exerciseId,
           title: exercise.title,
           userAnswer: exercise.userAnswer,
           aiSolution: exercise.aiSolution,
-          similarity: result.similarity,
-          aiDetected: result.aiDetected,
-          reason: result.reason,
+          similarity: parsed.similarity,
+          aiDetected: parsed.aiDetected,
+          reason: parsed.reason,
         });
 
-        if (result.aiDetected) aiDetectedCount++;
+        if (parsed.aiDetected) aiDetectedCount++;
       } catch (error) {
         console.error("Comparison error for exercise:", exercise.exerciseId, error);
         comparisons.push({

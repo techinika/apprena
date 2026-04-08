@@ -120,7 +120,7 @@ export default function PublicRoadmapView({ slug }: { slug: string }) {
 
       if (res.ok) {
         toast.success("Roadmap duplicated! You can now customize it.");
-        router.push(`/activity/${result.newRoadmapId}`);
+        router.push(`/workspace/${result.newRoadmapId}`);
       } else {
         toast.error(result.error || "Failed to duplicate roadmap");
       }

@@ -30,6 +30,7 @@ export interface Activity {
   originalRoadmapId?: string;
   forkedFrom?: string;
   ownFeedbacks?: OwnFeedback[];
+  curriculumNeedsGeneration?: boolean;
 }
 
 export interface OwnFeedback {

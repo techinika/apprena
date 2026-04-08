@@ -7,7 +7,6 @@ import {
   updateDoc,
   increment,
 } from "firebase/firestore";
-import { verifyAndDeductCredit } from "@/db/operations/CreditCheck";
 import { NextResponse } from "next/server";
 
 const ALLOWED_FILE_TYPES = ["application/pdf"];
@@ -69,31 +68,22 @@ async function uploadToCloudinary(file: File): Promise<string> {
 }
 
 async function parsePDFWithAI(pdfText: string): Promise<string> {
-  const { GoogleGenerativeAI } = await import("@google/generative-ai");
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash-exp",
-    generationConfig: {
-      temperature: 0.2,
-    },
-  });
+  const { generateText } = await import("@/lib/ai");
 
   const prompt = `
-    You are a professional resume and document analyzer. Extract and summarize the following document content, focusing on:
-    1. Key skills and competencies
-    2. Work experience and titles
-    3. Education and certifications
-    4. Notable achievements or metrics
-    
-    Document content:
-    ${pdfText.slice(0, 15000)}
-    
-    Provide a structured summary in plain text format.
-  `;
+You are a professional resume and document analyzer. Extract and summarize the following document content, focusing on:
+1. Key skills and competencies
+2. Work experience and titles
+3. Education and certifications
+4. Notable achievements or metrics
 
-  const result = await model.generateContent(prompt);
-  return result.response.text();
+Document content:
+${pdfText.slice(0, 15000)}
+
+Provide a structured summary in plain text format.
+`;
+
+  return await generateText(prompt);
 }
 
 export async function POST(req: Request) {
@@ -137,26 +127,7 @@ export async function POST(req: Request) {
       uploadedDocs.push({ name: file.name, url: cloudinaryUrl });
     }
 
-    if (userId) {
-      const verification = await verifyAndDeductCredit(userId);
-      if (!verification.allowed) {
-        return NextResponse.json(
-          { error: "Insufficient credits" },
-          { status: 403 },
-        );
-      }
-    }
-
-    const { GoogleGenerativeAI } = await import("@google/generative-ai");
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
-      generationConfig: {
-        responseMimeType: "application/json",
-        temperature: 0.7,
-      },
-    });
+    const { generateJsonWithFallback } = await import("@/lib/ai");
 
     const sanitizedAnswers = {
       current: sanitizeString(parsedAnswers.current || ""),
@@ -247,9 +218,7 @@ Create a detailed, personalized career transformation plan that:
 
     let aiResponse;
     try {
-      const result = await model.generateContent(prompt);
-      const responseText = result.response.text();
-      aiResponse = JSON.parse(responseText);
+      aiResponse = await generateJsonWithFallback(prompt);
     } catch (parseError) {
       console.error("AI JSON parse error:", parseError);
       if (userId) {

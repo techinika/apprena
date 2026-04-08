@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+import { generateWithFallback } from "@/lib/ai";
 
 export async function POST(req: Request) {
   try {
@@ -10,11 +8,6 @@ export async function POST(req: Request) {
     if (!userId || !exerciseContent || !userAnswer) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
-
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
-      generationConfig: { responseMimeType: "application/json", temperature: 0.3 },
-    });
 
     const prompt = `
 You are an expert educator grading a student's submission.
@@ -65,10 +58,8 @@ Be fair but rigorous. Consider the complexity of the question.
 
     let result;
     try {
-      const response = await model.generateContent(prompt);
-      const responseText = response.response.text().trim();
-      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-      result = jsonMatch ? JSON.parse(jsonMatch[0]) : { grade: 70, feedback: "Good attempt!", aiDetected: false, similarity: 0 };
+      const aiResult = await generateWithFallback(prompt);
+      result = aiResult.parsed || { grade: 70, feedback: "Good attempt!", aiDetected: false, similarity: 0 };
     } catch {
       result = { grade: 70, feedback: "Well done on completing the exercise!", aiDetected: false, similarity: 0 };
     }

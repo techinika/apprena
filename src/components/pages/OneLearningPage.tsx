@@ -19,6 +19,7 @@ import {
   updateDoc,
   serverTimestamp,
   arrayUnion,
+  deleteDoc,
 } from "firebase/firestore";
 import { useAuth } from "@/lib/AuthContext";
 import { toast } from "sonner";
@@ -28,6 +29,8 @@ import Link from "next/link";
 import Loading from "@/app/loading";
 import confetti from "canvas-confetti";
 import { SuccessModal } from "../parts/learning/SuccessOverlay";
+import { Trash2, Sparkles } from "lucide-react";
+import { ConfirmModal } from "../parts/ConfirmModal";
 
 export default function SingleLearningPlan({ id }: { id: string }) {
   const { user } = useAuth();
@@ -36,6 +39,7 @@ export default function SingleLearningPlan({ id }: { id: string }) {
   const [loading, setLoading] = useState(true);
   const [showSuccess, setShowSuccess] = useState(false);
   const [badgeData, setBadgeData] = useState<{ id: string; title: string }>();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (!user || !id) return;
@@ -77,6 +81,21 @@ export default function SingleLearningPlan({ id }: { id: string }) {
         origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
       });
     }, 250);
+  };
+
+  const handleDeletePlan = async () => {
+    try {
+      await deleteDoc(doc(db, "learningPlans", id));
+      toast.success("Learning plan deleted");
+      router.push("/learning");
+    } catch (error) {
+      toast.error("Failed to delete learning plan");
+    }
+  };
+
+  const handleGenerateMilestones = () => {
+    toast.info("Generating milestones... (Functionality to be implemented)");
+    // TODO: Implement actual milestone generation logic based on user's requirements
   };
 
   const toggleModuleStatus = async (index: number, currentStatus: string) => {
@@ -159,6 +178,12 @@ export default function SingleLearningPlan({ id }: { id: string }) {
             <ArrowLeft size={20} /> Back to Learning Hub
           </button>
           <div className="flex items-center gap-4">
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              className="flex items-center gap-2 px-4 py-2 text-red-500 font-bold hover:bg-red-50 rounded-xl transition-colors"
+            >
+              <Trash2 size={18} /> Delete
+            </button>
             <div className="text-right hidden md:block">
               <p className="text-[10px] font-black uppercase text-slate-400">
                 Progress
@@ -209,6 +234,15 @@ export default function SingleLearningPlan({ id }: { id: string }) {
             </div>
           </div>
         </header>
+
+        <div className="flex justify-end mb-8">
+          <button
+            onClick={handleGenerateMilestones}
+            className="flex items-center gap-2 px-6 py-3 bg-amber-500 text-slate-900 rounded-full font-bold hover:bg-slate-900 hover:text-white transition-all shadow-md"
+          >
+            <Sparkles size={18} /> Generate More Milestones
+          </button>
+        </div>
 
         <div className="space-y-4">
           <h3 className="text-xl font-black text-slate-900 mb-6">
@@ -317,6 +351,16 @@ export default function SingleLearningPlan({ id }: { id: string }) {
           })}
         </div>
       </main>
+
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDeletePlan}
+        title="Delete Learning Plan"
+        message="Are you sure you want to delete this learning plan? This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
+      />
     </div>
   );
 }

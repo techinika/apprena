@@ -40,7 +40,7 @@ export const fetchActivityById = async (activityId: string, userId?: string) => 
         } as Activity;
       }
 
-      if (data.status === "claimed" && data.userId) {
+      if (data.userId) {
         if (userId && data.userId !== userId) {
           console.warn("User attempted to access another user's activity.");
           return null;

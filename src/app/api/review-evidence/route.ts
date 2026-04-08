@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { generateJsonWithFallback, genAI } from "@/lib/ai";
 import {
   collection,
   addDoc,
@@ -9,8 +9,6 @@ import {
   getDoc,
 } from "firebase/firestore";
 import { db } from "@/db/firebase";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 interface EvidenceReviewRequest {
   userId: string;
@@ -36,18 +34,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
-      generationConfig: { responseMimeType: "application/json", temperature: 0.4 },
-    });
-
     let evidenceAnalysis = "";
     
-    if (evidenceType === "image") {
+    if (evidenceType === "image" && genAI) {
       try {
-        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+        const visionModel = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
         const imagePart = { inlineData: { data: evidenceUrl.replace(/^data:image\/[^;]+;base64,/, ""), mimeType: "image/jpeg" } };
-        const imageResult = await model.generateContent([
+        const imageResult = await visionModel.generateContent([
           `Analyze this image as evidence for completing the milestone: "${context.milestoneTitle}". 
            Description provided: "${description}"
            
@@ -102,8 +95,7 @@ Be encouraging but honest. Focus on helping the user grow.
 
     let aiResponse;
     try {
-      const result = await model.generateContent(prompt);
-      aiResponse = JSON.parse(result.response.text());
+      aiResponse = await generateJsonWithFallback(prompt);
     } catch (parseError) {
       console.error("AI parse error:", parseError);
       return NextResponse.json({ error: "Failed to analyze evidence. Please try again." }, { status: 502 });

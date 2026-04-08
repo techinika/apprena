@@ -10,6 +10,9 @@ import {
   CreditCard,
   AlertCircle,
   TrendingUp,
+  Trash2,
+  Loader2,
+  X,
 } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 import Link from "next/link";
@@ -20,6 +23,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import PaymentSuccessOverlay from "../parts/workspace/PaymentOverlay";
 import { formatDate } from "../../lib/functions";
 import SuccessPage from "../parts/workspace/SuccessfulAnalysis";
+import { toast } from "sonner";
 
 const Workspace = () => {
   const router = useRouter();
@@ -30,6 +34,8 @@ const Workspace = () => {
   const analysis = searchParams.get("analysis");
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState<{ show: boolean; id: string | null }>({ show: false, id: null });
 
   const remainingCredits =
     (profile?.baseCredits ?? 0) + (profile?.purchasedCredits ?? 0);

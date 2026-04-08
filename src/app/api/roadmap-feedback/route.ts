@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { generateWithFallback } from "@/lib/ai";
 import {
   collection,
   addDoc,
@@ -7,15 +7,8 @@ import {
   doc,
   updateDoc,
   getDoc,
-  getDocs,
-  query,
-  where,
-  orderBy,
-  limit,
 } from "firebase/firestore";
 import { db } from "@/db/firebase";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 interface RoadmapFeedbackRequest {
   userId: string;
@@ -24,7 +17,6 @@ interface RoadmapFeedbackRequest {
   stepTitle: string;
   stepDescription: string;
   feedback: string;
-  currentRoadmap: any;
 }
 
 export async function POST(req: Request) {
@@ -44,11 +36,6 @@ export async function POST(req: Request) {
       createdAt: serverTimestamp(),
       aiProcessed: false,
       version: 1,
-    });
-
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
-      generationConfig: { responseMimeType: "application/json", temperature: 0.3 },
     });
 
     const prompt = `
@@ -77,31 +64,11 @@ Analyze the feedback and determine if the roadmap step needs modification. Retur
 `;
 
     let aiResponse;
-    const maxRetries = 3;
-    let lastError = null;
-    
-    for (let attempt = 0; attempt < maxRetries; attempt++) {
-      try {
-        const result = await model.generateContent(prompt);
-        const responseText = result.response.text().trim();
-        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-        aiResponse = jsonMatch ? JSON.parse(jsonMatch[0]) : { needsModification: false, reason: "Could not parse response" };
-        break;
-      } catch (parseError: any) {
-        lastError = parseError;
-        if (parseError?.message?.includes("503") || parseError?.status === 503) {
-          if (attempt < maxRetries - 1) {
-            await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
-            continue;
-          }
-        }
-        console.error("AI parse error:", parseError);
-        aiResponse = { needsModification: false, reason: "Could not process feedback" };
-        break;
-      }
-    }
-
-    if (!aiResponse && lastError) {
+    try {
+      const result = await generateWithFallback(prompt);
+      aiResponse = result.parsed || { needsModification: false, reason: "Could not parse response" };
+    } catch (error) {
+      console.error("AI error:", error);
       aiResponse = { needsModification: false, reason: "AI service unavailable. Try again later." };
     }
 
