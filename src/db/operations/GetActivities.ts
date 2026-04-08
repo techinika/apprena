@@ -25,7 +25,7 @@ export const getUserActivities = async (userId: string) => {
   })) as Activity[];
 };
 
-export const fetchActivityById = async (activityId: string) => {
+export const fetchActivityById = async (activityId: string, userId?: string) => {
   try {
     const docRef = doc(db, "activities", activityId);
     const docSnap = await getDoc(docRef);
@@ -33,15 +33,25 @@ export const fetchActivityById = async (activityId: string) => {
     if (docSnap.exists()) {
       const data = docSnap.data();
 
-      if (data.status !== "claimed") {
-        console.warn("Attempted to access an unclaimed activity.");
-        return null;
+      if (data.status === "unclaimed") {
+        return {
+          id: docSnap.id,
+          ...data,
+        } as Activity;
       }
 
-      return {
-        id: docSnap.id,
-        ...data,
-      } as Activity;
+      if (data.userId) {
+        if (userId && data.userId !== userId) {
+          console.warn("User attempted to access another user's activity.");
+          return null;
+        }
+        return {
+          id: docSnap.id,
+          ...data,
+        } as Activity;
+      }
+
+      return null;
     } else {
       console.error("No such activity document!");
       return null;

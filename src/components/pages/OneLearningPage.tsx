@@ -4,12 +4,14 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
+  ArrowRight,
   ExternalLink,
   CheckCircle2,
   Circle,
   Trophy,
   Clock,
   Lock,
+  BookOpen,
 } from "lucide-react";
 import {
   doc,
@@ -17,6 +19,7 @@ import {
   updateDoc,
   serverTimestamp,
   arrayUnion,
+  deleteDoc,
 } from "firebase/firestore";
 import { useAuth } from "@/lib/AuthContext";
 import { toast } from "sonner";
@@ -26,6 +29,8 @@ import Link from "next/link";
 import Loading from "@/app/loading";
 import confetti from "canvas-confetti";
 import { SuccessModal } from "../parts/learning/SuccessOverlay";
+import { Trash2, Sparkles } from "lucide-react";
+import { ConfirmModal } from "../parts/ConfirmModal";
 
 export default function SingleLearningPlan({ id }: { id: string }) {
   const { user } = useAuth();
@@ -34,6 +39,7 @@ export default function SingleLearningPlan({ id }: { id: string }) {
   const [loading, setLoading] = useState(true);
   const [showSuccess, setShowSuccess] = useState(false);
   const [badgeData, setBadgeData] = useState<{ id: string; title: string }>();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (!user || !id) return;
@@ -75,6 +81,21 @@ export default function SingleLearningPlan({ id }: { id: string }) {
         origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
       });
     }, 250);
+  };
+
+  const handleDeletePlan = async () => {
+    try {
+      await deleteDoc(doc(db, "learningPlans", id));
+      toast.success("Learning plan deleted");
+      router.push("/learning");
+    } catch (error) {
+      toast.error("Failed to delete learning plan");
+    }
+  };
+
+  const handleGenerateMilestones = () => {
+    toast.info("Generating milestones... (Functionality to be implemented)");
+    // TODO: Implement actual milestone generation logic based on user's requirements
   };
 
   const toggleModuleStatus = async (index: number, currentStatus: string) => {
@@ -157,6 +178,12 @@ export default function SingleLearningPlan({ id }: { id: string }) {
             <ArrowLeft size={20} /> Back to Learning Hub
           </button>
           <div className="flex items-center gap-4">
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              className="flex items-center gap-2 px-4 py-2 text-red-500 font-bold hover:bg-red-50 rounded-xl transition-colors"
+            >
+              <Trash2 size={18} /> Delete
+            </button>
             <div className="text-right hidden md:block">
               <p className="text-[10px] font-black uppercase text-slate-400">
                 Progress
@@ -208,14 +235,22 @@ export default function SingleLearningPlan({ id }: { id: string }) {
           </div>
         </header>
 
+        <div className="flex justify-end mb-8">
+          <button
+            onClick={handleGenerateMilestones}
+            className="flex items-center gap-2 px-6 py-3 bg-amber-500 text-slate-900 rounded-full font-bold hover:bg-slate-900 hover:text-white transition-all shadow-md"
+          >
+            <Sparkles size={18} /> Generate More Milestones
+          </button>
+        </div>
+
         <div className="space-y-4">
           <h3 className="text-xl font-black text-slate-900 mb-6">
             Execution Steps
           </h3>
           {plan.modules.map((module, index) => {
-            const isLocked =
-              module.status === "completed" &&
-              plan.modules[index + 1]?.status === "completed";
+            const prevModuleCompleted = index === 0 || plan.modules[index - 1]?.status === "completed";
+            const isLocked = !prevModuleCompleted;
 
             return (
               <div
@@ -223,14 +258,17 @@ export default function SingleLearningPlan({ id }: { id: string }) {
                 className={`group flex items-center gap-6 p-6 rounded-[2.5rem] border transition-all ${
                   module.status === "completed"
                     ? "bg-slate-50 border-emerald-200/50 opacity-90"
+                    : isLocked
+                    ? "bg-slate-50 border-slate-100 opacity-60"
                     : "bg-white border-slate-200 hover:border-amber-500 shadow-sm"
                 }`}
               >
                 <button
-                  onClick={() => toggleModuleStatus(index, module.status)}
+                  onClick={() => !isLocked && toggleModuleStatus(index, module.status)}
+                  disabled={isLocked}
                   className={`shrink-0 transition-transform active:scale-90 ${
                     isLocked
-                      ? "text-emerald-300 cursor-not-allowed"
+                      ? "text-slate-200 cursor-not-allowed"
                       : module.status === "completed"
                       ? "text-emerald-500"
                       : "text-slate-200 hover:text-amber-500"
@@ -261,25 +299,68 @@ export default function SingleLearningPlan({ id }: { id: string }) {
                   <p className="text-sm text-slate-500 font-medium">
                     {module.provider}
                   </p>
+                  <div className="flex items-center gap-3 mt-2">
+                    {module.isGenerated && (
+                      <div className="flex items-center gap-1">
+                        <BookOpen size={12} className="text-amber-500" />
+                        <span className="text-[10px] font-bold text-amber-500">AI Generated</span>
+                      </div>
+                    )}
+                    {module.content?.some(c => c.grade !== undefined) && (
+                      <div className="flex items-center gap-1 text-xs">
+                        <span className={`font-bold ${(plan.totalGrade || 0) >= 80 ? "text-emerald-600" : "text-amber-600"}`}>
+                          {plan.totalGrade || 0}%
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <Link
-                  href={module.url}
-                  target="_blank"
-                  className={`p-4 rounded-2xl flex items-center gap-2 font-bold transition-all ${
-                    module.status === "completed"
-                      ? "bg-slate-200 text-slate-500"
-                      : "bg-amber-500 text-slate-900 hover:bg-slate-900 hover:text-white"
-                  }`}
-                >
-                  <span className="hidden md:inline">Go to Course</span>
-                  <ExternalLink size={18} />
-                </Link>
+                {module.isGenerated && module.content ? (
+                  <button
+                    onClick={() => !isLocked && router.push(`/learning/${id}/course/${index}`)}
+                    disabled={isLocked}
+                    className={`p-4 rounded-2xl flex items-center gap-2 font-bold transition-all ${
+                      module.status === "completed"
+                        ? "bg-slate-200 text-slate-500"
+                        : isLocked
+                        ? "bg-slate-100 text-slate-300 cursor-not-allowed"
+                        : "bg-amber-500 text-slate-900 hover:bg-slate-900 hover:text-white"
+                    }`}
+                  >
+                    {isLocked ? <Lock size={18} /> : module.status === "completed" ? <CheckCircle2 size={18} /> : null}
+                    <span className="hidden md:inline">{module.status === "completed" ? "Completed" : isLocked ? "Locked" : "Start Course"}</span>
+                    {!isLocked && module.status !== "completed" && <ArrowRight size={18} />}
+                  </button>
+                ) : (
+                  <Link
+                    href={module.url}
+                    target="_blank"
+                    className={`p-4 rounded-2xl flex items-center gap-2 font-bold transition-all ${
+                      module.status === "completed"
+                        ? "bg-slate-200 text-slate-500"
+                        : "bg-amber-500 text-slate-900 hover:bg-slate-900 hover:text-white"
+                    }`}
+                  >
+                    <span className="hidden md:inline">Go to Course</span>
+                    <ExternalLink size={18} />
+                  </Link>
+                )}
               </div>
             );
           })}
         </div>
       </main>
+
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDeletePlan}
+        title="Delete Learning Plan"
+        message="Are you sure you want to delete this learning plan? This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
+      />
     </div>
   );
 }

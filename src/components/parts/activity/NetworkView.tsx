@@ -1,13 +1,18 @@
 import { NetworkPerson } from "@/types/activity";
 import { Info, Users } from "lucide-react";
+import { SectionFeedback } from "./SectionFeedback";
+
+interface NetworkSectionProps {
+  network: NetworkPerson[] | undefined;
+  reason: string | undefined;
+  activityId?: string;
+}
 
 export const NetworkSection = ({
   network,
   reason,
-}: {
-  network: NetworkPerson[] | undefined;
-  reason: string | undefined;
-}) => {
+  activityId,
+}: NetworkSectionProps) => {
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
       {reason && (
@@ -15,9 +20,18 @@ export const NetworkSection = ({
           <div className="bg-amber-100 p-2 rounded-xl">
             <Info className="text-amber-600" size={20} />
           </div>
-          <p className="text-sm font-medium text-amber-900 leading-relaxed">
-            {reason}
-          </p>
+          <div className="flex-1">
+            <p className="text-sm font-medium text-amber-900 leading-relaxed">
+              {reason}
+            </p>
+          </div>
+          {activityId && (
+            <SectionFeedback
+              activityId={activityId}
+              sectionType="network"
+              sectionTitle="Social Circle"
+            />
+          )}
         </div>
       )}
 
@@ -35,16 +49,29 @@ export const NetworkSection = ({
                 />
               </div>
 
-              <div>
-                <span className="text-[10px] font-black uppercase text-amber-600 tracking-[0.2em] mb-1 block">
-                  {person.type}
-                </span>
-                <h4 className="text-xl font-bold text-slate-900">
-                  {person.name}
-                </h4>
-                <p className="text-sm font-semibold text-slate-400 mb-4">
-                  {person.role}
-                </p>
+              <div className="flex-1">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <span className="text-[10px] font-black uppercase text-amber-600 tracking-[0.2em] mb-1 block">
+                      {person.type}
+                    </span>
+                    <h4 className="text-xl font-bold text-slate-900">
+                      {person.name}
+                    </h4>
+                    <p className="text-sm font-semibold text-slate-400 mb-4">
+                      {person.role}
+                    </p>
+                  </div>
+                  {activityId && (
+                    <SectionFeedback
+                      activityId={activityId}
+                      sectionType="network"
+                      sectionTitle="Social Circle"
+                      itemId={`network-${index}`}
+                      itemTitle={person.name}
+                    />
+                  )}
+                </div>
 
                 <div className="relative">
                   <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-100 rounded-full" />

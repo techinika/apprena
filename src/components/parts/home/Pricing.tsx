@@ -3,6 +3,8 @@ import { Check, Star } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+const EXCHANGE_RATE = 1200;
+
 export const Pricing = () => {
   const { user } = useAuth();
   const router = useRouter();
@@ -16,13 +18,16 @@ export const Pricing = () => {
         <p className="text-slate-500 text-xl font-medium">
           Invest in a roadmap, not a guess.
         </p>
+        <p className="text-amber-600 text-sm font-bold mt-2">
+          Prices in Rwandan Francs (RWF)
+        </p>
       </div>
       <div className="grid md:grid-cols-3 gap-8">
         <div className="p-10 rounded-[3rem] bg-slate-50 border border-slate-200 flex flex-col">
           <h3 className="text-xl font-black mb-2 uppercase tracking-widest text-slate-400">
             Explorer
           </h3>
-          <div className="text-5xl font-black mb-8 text-slate-900">$0</div>
+          <div className="text-5xl font-black mb-8 text-slate-900">Free</div>
           <ul className="space-y-4 mb-10 flex-grow">
             {["2 Career Analyses", "Basic Roadmap View", "Social Insights"].map(
               (item) => (
@@ -51,7 +56,7 @@ export const Pricing = () => {
             Single Sprint
           </h3>
           <div className="text-5xl font-black mb-8 text-slate-900">
-            $0.99
+            1,200 RWF
             <span className="text-sm text-slate-400 font-normal">
               {" "}
               /analysis
@@ -92,7 +97,7 @@ export const Pricing = () => {
             Architect
           </h3>
           <div className="text-5xl font-black mb-8">
-            $9.99<span className="text-sm text-slate-500 font-normal"> /mo</span>
+            12,000 RWF<span className="text-sm text-slate-500 font-normal"> /mo</span>
           </div>
           <ul className="space-y-4 mb-10 grow">
             {[

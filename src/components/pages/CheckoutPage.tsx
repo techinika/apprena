@@ -171,16 +171,32 @@ const CheckoutPage = () => {
           const subQuery = query(
             collection(db, "subscriptions"),
             where("userId", "==", user?.uid),
-            where("status", "==", "active"),
-            orderBy("endDate", "desc"),
-            limit(1)
+            where("status", "==", "active")
           );
           const subSnap = await getDocs(subQuery);
 
-          let startDate = new Date();
+          const now = new Date();
+          let startDate = now;
+          
           if (!subSnap.empty) {
-            const currentEnd = subSnap.docs[0].data().endDate.toDate();
-            if (currentEnd > startDate) startDate = currentEnd;
+            for (const subDoc of subSnap.docs) {
+              const subData = subDoc.data();
+              if (subData.endDate) {
+                let currentEnd: Date;
+                if (subData.endDate.toDate) {
+                  currentEnd = subData.endDate.toDate();
+                } else if (subData.endDate instanceof Date) {
+                  currentEnd = subData.endDate;
+                } else {
+                  currentEnd = new Date(subData.endDate);
+                }
+                
+                if (currentEnd > now) {
+                  startDate = currentEnd;
+                  break;
+                }
+              }
+            }
           }
 
           const endDate = new Date(startDate);
@@ -191,13 +207,16 @@ const CheckoutPage = () => {
             userId: user?.uid,
             orderId: order.id,
             status: "active",
+            planId: "architect",
             startDate: startDate,
             endDate: endDate,
-            planId: "architect",
+            createdAt: serverTimestamp(),
           });
 
-          const profileRef = doc(db, "profiles", String(user?.uid));
-          batch.update(profileRef, { accountType: "architect" });
+          batch.update(profileRef, { 
+            accountType: "architect",
+            subscriptionEndDate: endDate,
+          });
         }
       };
 
@@ -401,7 +420,7 @@ const CheckoutPage = () => {
                           : "The Architect"}
                       </p>
                       <p className="font-bold text-white">
-                        ${ord.amount.toFixed(2)}
+                        {ord.amount.toLocaleString()} RWF
                       </p>
                     </div>
                     <button
@@ -422,7 +441,7 @@ const CheckoutPage = () => {
                     Total Due
                   </p>
                   <p className="text-3xl font-black text-amber-400">
-                    ${totalAmount.toFixed(2)}
+                    {totalAmount.toLocaleString()} RWF
                   </p>
                 </div>
               </div>

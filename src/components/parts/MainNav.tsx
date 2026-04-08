@@ -3,6 +3,7 @@
 import { useAuth } from "@/lib/AuthContext";
 import { APP } from "@/variables/globals";
 import Link from "next/link";
+import Image from "next/image";
 
 function MainNav() {
   const { user } = useAuth();
@@ -10,10 +11,13 @@ function MainNav() {
     <nav className="flex justify-between items-center py-6 px-8 max-w-7xl mx-auto w-full text-white">
       <Link href="/">
         <div className="relative w-30 transition-transform group-hover:scale-105">
-          <img
+          <Image
             src="/transparent-logo.png"
             alt={`${APP?.NAME} Logo`}
-            className="object-contain w-full h-full"
+            width={120}
+            height={40}
+            className="object-contain"
+            priority
           />
         </div>
       </Link>

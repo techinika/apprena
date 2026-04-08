@@ -1,17 +1,25 @@
 import { CheckCircle2, Layers, List } from "lucide-react";
-import { FlowchartView } from "./FlowchartView";
 import { RoadmapStep } from "@/types/activity";
+import dynamic from "next/dynamic";
+import { StepFeedback } from "./StepFeedback";
+
+const FlowchartView = dynamic(
+  () => import("./FlowchartView").then((mod) => ({ default: mod.FlowchartView })),
+  { ssr: false, loading: () => <div className="h-64 animate-pulse bg-slate-100 rounded-3xl" /> }
+);
 
 export const RoadmapSection = ({
   view,
   setView,
   roadmap,
   chart,
+  activityId,
 }: {
   view: string;
   setView: (v: string) => void;
   roadmap: RoadmapStep[] | undefined;
   chart: string | undefined;
+  activityId?: string;
 }) => {
   const steps = roadmap || [];
 
@@ -44,19 +52,32 @@ export const RoadmapSection = ({
                 <div className="absolute -left-13.25 top-0 w-6 h-6 bg-white border-4 border-amber-600 rounded-full z-10" />
 
                 <div className="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
-                  <span className="text-xs font-black text-amber-500 uppercase tracking-wider">
-                    {step.tag}
-                  </span>
-                  <h3 className="text-xl font-bold mt-1 text-slate-900">
-                    {step.title}
-                  </h3>
-                  <p className="text-slate-500 mt-2 leading-relaxed">
-                    {step.desc}
-                  </p>
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <span className="text-xs font-black text-amber-500 uppercase tracking-wider">
+                        {step.tag}
+                      </span>
+                      <h3 className="text-xl font-bold mt-1 text-slate-900">
+                        {step.title}
+                      </h3>
+                      <p className="text-slate-500 mt-2 leading-relaxed">
+                        {step.desc}
+                      </p>
 
-                  <div className="mt-4 pt-4 border-t border-slate-50 flex items-center gap-2 text-emerald-600 font-bold text-sm">
-                    <CheckCircle2 size={16} />
-                    <span>Expected: {step.result}</span>
+                      <div className="mt-4 pt-4 border-t border-slate-50 flex items-center gap-2 text-emerald-600 font-bold text-sm">
+                        <CheckCircle2 size={16} />
+                        <span>Expected: {step.result}</span>
+                      </div>
+                    </div>
+                    {activityId && (
+                      <StepFeedback
+                        activityId={activityId}
+                        roadmapStepId={`step-${activityId}-${i}`}
+                        stepTitle={step.title}
+                        stepDescription={step.desc}
+                        currentRoadmap={roadmap}
+                      />
+                    )}
                   </div>
                 </div>
               </div>

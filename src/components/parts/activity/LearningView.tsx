@@ -9,6 +9,8 @@ import {
   Loader2,
   Check,
   ArrowUpRight,
+  Sparkles,
+  Wand2,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -19,10 +21,14 @@ import {
   where,
   limit,
   getDocs,
+  doc,
+  updateDoc,
 } from "firebase/firestore";
 import { useAuth } from "@/lib/AuthContext";
 import { toast } from "sonner";
 import { db } from "@/db/firebase";
+import { useRouter } from "next/navigation";
+import { SectionFeedback } from "./SectionFeedback";
 
 export const LearningSection = ({
   learningGaps,
@@ -30,11 +36,15 @@ export const LearningSection = ({
   activityId,
   title,
   goal,
-}: LearningSectionProps & { activityId?: string; title?: string }) => {
-  const { user } = useAuth();
+  userInput,
+}: LearningSectionProps & { activityId?: string; title?: string; userInput?: any }) => {
+  const { user, profile } = useAuth();
+  const router = useRouter();
   const [isSyncing, setIsSyncing] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [existingPlanId, setExistingPlanId] = useState<string | null>(null);
+  const [generatedPlanId, setGeneratedPlanId] = useState<string | null>(null);
 
   useEffect(() => {
     const checkExistingPlan = async () => {
@@ -51,6 +61,10 @@ export const LearningSection = ({
       if (!querySnapshot.empty) {
         setIsSaved(true);
         setExistingPlanId(querySnapshot.docs[0].id);
+        const data = querySnapshot.docs[0].data();
+        if (data.isGenerated) {
+          setGeneratedPlanId(querySnapshot.docs[0].id);
+        }
       }
     };
 
@@ -63,11 +77,12 @@ export const LearningSection = ({
 
     setIsSyncing(true);
     try {
-      const modules = curriculum.map((item) => ({
+      const modules = curriculum.map((item, idx) => ({
+        id: `module-${Date.now()}-${idx}`,
         course: item.course,
         provider: item.provider,
         url: item.url,
-        status: "not_started",
+        status: "not_started" as const,
         progress: 0,
       }));
 
@@ -91,6 +106,52 @@ export const LearningSection = ({
       toast.error("Failed to save plan.");
     } finally {
       setIsSyncing(false);
+    }
+  };
+
+  const handleGenerateCurriculum = async () => {
+    if (!user) return toast.error("Please login first");
+    
+    const remaining = (profile?.baseCredits ?? 0) + (profile?.purchasedCredits ?? 0);
+    if (remaining <= 0 && profile?.accountType === "free") {
+      toast.error("Insufficient credits. Upgrade to generate custom curriculum.");
+      router.push("/upgrade");
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const response = await fetch("/api/generate-curriculum", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user.uid,
+          planId: generatedPlanId || undefined,
+          roadmapData: {
+            title: title || "",
+            goal: goal || userInput?.goal || "",
+            skills: userInput?.skills || "",
+            blocks: userInput?.blocks || "",
+            ecosystem: userInput?.ecosystem || "",
+            learningGaps,
+          },
+          targetSkill: learningGaps?.technical?.[0]?.skill || "Professional Skills",
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setGeneratedPlanId(result.planId);
+        toast.success("Custom curriculum generated!");
+        router.push(`/learning/${result.planId}`);
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to generate curriculum");
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -181,29 +242,73 @@ export const LearningSection = ({
 
         <div className="grid gap-4 relative z-10">
           {curriculum?.map((item, index) => (
-            <Link
-              key={index + 1}
-              href={item.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-white/10 p-5 rounded-2xl flex items-center justify-between border border-white/10 hover:bg-white/15 transition-all group"
-            >
-              <div>
+            <div key={index + 1} className="bg-white/10 p-5 rounded-2xl flex items-center justify-between border border-white/10 hover:bg-white/15 transition-all group">
+              <div className="flex-1">
                 <p className="font-bold text-lg group-hover:text-amber-400 transition-colors">
                   {item.course}
                 </p>
                 <p className="text-sm opacity-60">{item.provider}</p>
               </div>
-              <ExternalLink
-                size={20}
-                className="opacity-40 group-hover:opacity-100 transition-opacity"
-              />
-            </Link>
+              <div className="flex items-center gap-3">
+                <SectionFeedback
+                  activityId={activityId || ""}
+                  sectionType="learning"
+                  sectionTitle="Recommended Curriculum"
+                  itemId={`course-${index}`}
+                  itemTitle={item.course}
+                />
+                <ExternalLink
+                  size={20}
+                  className="opacity-40 group-hover:opacity-100 transition-opacity"
+                />
+              </div>
+            </div>
           ))}
         </div>
 
         {/* Decorative background element */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl -mr-32 -mt-32" />
+      </div>
+
+      <div className="bg-gradient-to-r from-amber-500 to-orange-500 rounded-[2.5rem] p-8 md:p-12 text-white shadow-xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32" />
+        <div className="relative z-10">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-6">
+            <div>
+              <h3 className="text-2xl font-black mb-2 flex items-center gap-3">
+                <Wand2 size={28} /> AI-Generated Curriculum
+              </h3>
+              <p className="text-white/80 text-sm">
+                Get a personalized learning path generated just for you based on your goals and roadmap.
+              </p>
+            </div>
+            <button
+              onClick={handleGenerateCurriculum}
+              disabled={isGenerating}
+              className="flex items-center gap-2 px-8 py-4 rounded-2xl font-black text-sm bg-white text-amber-600 hover:bg-slate-100 active:scale-95 shadow-lg transition-all disabled:opacity-50"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="animate-spin" size={18} />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles size={18} />
+                  {generatedPlanId ? "Regenerate" : "Generate My Path"}
+                </>
+              )}
+            </button>
+          </div>
+          {generatedPlanId && (
+            <Link
+              href={`/learning/${generatedPlanId}`}
+              className="inline-flex items-center gap-2 text-sm font-bold text-white/90 hover:text-white underline"
+            >
+              View your generated curriculum <ArrowUpRight size={16} />
+            </Link>
+          )}
+        </div>
       </div>
     </div>
   );

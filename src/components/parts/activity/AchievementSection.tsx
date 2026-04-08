@@ -1,11 +1,16 @@
 import { AchievementItem } from "@/types/activity";
 import { Trophy } from "lucide-react";
+import { SectionFeedback } from "./SectionFeedback";
+
+interface AchievementsSectionProps {
+  achievements: AchievementItem[] | undefined;
+  activityId?: string;
+}
 
 export const AchievementsSection = ({
   achievements,
-}: {
-  achievements: AchievementItem[] | undefined;
-}) => {
+  activityId,
+}: AchievementsSectionProps) => {
   if (!achievements || achievements.length === 0) {
     return (
       <div className="p-12 text-center bg-slate-50 rounded-[3rem] border-2 border-dashed border-slate-200">
@@ -30,13 +35,24 @@ export const AchievementsSection = ({
             }`}
           >
             <div className="ml-12 md:ml-0 w-[85%] md:w-[45%] bg-white border border-slate-100 p-8 rounded-[2.5rem] shadow-sm hover:shadow-xl hover:shadow-amber-500/5 transition-all duration-500 group">
-              <div className="flex items-baseline gap-2 mb-1">
-                <h4 className="text-amber-600 font-black text-3xl">
-                  {level.time}
-                </h4>
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  Horizon
-                </span>
+              <div className="flex justify-between items-start mb-1">
+                <div className="flex items-baseline gap-2">
+                  <h4 className="text-amber-600 font-black text-3xl">
+                    {level.time}
+                  </h4>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    Horizon
+                  </span>
+                </div>
+                {activityId && (
+                  <SectionFeedback
+                    activityId={activityId}
+                    sectionType="achievements"
+                    sectionTitle="Achievements"
+                    itemId={`achievement-${i}`}
+                    itemTitle={level.title}
+                  />
+                )}
               </div>
 
               <h5 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-amber-600 transition-colors">
