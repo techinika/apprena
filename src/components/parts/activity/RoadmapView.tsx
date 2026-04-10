@@ -1,7 +1,12 @@
-import { CheckCircle2, Layers, List } from "lucide-react";
-import { RoadmapStep } from "@/types/activity";
+import React, { useState } from "react";
+import { CheckCircle2, Layers, List, Sparkles, Loader2 } from "lucide-react";
+import { RoadmapStep, Milestone } from "@/types/activity";
 import dynamic from "next/dynamic";
 import { StepFeedback } from "./StepFeedback";
+import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "@/db/firebase";
+import { useAuth } from "@/lib/AuthContext";
+import { toast } from "sonner";
 
 const FlowchartView = dynamic(
   () => import("./FlowchartView").then((mod) => ({ default: mod.FlowchartView })),
@@ -21,7 +26,36 @@ export const RoadmapSection = ({
   chart: string | undefined;
   activityId?: string;
 }) => {
+  const { user } = useAuth();
   const steps = roadmap || [];
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const handleGenerateMilestones = async () => {
+    if (!activityId || !user || !roadmap?.length) return;
+    
+    setIsGenerating(true);
+    try {
+      const milestones: Milestone[] = roadmap.map((step, index) => ({
+        id: `milestone-${Date.now()}-${index}`,
+        type: "learning" as const,
+        title: step.title,
+        description: step.desc,
+        status: "pending" as const,
+      }));
+
+      await updateDoc(doc(db, "activities", activityId), {
+        milestones: milestones,
+        lastUpdated: serverTimestamp(),
+      });
+      
+      toast.success("Milestones generated from roadmap!");
+    } catch (error) {
+      console.error("Error generating milestones:", error);
+      toast.error("Failed to generate milestones");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   return (
     <section className="space-y-8">
@@ -42,6 +76,23 @@ export const RoadmapSection = ({
             <t.icon size={14} /> {t.label}
           </button>
         ))}
+        <div className="ml-4 border-l border-slate-200 pl-4">
+          <button
+            onClick={handleGenerateMilestones}
+            disabled={isGenerating || !roadmap?.length}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold bg-amber-500 text-white hover:bg-amber-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isGenerating ? (
+              <>
+                <Loader2 size={14} className="animate-spin" /> Generating...
+              </>
+            ) : (
+              <>
+                <Sparkles size={14} /> Generate Milestones
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {view === "timeline" ? (

@@ -24,6 +24,9 @@ import PaymentSuccessOverlay from "../parts/workspace/PaymentOverlay";
 import { formatDate } from "../../lib/functions";
 import SuccessPage from "../parts/workspace/SuccessfulAnalysis";
 import { toast } from "sonner";
+import { deleteDoc, doc } from "firebase/firestore";
+import { db } from "@/db/firebase";
+import { ConfirmModal } from "../parts/ConfirmModal";
 
 const Workspace = () => {
   const router = useRouter();
@@ -35,7 +38,22 @@ const Workspace = () => {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [showDeleteModal, setShowDeleteModal] = useState<{ show: boolean; id: string | null }>({ show: false, id: null });
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; title: string } | null>(null);
+
+  const handleDeleteRoadmap = async () => {
+    if (!deleteConfirm?.id) return;
+    setDeletingId(deleteConfirm.id);
+    try {
+      await deleteDoc(doc(db, "activities", deleteConfirm.id));
+      setActivities(prev => prev.filter(a => a.id !== deleteConfirm.id));
+      toast.success("Roadmap deleted");
+    } catch (error) {
+      toast.error("Failed to delete roadmap");
+    } finally {
+      setDeletingId(null);
+      setDeleteConfirm(null);
+    }
+  };
 
   const remainingCredits =
     (profile?.baseCredits ?? 0) + (profile?.purchasedCredits ?? 0);
@@ -163,8 +181,20 @@ const Workspace = () => {
           {activities.map((activity) => (
             <div
               key={activity.id}
-              className="group bg-white border border-slate-200 rounded-4xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col justify-between"
+              className="group bg-white border border-slate-200 rounded-4xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col justify-between relative"
             >
+              <button
+                onClick={() => setDeleteConfirm({ id: activity.id, title: activity.title })}
+                disabled={deletingId === activity.id}
+                className="absolute top-4 right-4 p-2 rounded-full bg-red-50 text-red-500 opacity-0 group-hover:opacity-100 hover:bg-red-100 transition-all z-10"
+                title="Delete roadmap"
+              >
+                {deletingId === activity.id ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <Trash2 size={14} />
+                )}
+              </button>
               <div>
                 <div className="flex justify-between items-start mb-6">
                   <div className="bg-slate-50 p-3 rounded-2xl text-slate-400 group-hover:text-amber-600 transition-colors">
@@ -191,6 +221,16 @@ const Workspace = () => {
           ))}
         </div>
       </main>
+
+      <ConfirmModal
+        isOpen={!!deleteConfirm}
+        onClose={() => setDeleteConfirm(null)}
+        onConfirm={handleDeleteRoadmap}
+        title="Delete Roadmap"
+        message={`Are you sure you want to delete "${deleteConfirm?.title}"? This action cannot be undone.`}
+        confirmText="Delete"
+        variant="danger"
+      />
     </div>
   );
 };

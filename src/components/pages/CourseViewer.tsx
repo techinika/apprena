@@ -35,6 +35,7 @@ import { LearningPlan, GeneratedContent } from "@/types/learning";
 import { db } from "@/db/firebase";
 import Loading from "@/app/loading";
 import confetti from "canvas-confetti";
+import { createNotification, NotificationMessages } from "@/lib/notificationUtils";
 
 export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
   const { user } = useAuth();
@@ -291,7 +292,7 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
   };
 
   const markContentComplete = async (grade?: number, feedback?: string, aiDetected?: boolean) => {
-    if (!plan || !currentContent || !learningId) return;
+    if (!plan || !currentContent || !learningId || currentContent.completed) return;
 
     try {
       const moduleIdx = parseInt(moduleIndex);
@@ -300,11 +301,15 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
       
       if (!module.content) return;
       
-      module.content = module.content.map((c, idx) =>
-        idx === contentIndex 
-          ? { ...c, completed: true, grade: grade ?? c.grade, feedback: feedback ?? c.feedback, usedAiForAnswer: aiDetected ?? false } 
-          : c
-      );
+      module.content = module.content.map((c, idx) => {
+        if (idx !== contentIndex) return c;
+        
+        const updates: Partial<GeneratedContent> = { completed: true, usedAiForAnswer: aiDetected ?? false };
+        if (grade !== undefined) updates.grade = grade;
+        if (feedback !== undefined) updates.feedback = feedback;
+        
+        return { ...c, ...updates };
+      });
 
       const allContentComplete = module.content.every((c) => c.completed);
       if (allContentComplete) {
@@ -313,16 +318,23 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
         module.status = "in_progress";
       }
 
-      const allModulesComplete = updatedModules.every((m) => m.status === "completed");
+      const allModulesComplete = updatedModules.every((m) => 
+        m.isGenerated && m.content
+          ? m.content.every((c: any) => c.completed)
+          : m.status === "completed"
+      );
       
       const totalGrade = calculateTotalGrade();
       
-      const updateData: any = {
+      const updateData: Record<string, any> = {
         modules: updatedModules,
         lastUpdated: serverTimestamp(),
         isActive: !allModulesComplete,
-        totalGrade,
       };
+      
+      if (totalGrade > 0) {
+        updateData.totalGrade = totalGrade;
+      }
       
       if (allModulesComplete && totalGrade >= 80) {
         updateData.passedAt = serverTimestamp();
@@ -345,10 +357,26 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
               unlockedAt: new Date().toISOString(),
             }),
           });
+          await createNotification({
+            ...NotificationMessages.courseCompleted(plan.title, totalGrade),
+            userId: user!.uid,
+            link: `/learning/${learningId}`,
+          });
+          await createNotification({
+            ...NotificationMessages.badgeEarned(plan.title),
+            userId: user!.uid,
+            link: `/profile`,
+          });
           toast.success(`Congratulations! You passed with ${totalGrade}%!`);
         } else {
           toast.error(`You scored ${totalGrade}%. You need 80% to pass.`);
         }
+      } else if (allContentComplete) {
+        await createNotification({
+          ...NotificationMessages.moduleCompleted(module.course),
+          userId: user!.uid,
+          link: `/learning/${learningId}`,
+        });
       }
     } catch (error) {
       console.error("Error updating progress:", error);
@@ -405,7 +433,11 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
   const totalContent = moduleContent.length;
   const completedContent = moduleContent.filter((c: GeneratedContent) =>c.completed).length;
   let totalGrade = calculateTotalGrade();
-  const allModulesComplete = plan.modules.every(m => m.status === "completed");
+  const allModulesComplete = plan.modules.every(m => 
+    m.isGenerated && m.content
+      ? m.content.every((c: any) => c.completed)
+      : m.status === "completed"
+  );
   const passed = allModulesComplete && totalGrade >= 80;
   
   const hasAiDetection = plan.modules.some(m => 
@@ -637,6 +669,24 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
                 </div>
               )}
 
+              {!currentContent.completed && currentContent.type !== "exercise" && (
+                <div className="mt-8 p-6 bg-amber-50 rounded-2xl border border-amber-200">
+                  <p className="text-sm text-amber-700 mb-4">
+                    Ready to move on? Mark this {currentContent.type} as complete to continue.
+                  </p>
+                  <button
+                    onClick={async () => {
+                      await markContentComplete();
+                      toast.success(`${currentContent.type} marked as complete!`);
+                    }}
+                    className="px-8 py-4 bg-amber-600 text-white rounded-2xl font-black hover:bg-amber-700 transition-all flex items-center gap-2"
+                  >
+                    <CheckCircle2 size={20} />
+                    Mark as Complete
+                  </button>
+                </div>
+              )}
+
               <div className="mt-12 pt-8 border-t border-slate-100 flex justify-between items-center">
                 <button
                   onClick={() => handleNavigate(contentIndex - 1)}
@@ -663,6 +713,17 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
                       className="px-8 py-4 bg-amber-600 text-white rounded-2xl font-black hover:bg-amber-700 transition-all flex items-center gap-2"
                     >
                       Next
+                      <ArrowRight size={20} />
+                    </button>
+                  )}
+
+                  {contentIndex === totalContent - 1 && currentContent.completed && !allModulesComplete && (
+                    <button
+                      onClick={() => router.push(`/learning/${learningId}`)}
+                      className="px-8 py-4 bg-emerald-600 text-white rounded-2xl font-black hover:bg-emerald-700 transition-all flex items-center gap-2"
+                    >
+                      <CheckCircle2 size={20} />
+                      Complete Module & Continue
                       <ArrowRight size={20} />
                     </button>
                   )}

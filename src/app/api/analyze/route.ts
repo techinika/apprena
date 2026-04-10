@@ -8,6 +8,7 @@ import {
   increment,
 } from "firebase/firestore";
 import { NextResponse } from "next/server";
+import { createNotification, NotificationMessages } from "@/lib/notificationUtils";
 
 const ALLOWED_FILE_TYPES = ["application/pdf"];
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -244,6 +245,14 @@ Create a detailed, personalized career transformation plan that:
       userInput: sanitizedAnswers,
       uploadedDocuments: uploadedDocs,
     });
+
+    if (userId) {
+      await createNotification({
+        ...NotificationMessages.roadmapGenerated(aiResponse.title || "Your Career Roadmap"),
+        userId,
+        link: `/workspace/${docRef.id}`,
+      });
+    }
 
     return NextResponse.json({
       id: docRef.id,
