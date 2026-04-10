@@ -69,10 +69,10 @@ const PaymentSuccessOverlay = () => {
                   <p className="text-[10px] font-black uppercase text-slate-400 mb-1">
                     Status
                   </p>
-                  <p className="font-bold text-slate-900 flex items-center gap-2">
+                  <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-emerald-500 rounded-full" />
-                    Activated
-                  </p>
+                    <span className="font-bold text-slate-900">Activated</span>
+                  </div>
                 </div>
                 <div className="bg-slate-50 p-4 rounded-2xl text-left border border-slate-100">
                   <p className="text-[10px] font-black uppercase text-slate-400 mb-1">

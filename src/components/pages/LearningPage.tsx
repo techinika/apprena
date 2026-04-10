@@ -144,24 +144,25 @@ const LearningPage = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {completedPlans.map((plan) => (
-                <div
-                  key={plan.id}
-                  className="bg-white border border-slate-100 p-6 rounded-3xl opacity-70 hover:opacity-100 transition-opacity cursor-pointer text-left relative group"
-                >
+                <div key={plan.id} className="relative">
+                  <button
+                    onClick={() => router.push(`/learning/${plan.id}`)}
+                    className="w-full text-left bg-white border border-slate-100 p-6 rounded-3xl opacity-70 hover:opacity-100 transition-opacity group"
+                  >
+                    <CheckCircle2 className="text-emerald-500 mb-3" />
+                    <h4 className="font-bold text-slate-900">{plan.title}</h4>
+                    <p className="text-xs text-slate-500 mt-1">Goal Achieved</p>
+                  </button>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       setDeleteConfirm({ planId: plan.id, planTitle: plan.title });
                     }}
                     className="absolute top-3 right-3 p-2 rounded-full bg-red-50 text-red-500 opacity-0 group-hover:opacity-100 hover:bg-red-100 transition-all z-10"
+                    title="Delete learning plan"
                   >
                     <Trash2 size={14} />
                   </button>
-                  <Link href={`/learning/${plan.id}`} className="block">
-                    <CheckCircle2 className="text-emerald-500 mb-3" />
-                  </Link>
-                  <h4 className="font-bold text-slate-900">{plan.title}</h4>
-                  <p className="text-xs text-slate-500 mt-1">Goal Achieved</p>
                 </div>
               ))}
             </div>

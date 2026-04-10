@@ -52,4 +52,15 @@ export interface LearningPlan {
     blocks: string;
     ecosystem: string;
   };
+  milestones?: LearningMilestone[];
+}
+
+export interface LearningMilestone {
+  id: string;
+  title: string;
+  description: string;
+  type: "learning" | "network" | "habit" | "achievement";
+  status: "pending" | "in_progress" | "completed";
+  moduleIds: string[];
+  completedAt?: string;
 }

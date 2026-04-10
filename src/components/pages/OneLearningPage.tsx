@@ -29,8 +29,10 @@ import Link from "next/link";
 import Loading from "@/app/loading";
 import confetti from "canvas-confetti";
 import { SuccessModal } from "../parts/learning/SuccessOverlay";
-import { Trash2, Sparkles } from "lucide-react";
+import { Trash2, Sparkles, Loader2 } from "lucide-react";
 import { ConfirmModal } from "../parts/ConfirmModal";
+import { LearningMilestone } from "@/types/learning";
+import { createNotification, NotificationMessages } from "@/lib/notificationUtils";
 
 export default function SingleLearningPlan({ id }: { id: string }) {
   const { user } = useAuth();
@@ -40,6 +42,7 @@ export default function SingleLearningPlan({ id }: { id: string }) {
   const [showSuccess, setShowSuccess] = useState(false);
   const [badgeData, setBadgeData] = useState<{ id: string; title: string }>();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isGeneratingMilestones, setIsGeneratingMilestones] = useState(false);
 
   useEffect(() => {
     if (!user || !id) return;
@@ -93,9 +96,94 @@ export default function SingleLearningPlan({ id }: { id: string }) {
     }
   };
 
-  const handleGenerateMilestones = () => {
-    toast.info("Generating milestones... (Functionality to be implemented)");
-    // TODO: Implement actual milestone generation logic based on user's requirements
+  const handleGenerateMilestones = async () => {
+    if (!plan || !id) return;
+    setIsGeneratingMilestones(true);
+
+    try {
+      const modules = plan.modules || [];
+      const totalModules = modules.length;
+      
+      if (totalModules === 0) {
+        toast.error("No modules available to generate milestones");
+        setIsGeneratingMilestones(false);
+        return;
+      }
+
+      const newMilestones: LearningMilestone[] = [];
+      
+      const completedModules = modules.filter(m => m.status === "completed");
+      const remainingModules = modules.filter(m => m.status !== "completed");
+
+      if (completedModules.length > 0) {
+        const learningMilestone: LearningMilestone = {
+          id: `milestone-${Date.now()}-learning`,
+          title: `Complete ${completedModules.length} Learning Modules`,
+          description: `You've mastered ${completedModules.length} modules. Keep the momentum going!`,
+          type: "learning",
+          status: completedModules.length === totalModules ? "completed" : "in_progress",
+          moduleIds: completedModules.map(m => m.id),
+          completedAt: completedModules.length === totalModules ? new Date().toISOString() : undefined,
+        };
+        newMilestones.push(learningMilestone);
+      }
+
+      if (remainingModules.length > 0) {
+        const upcomingMilestone: LearningMilestone = {
+          id: `milestone-${Date.now()}-upcoming`,
+          title: `Complete ${remainingModules.length} Remaining Modules`,
+          description: `${remainingModules.length} more modules to go. You're on track!`,
+          type: "learning",
+          status: "pending",
+          moduleIds: remainingModules.map(m => m.id),
+        };
+        newMilestones.push(upcomingMilestone);
+      }
+
+      const currentMilestoneCount = plan.milestones?.length || 0;
+      const targetCompletion = Math.ceil(totalModules / 3);
+      
+      if (currentMilestoneCount < 3 && completedModules.length >= targetCompletion) {
+        const achievementMilestone: LearningMilestone = {
+          id: `milestone-${Date.now()}-achievement`,
+          title: `${targetCompletion} Modules Milestone`,
+          description: `Amazing! You've completed ${targetCompletion} modules. This is a significant achievement!`,
+          type: "achievement",
+          status: completedModules.length >= targetCompletion ? "completed" : "pending",
+          moduleIds: modules.slice(0, targetCompletion).map(m => m.id),
+          completedAt: completedModules.length >= targetCompletion ? new Date().toISOString() : undefined,
+        };
+        newMilestones.push(achievementMilestone);
+      }
+
+      if (completedModules.length > 0 && completedModules.length < totalModules) {
+        const habitMilestone: LearningMilestone = {
+          id: `milestone-${Date.now()}-habit`,
+          title: "Build Your Learning Habit",
+          description: "Consistent learning is key to success. You're building great habits!",
+          type: "habit",
+          status: "in_progress",
+          moduleIds: completedModules.map(m => m.id),
+        };
+        newMilestones.push(habitMilestone);
+      }
+
+      const existingMilestones = plan.milestones || [];
+      const allMilestones = [...existingMilestones, ...newMilestones];
+
+      const planRef = doc(db, "learningPlans", id);
+      await updateDoc(planRef, {
+        milestones: allMilestones,
+        lastUpdated: serverTimestamp(),
+      });
+
+      toast.success("Milestones generated!");
+    } catch (error) {
+      console.error("Error generating milestones:", error);
+      toast.error("Failed to generate milestones");
+    } finally {
+      setIsGeneratingMilestones(false);
+    }
   };
 
   const toggleModuleStatus = async (index: number, currentStatus: string) => {
@@ -138,10 +226,26 @@ export default function SingleLearningPlan({ id }: { id: string }) {
               unlockedAt: new Date().toISOString(),
             }),
           });
+          await createNotification({
+            ...NotificationMessages.courseCompleted(plan.title, 100),
+            userId: user.uid,
+            link: `/learning/${id}`,
+          });
+          await createNotification({
+            ...NotificationMessages.badgeEarned(plan.title),
+            userId: user.uid,
+            link: `/profile`,
+          });
           setShowSuccess(true);
           setBadgeData({
             title: plan?.title,
             id: `badge-${id}`,
+          });
+        } else {
+          await createNotification({
+            ...NotificationMessages.moduleCompleted(plan.modules[index].course),
+            userId: user.uid,
+            link: `/learning/${id}`,
           });
         }
       }
@@ -238,9 +342,18 @@ export default function SingleLearningPlan({ id }: { id: string }) {
         <div className="flex justify-end mb-8">
           <button
             onClick={handleGenerateMilestones}
-            className="flex items-center gap-2 px-6 py-3 bg-amber-500 text-slate-900 rounded-full font-bold hover:bg-slate-900 hover:text-white transition-all shadow-md"
+            disabled={isGeneratingMilestones}
+            className="flex items-center gap-2 px-6 py-3 bg-amber-500 text-slate-900 rounded-full font-bold hover:bg-slate-900 hover:text-white transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Sparkles size={18} /> Generate More Milestones
+            {isGeneratingMilestones ? (
+              <>
+                <Loader2 size={18} className="animate-spin" /> Generating...
+              </>
+            ) : (
+              <>
+                <Sparkles size={18} /> Generate More Milestones
+              </>
+            )}
           </button>
         </div>
 
@@ -249,39 +362,39 @@ export default function SingleLearningPlan({ id }: { id: string }) {
             Execution Steps
           </h3>
           {plan.modules.map((module, index) => {
-            const prevModuleCompleted = index === 0 || plan.modules[index - 1]?.status === "completed";
+            const isModuleCompleted = module.isGenerated && module.content
+              ? module.content.every((c: any) => c.completed)
+              : module.status === "completed";
+            const prevModule = plan.modules[index - 1];
+            const prevModuleCompleted = index === 0 || (prevModule?.isGenerated && prevModule?.content
+              ? prevModule.content.every((c: any) => c.completed)
+              : prevModule?.status === "completed");
             const isLocked = !prevModuleCompleted;
 
             return (
               <div
                 key={index}
                 className={`group flex items-center gap-6 p-6 rounded-[2.5rem] border transition-all ${
-                  module.status === "completed"
+                  isModuleCompleted
                     ? "bg-slate-50 border-emerald-200/50 opacity-90"
                     : isLocked
                     ? "bg-slate-50 border-slate-100 opacity-60"
                     : "bg-white border-slate-200 hover:border-amber-500 shadow-sm"
                 }`}
               >
-                <button
-                  onClick={() => !isLocked && toggleModuleStatus(index, module.status)}
-                  disabled={isLocked}
-                  className={`shrink-0 transition-transform active:scale-90 ${
-                    isLocked
-                      ? "text-slate-200 cursor-not-allowed"
-                      : module.status === "completed"
-                      ? "text-emerald-500"
-                      : "text-slate-200 hover:text-amber-500"
+                <div
+                  className={`shrink-0 ${
+                    isLocked ? "text-slate-200 cursor-not-allowed" : ""
                   }`}
                 >
                   {isLocked ? (
                     <Lock size={32} />
-                  ) : module.status === "completed" ? (
-                    <CheckCircle2 size={32} />
+                  ) : isModuleCompleted ? (
+                    <CheckCircle2 size={32} className="text-emerald-500" />
                   ) : (
-                    <Circle size={32} strokeWidth={1.5} />
+                    <Circle size={32} strokeWidth={1.5} className="text-slate-200 hover:text-amber-500" />
                   )}
-                </button>
+                </div>
 
                 <div className="grow">
                   <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
@@ -289,7 +402,7 @@ export default function SingleLearningPlan({ id }: { id: string }) {
                   </p>
                   <h4
                     className={`text-xl font-bold ${
-                      module.status === "completed"
+                      isModuleCompleted
                         ? "text-slate-400 line-through"
                         : "text-slate-900"
                     }`}
@@ -321,23 +434,23 @@ export default function SingleLearningPlan({ id }: { id: string }) {
                     onClick={() => !isLocked && router.push(`/learning/${id}/course/${index}`)}
                     disabled={isLocked}
                     className={`p-4 rounded-2xl flex items-center gap-2 font-bold transition-all ${
-                      module.status === "completed"
+                      isModuleCompleted
                         ? "bg-slate-200 text-slate-500"
                         : isLocked
                         ? "bg-slate-100 text-slate-300 cursor-not-allowed"
                         : "bg-amber-500 text-slate-900 hover:bg-slate-900 hover:text-white"
                     }`}
                   >
-                    {isLocked ? <Lock size={18} /> : module.status === "completed" ? <CheckCircle2 size={18} /> : null}
-                    <span className="hidden md:inline">{module.status === "completed" ? "Completed" : isLocked ? "Locked" : "Start Course"}</span>
-                    {!isLocked && module.status !== "completed" && <ArrowRight size={18} />}
+                    {isLocked ? <Lock size={18} /> : isModuleCompleted ? <CheckCircle2 size={18} /> : null}
+                    <span className="hidden md:inline">{isModuleCompleted ? "Completed" : isLocked ? "Locked" : "Start Course"}</span>
+                    {!isLocked && !isModuleCompleted && <ArrowRight size={18} />}
                   </button>
                 ) : (
                   <Link
                     href={module.url}
                     target="_blank"
                     className={`p-4 rounded-2xl flex items-center gap-2 font-bold transition-all ${
-                      module.status === "completed"
+                      isModuleCompleted
                         ? "bg-slate-200 text-slate-500"
                         : "bg-amber-500 text-slate-900 hover:bg-slate-900 hover:text-white"
                     }`}

@@ -5,10 +5,15 @@ A Next.js 16 application providing personalized career roadmaps, learning paths,
 ## Features
 
 - **AI-Powered Career Analysis** - Generate personalized roadmaps using Google Gemini
+- **AI-Generated Curriculum** - Custom learning paths with lessons, exercises, and quizzes
+- **Interactive Course Viewer** - Track progress through each content piece
 - **Learning Path Tracking** - Track courses and curriculum progress
+- **Milestone Generation** - One-click milestone creation from roadmaps
 - **Achievement System** - Earn verified badges and milestones
+- **Notifications** - Real-time updates for all learning activities
 - **Social Network Suggestions** - AI-recommended connections for career growth
 - **Workspace Management** - Organize all your career activities
+- **Live Chat Support** - Tawk.to integration for real-time assistance
 
 ## Tech Stack
 
@@ -115,7 +120,7 @@ src/
 Generate AI-powered career roadmap.
 
 **Request:**
-- `file` (optional): Resume/CV files (PDF, DOC, DOCX)
+- `file` (optional): Resume/CV files (PDF)
 - `answers`: JSON string with assessment answers
 - `userId` (optional): User ID for credit deduction
 
@@ -130,7 +135,38 @@ Generate AI-powered career roadmap.
   "curriculum": [...],
   "habits": [...],
   "network": [...],
-  "achievements": [...]
+  "achievements": [...],
+  "milestones": [...]
+}
+```
+
+### POST /api/generate-curriculum
+Generate AI-powered personalized learning curriculum with lessons, exercises, and quizzes.
+
+**Request:**
+- `userId`: User ID
+- `roadmapData`: Goal, skills, and learning gaps context
+- `targetSkill`: Primary skill to focus on
+
+**Response:**
+```json
+{
+  "success": true,
+  "planId": "learning_plan_id",
+  "modules": [
+    {
+      "course": "Unique module title",
+      "provider": "Apprena AI",
+      "content": [
+        {
+          "title": "Lesson title",
+          "type": "lesson|reading|exercise|quiz",
+          "content": "Content...",
+          "duration": "10-20 min"
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -138,8 +174,10 @@ Generate AI-powered career roadmap.
 
 - **AssessmentForm** - Landing page form for generating roadmaps
 - **OneActivityPage** - Detailed view of generated roadmap
+- **CourseViewer** - Interactive learning with AI grading for exercises
 - **LearningSection** - Curriculum and skill gap tracking
 - **RoadmapSection** - Timeline and flowchart visualization
+- **NotificationsPage** - Activity feed for all learning events
 
 ## Security Notes
 

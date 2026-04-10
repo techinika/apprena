@@ -8,6 +8,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { db } from "@/db/firebase";
+import { createNotification, NotificationMessages } from "@/lib/notificationUtils";
 
 interface GenerateCurriculumRequest {
   userId: string;
@@ -79,7 +80,7 @@ Create a detailed curriculum with learning modules. Each module should have:
   "totalHours": number (estimate total hours for completing the entire curriculum),
   "modules": [
     {
-      "course": "Unique and descriptive module title (e.g., 'Fundamentals of React Hooks', 'Advanced State Management in Redux')",
+      "course": "Unique and descriptive module title (e.g., 'Fundamentals of React Hooks', 'Advanced State Management in Redux'). IMPORTANT: Each module MUST have a COMPLETELY DIFFERENT and unique title - do not repeat similar names.",
       "provider": "Apprena AI",
       "isGenerated": true,
       "content": [
@@ -98,6 +99,8 @@ Create a detailed curriculum with learning modules. Each module should have:
 
 ## RULES
 - Create 5-6 modules covering the skill from basics to advanced
+- Each module MUST have a UNIQUE, descriptive title that is different from all other modules
+- Avoid generic names like "Module 1", "Module 2" - use specific descriptive titles
 - Each module should have 2-3 content pieces (NOT 3-5)
 - Keep each content piece SHORT (100-300 words max) to avoid JSON parsing issues
 - Include a mix of lessons, readings, exercises, and quizzes
@@ -130,39 +133,64 @@ Create a detailed curriculum with learning modules. Each module should have:
       );
     }
 
-    const modules = aiResponse.modules.slice(0, 6).map((m: any, idx: number) => ({
-      ...m,
-      id: `module-${Date.now()}-${idx}`,
-      status: "not_started",
-      content: m.content?.map((c: any, cidx: number) => ({
-        ...c,
-        id: `content-${Date.now()}-${idx}-${cidx}`,
-        completed: false,
-        usedAiForAnswer: false,
-      })),
-    }));
+    const moduleTitles = [
+      "Foundations", "Core Principles", "Essential Skills", "Practical Application",
+      "Advanced Techniques", "Mastery Level", "Expert Implementation", "Real-World Projects"
+    ];
+    
+    const modules = aiResponse.modules.slice(0, 6).map((m: any, idx: number) => {
+      const uniqueTitle = moduleTitles[idx] ? `${moduleTitles[idx]} in ${targetSkill}` : m.course || m.title;
+      return {
+        id: `module-${Date.now()}-${idx}`,
+        course: m.course || m.title || uniqueTitle,
+        provider: "Apprena AI",
+        isGenerated: true,
+        status: "not_started",
+        content: m.content?.map((c: any, cidx: number) => ({
+          ...c,
+          id: `content-${Date.now()}-${idx}-${cidx}`,
+          completed: false,
+          usedAiForAnswer: false,
+        })),
+      };
+    });
+
+    const planTitle = aiResponse.title || `Mastering ${targetSkill}`;
+    const createdAt = serverTimestamp();
+    const lastUpdated = serverTimestamp();
 
     if (planId) {
       const planRef = doc(db, "learningPlans", planId);
       await updateDoc(planRef, {
         modules: modules,
+        title: planTitle,
         isGenerated: true,
         totalHours: aiResponse.totalHours || Math.round(modules.length * 3),
-        lastUpdated: serverTimestamp(),
+        lastUpdated,
+      });
+      await createNotification({
+        ...NotificationMessages.courseGenerated(planTitle),
+        userId,
+        link: `/learning/${planId}`,
       });
       return NextResponse.json({ success: true, planId, modules });
     } else {
       const docRef = await addDoc(collection(db, "learningPlans"), {
         userId,
-        title: aiResponse.title || `Mastering ${targetSkill}`,
+        title: planTitle,
         target: roadmapData.goal,
         modules,
         isGenerated: true,
         isActive: true,
         roadmapData,
         totalHours: aiResponse.totalHours || Math.round(modules.length * 3),
-        createdAt: serverTimestamp(),
-        lastUpdated: serverTimestamp(),
+        createdAt,
+        lastUpdated,
+      });
+      await createNotification({
+        ...NotificationMessages.courseGenerated(planTitle),
+        userId,
+        link: `/learning/${docRef.id}`,
       });
       return NextResponse.json({ success: true, planId: docRef.id, modules });
     }

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Script from "next/script";
 import { db } from "@/db/firebase";
 import {
   collection,
@@ -123,9 +124,14 @@ const CONTACT_METHODS = [
   {
     icon: MessageCircle,
     label: "Live Chat",
-    description: "Unavailable at the moment",
+    description: "Click to chat with us",
     href: "#",
-    color: "bg-slate-50 text-slate-400 cursor-not-allowed",
+    color: "bg-emerald-50 text-emerald-600 cursor-pointer hover:scale-105",
+    onClick: () => {
+      if (typeof window !== "undefined" && (window as any).Tawk_API) {
+        (window as any).Tawk_API.maximize();
+      }
+    },
   },
 ];
 
@@ -232,6 +238,11 @@ export default function SupportPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 py-12 px-6">
+      <Script
+        id="tawk-script"
+        strategy="lazyOnload"
+        src="https://embed.tawk.to/67e0a9fa4d96ff1912ebc675/1k5c9d3s8"
+      />
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <div className="w-20 h-20 bg-gradient-to-br from-amber-500 to-orange-500 text-white rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-amber-200">
@@ -254,17 +265,31 @@ export default function SupportPage() {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {CONTACT_METHODS.map((method) => (
-                  <a
-                    key={method.label}
-                    href={method.href}
-                    className={`${method.color} p-5 rounded-2xl flex items-center gap-4 hover:scale-105 transition-transform`}
-                  >
-                    <method.icon size={24} />
-                    <div>
-                      <p className="font-bold text-sm">{method.label}</p>
-                      <p className="text-xs opacity-70">{method.description}</p>
-                    </div>
-                  </a>
+                  method.onClick ? (
+                    <button
+                      key={method.label}
+                      onClick={method.onClick}
+                      className={`${method.color} p-5 rounded-2xl flex items-center gap-4 hover:scale-105 transition-transform text-left`}
+                    >
+                      <method.icon size={24} />
+                      <div>
+                        <p className="font-bold text-sm">{method.label}</p>
+                        <p className="text-xs opacity-70">{method.description}</p>
+                      </div>
+                    </button>
+                  ) : (
+                    <a
+                      key={method.label}
+                      href={method.href}
+                      className={`${method.color} p-5 rounded-2xl flex items-center gap-4 hover:scale-105 transition-transform`}
+                    >
+                      <method.icon size={24} />
+                      <div>
+                        <p className="font-bold text-sm">{method.label}</p>
+                        <p className="text-xs opacity-70">{method.description}</p>
+                      </div>
+                    </a>
+                  )
                 ))}
               </div>
             </section>
