@@ -4,6 +4,7 @@ import { APP } from "@/variables/globals";
 import { Nunito } from "next/font/google";
 import { AuthProvider } from "@/lib/AuthContext";
 import { Toaster } from "sonner";
+import MentorChat from "@/components/parts/chat/MentorChat";
 
 export const metadata: Metadata = {
   title: {
