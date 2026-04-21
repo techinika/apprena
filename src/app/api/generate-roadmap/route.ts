@@ -44,6 +44,7 @@ export async function POST(req: Request) {
         current: "Team member roadmap",
         goal: targetRole,
       },
+      confidenceScore: aiResponse.confidenceScore || 17,
     });
 
     return NextResponse.json({

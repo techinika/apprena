@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "@/db/firebase";
+import { sendShareNotificationEmail } from "@/lib/email";
 
 function generateSlug(title: string, id: string): string {
   const slugify = (text: string) => {

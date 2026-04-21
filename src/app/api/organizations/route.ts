@@ -13,16 +13,34 @@ import {
   serverTimestamp,
   arrayUnion,
 } from "firebase/firestore";
-import { Organization, OrganizationMember, MemberPermissions } from "@/types/organization";
+import { Organization, OrganizationMember, OrganizationInvoice, MemberPermissions } from "@/types/organization";
+import { createInvoice } from "@/lib/payments";
+
+const TIER_PRICES: Record<string, { monthly: number; annual: number }> = {
+  "team-starter": { monthly: 24000, annual: 240000 },
+  "team-growth": { monthly: 40000, annual: 400000 },
+  "team-enterprise": { monthly: 80000, annual: 800000 },
+};
+
+function getMaxMembers(tierId: string): number {
+  const tierMembers: Record<string, number> = {
+    "team-starter": 5,
+    "team-growth": 15,
+    "team-enterprise": 9999,
+  };
+  return tierMembers[tierId] || 5;
+}
 
 export async function POST(req: Request) {
   try {
-    const { userId, name, tierId } = await req.json();
+    const { userId, name, tierId, billingCycle = "monthly", userEmail, userName } = await req.json();
 
     if (!userId || !name) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
+    const tierInfo = TIER_PRICES[tierId] || TIER_PRICES["team-starter"];
+    const amountRwf = billingCycle === "annual" ? tierInfo.annual : tierInfo.monthly;
     const maxMembers = getMaxMembers(tierId);
 
     const orgRef = await addDoc(collection(db, "organizations"), {
@@ -33,7 +51,7 @@ export async function POST(req: Request) {
       subscription: {
         tierId: tierId || "team-starter",
         status: "trial",
-        billingCycle: "monthly",
+        billingCycle,
         currentPeriodStart: serverTimestamp(),
         currentPeriodEnd: null,
         autoRenew: true,
@@ -42,15 +60,55 @@ export async function POST(req: Request) {
         allowMemberRoadmaps: true,
         requireApproval: true,
       },
+      isActive: false,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
+    });
+
+    let invoiceNumber = "";
+    let paymentLinkUrl = "";
+    
+    try {
+      const irembopayInvoice = await createInvoice({
+        transactionId: `ORG-${orgRef.id}-${Date.now()}`,
+        amount: amountRwf,
+        description: `Organization Subscription - ${name} - ${tierId}`,
+        customer: {
+          email: userEmail,
+          name: userName,
+        },
+        expiryDays: 7,
+      });
+      invoiceNumber = irembopayInvoice.invoiceNumber;
+      paymentLinkUrl = irembopayInvoice.paymentLinkUrl;
+    } catch (invoiceError) {
+      console.error("Failed to create IremboPay invoice:", invoiceError);
+    }
+
+    const invoiceRef = await addDoc(collection(db, "organizationInvoices"), {
+      organizationId: orgRef.id,
+      userId,
+      amount: amountRwf,
+      amountRwf,
+      currency: "RWF",
+      status: "pending",
+      billingCycle,
+      tierId: tierId || "team-starter",
+      invoiceNumber: invoiceNumber || `INV-${Date.now()}`,
+      paymentLinkUrl,
+      createdAt: serverTimestamp(),
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    });
+
+    await updateDoc(doc(db, "organizations", orgRef.id), {
+      pendingInvoiceId: invoiceRef.id,
     });
 
     await addDoc(collection(db, "organizationMembers"), {
       organizationId: orgRef.id,
       userId,
       role: "owner",
-      status: "active",
+      status: "pending",
       permissions: {
         canCreateRoadmaps: true,
         canEditOwnRoadmaps: true,
@@ -63,7 +121,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ 
       success: true, 
-      organizationId: orgRef.id 
+      organizationId: orgRef.id,
+      invoiceId: invoiceRef.id,
+      amountRwf,
     });
   } catch (error: any) {
     console.error("Create organization error:", error);
@@ -104,11 +164,58 @@ export async function GET(req: Request) {
   }
 }
 
-function getMaxMembers(tierId: string): number {
-  const tierMembers: Record<string, number> = {
-    "team-starter": 5,
-    "team-growth": 15,
-    "team-enterprise": 9999,
-  };
-  return tierMembers[tierId] || 5;
+export async function DELETE(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const organizationId = searchParams.get("organizationId");
+  const userId = searchParams.get("userId");
+
+  if (!organizationId || !userId) {
+    return NextResponse.json({ error: "Missing organizationId or userId" }, { status: 400 });
+  }
+
+  try {
+    const orgDoc = await getDoc(doc(db, "organizations", organizationId));
+    if (!orgDoc.exists()) {
+      return NextResponse.json({ error: "Organization not found" }, { status: 404 });
+    }
+
+    const orgData = orgDoc.data();
+    if (orgData.ownerId !== userId) {
+      return NextResponse.json({ error: "Only the owner can delete this organization" }, { status: 403 });
+    }
+
+    const membersQuery = query(
+      collection(db, "organizationMembers"),
+      where("organizationId", "==", organizationId)
+    );
+    const membersSnapshot = await getDocs(membersQuery);
+    for (const memberDoc of membersSnapshot.docs) {
+      await deleteDoc(doc(db, "organizationMembers", memberDoc.id));
+    }
+
+    const templatesQuery = query(
+      collection(db, "organizationTemplates"),
+      where("organizationId", "==", organizationId)
+    );
+    const templatesSnapshot = await getDocs(templatesQuery);
+    for (const templateDoc of templatesSnapshot.docs) {
+      await deleteDoc(doc(db, "organizationTemplates", templateDoc.id));
+    }
+
+    const invitationsQuery = query(
+      collection(db, "organizationInvitations"),
+      where("organizationId", "==", organizationId)
+    );
+    const invitationsSnapshot = await getDocs(invitationsQuery);
+    for (const invDoc of invitationsSnapshot.docs) {
+      await deleteDoc(doc(db, "organizationInvitations", invDoc.id));
+    }
+
+    await deleteDoc(doc(db, "organizations", organizationId));
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error("Delete organization error:", error);
+    return NextResponse.json({ error: "Failed to delete organization" }, { status: 500 });
+  }
 }

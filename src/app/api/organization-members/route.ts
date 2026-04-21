@@ -13,10 +13,11 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { OrganizationMember } from "@/types/organization";
+import { sendInvitationEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
   try {
-    const { organizationId, email, role, invitedBy } = await req.json();
+    const { organizationId, email, role, invitedBy, invitedUserId } = await req.json();
 
     if (!organizationId || !email || !invitedBy) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -32,11 +33,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Member limit reached" }, { status: 400 });
     }
 
+    let linkedUserId = invitedUserId;
+    if (!linkedUserId) {
+      const userQuery = query(collection(db, "profiles"), where("email", "==", email.toLowerCase()));
+      const userSnap = await getDocs(userQuery);
+      if (!userSnap.empty) {
+        linkedUserId = userSnap.docs[0].id;
+      }
+    }
+
     const token = Math.random().toString(36).substring(2) + Date.now().toString(36);
 
     const invitationRef = await addDoc(collection(db, "organizationInvitations"), {
       organizationId,
-      email,
+      email: email.toLowerCase(),
+      invitedUserId: linkedUserId || null,
       role: role || "member",
       invitedBy,
       token,
@@ -44,6 +55,13 @@ export async function POST(req: Request) {
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       createdAt: serverTimestamp(),
     });
+
+    const inviterDoc = await getDoc(doc(db, "profiles", invitedBy));
+    const inviterName = inviterDoc.exists() 
+      ? inviterDoc.data().displayName || inviterDoc.data().email?.split("@")[0] 
+      : "Someone";
+
+    await sendInvitationEmail(email, orgData.name, inviterName, token);
 
     return NextResponse.json({ 
       success: true, 
@@ -53,6 +71,41 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("Invite member error:", error);
     return NextResponse.json({ error: "Failed to invite member" }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const memberId = searchParams.get("memberId");
+
+  if (!memberId) {
+    return NextResponse.json({ error: "Missing memberId" }, { status: 400 });
+  }
+
+  try {
+    const memberDoc = await getDoc(doc(db, "organizationMembers", memberId));
+    if (!memberDoc.exists()) {
+      return NextResponse.json({ error: "Member not found" }, { status: 404 });
+    }
+
+    const memberData = memberDoc.data();
+    const orgDoc = await getDoc(doc(db, "organizations", memberData.organizationId));
+    if (!orgDoc.exists()) {
+      return NextResponse.json({ error: "Organization not found" }, { status: 404 });
+    }
+
+    const orgData = orgDoc.data();
+    await deleteDoc(doc(db, "organizationMembers", memberId));
+
+    await updateDoc(doc(db, "organizations", memberData.organizationId), {
+      memberCount: Math.max(0, (orgData.memberCount || 1) - 1),
+      updatedAt: serverTimestamp(),
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error("Delete member error:", error);
+    return NextResponse.json({ error: "Failed to delete member" }, { status: 500 });
   }
 }
 

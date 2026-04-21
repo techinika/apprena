@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { jsPDF } from "jspdf";
 
+const LINE_HEIGHT_MULTIPLIER = 1.5;
+
 export async function POST(req: Request) {
   try {
     const { 
@@ -20,8 +22,10 @@ export async function POST(req: Request) {
 
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 20;
     const contentWidth = pageWidth - (margin * 2);
+    const maxY = pageHeight - margin;
     let y = 20;
 
     doc.setFillColor(30, 41, 59);
@@ -62,11 +66,12 @@ export async function POST(req: Request) {
 
     doc.setFontSize(11);
     doc.setFont("helvetica", "normal");
+    const baseLineHeight = 11 * LINE_HEIGHT_MULTIPLIER;
     
     for (const step of roadmap) {
-      if (y > 260) {
+      if (y > maxY - 40) {
         doc.addPage();
-        y = 20;
+        y = margin;
       }
 
       doc.setFillColor(241, 245, 249);
@@ -80,30 +85,32 @@ export async function POST(req: Request) {
       doc.setTextColor(0, 0, 0);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(12);
+      const lineHeight12 = 12 * LINE_HEIGHT_MULTIPLIER;
       const titleLines = doc.splitTextToSize(step.title, contentWidth - 40);
       doc.text(titleLines, margin + 35, y + 1);
-      y += titleLines.length * 6;
+      y += titleLines.length * lineHeight12;
       
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
+      const lineHeight10 = 10 * LINE_HEIGHT_MULTIPLIER;
       const descLines = doc.splitTextToSize(step.desc, contentWidth - 10);
       doc.text(descLines, margin + 5, y);
-      y += descLines.length * 5 + 3;
+      y += descLines.length * lineHeight10 + 3;
 
       doc.setFont("helvetica", "bold");
       doc.setTextColor(16, 185, 129);
       const resultLines = doc.splitTextToSize(`✓ ${step.result}`, contentWidth - 10);
       doc.text(resultLines, margin + 5, y);
-      y += resultLines.length * 5 + 5;
+      y += resultLines.length * lineHeight10 + 5;
       doc.setTextColor(0, 0, 0);
     }
 
     y += 10;
 
     if (curriculum && curriculum.length > 0) {
-      if (y > 230) {
+      if (y > maxY - 30) {
         doc.addPage();
-        y = 20;
+        y = margin;
       }
       
       doc.setFontSize(16);
@@ -113,27 +120,28 @@ export async function POST(req: Request) {
       
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
+      const lineHeight10 = 10 * LINE_HEIGHT_MULTIPLIER;
       
       for (const item of curriculum) {
-        if (y > 270) {
+        if (y > maxY - 30) {
           doc.addPage();
-          y = 20;
+          y = margin;
         }
         
         doc.setFillColor(255, 251, 235);
         const courseLines = doc.splitTextToSize(item.course, contentWidth - 10);
-        const itemHeight = 4 + (courseLines.length * 5) + 6;
+        const itemHeight = 4 + (courseLines.length * lineHeight10) + 6;
         doc.roundedRect(margin, y - 3, contentWidth, itemHeight, 1, 1, 'F');
         
         doc.setFont("helvetica", "bold");
         doc.text(courseLines, margin + 5, y + 2);
-        y += courseLines.length * 5 + 3;
+        y += courseLines.length * lineHeight10 + 3;
         
         doc.setFont("helvetica", "normal");
         doc.setTextColor(100, 100, 100);
         const providerLines = doc.splitTextToSize(`Provider: ${item.provider}`, contentWidth - 10);
         doc.text(providerLines, margin + 5, y + 2);
-        y += providerLines.length * 5 + 8;
+        y += providerLines.length * lineHeight10 + 8;
         doc.setTextColor(0, 0, 0);
       }
       
@@ -141,9 +149,9 @@ export async function POST(req: Request) {
     }
 
     if (habits && habits.length > 0) {
-      if (y > 230) {
+      if (y > maxY - 30) {
         doc.addPage();
-        y = 20;
+        y = margin;
       }
       
       doc.setFontSize(16);
@@ -153,35 +161,36 @@ export async function POST(req: Request) {
       
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
+      const lineHeight10 = 10 * LINE_HEIGHT_MULTIPLIER;
       
       for (const habit of habits) {
-        if (y > 270) {
+        if (y > maxY - 30) {
           doc.addPage();
-          y = 20;
+          y = margin;
         }
         
         doc.setFillColor(236, 253, 243);
         const habitLines = doc.splitTextToSize(`${habit.icon} ${habit.title}`, contentWidth - 10);
         const descLines = doc.splitTextToSize(habit.desc, contentWidth - 10);
-        const habitHeight = 4 + (habitLines.length * 5) + (descLines.length * 4) + 3;
+        const habitHeight = 4 + (habitLines.length * lineHeight10) + (descLines.length * lineHeight10) + 3;
         doc.roundedRect(margin, y - 3, contentWidth, habitHeight, 1, 1, 'F');
         
         doc.setFont("helvetica", "bold");
         doc.text(habitLines, margin + 5, y + 2);
-        y += habitLines.length * 5 + 2;
+        y += habitLines.length * lineHeight10 + 2;
         
         doc.setFont("helvetica", "normal");
         doc.text(descLines, margin + 5, y);
-        y += descLines.length * 4 + 8;
+        y += descLines.length * lineHeight10 + 8;
       }
       
       y += 5;
     }
 
     if (network && network.length > 0) {
-      if (y > 230) {
+      if (y > maxY - 30) {
         doc.addPage();
-        y = 20;
+        y = margin;
       }
       
       doc.setFontSize(16);
@@ -191,36 +200,37 @@ export async function POST(req: Request) {
       
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
+      const lineHeight10 = 10 * LINE_HEIGHT_MULTIPLIER;
       
       for (const person of network) {
-        if (y > 260) {
+        if (y > maxY - 30) {
           doc.addPage();
-          y = 20;
+          y = margin;
         }
         
         doc.setFillColor(248, 250, 252);
         const nameLines = doc.splitTextToSize(`${person.name} (${person.type})`, contentWidth - 10);
         const roleLines = doc.splitTextToSize(person.role, contentWidth - 10);
         const reasonLines = doc.splitTextToSize(person.reason, contentWidth - 10);
-        const personHeight = 4 + (nameLines.length * 5) + (roleLines.length * 5) + (reasonLines.length * 4) + 3;
+        const personHeight = 4 + (nameLines.length * lineHeight10) + (roleLines.length * lineHeight10) + (reasonLines.length * lineHeight10) + 3;
         doc.roundedRect(margin, y - 3, contentWidth, personHeight, 1, 1, 'F');
         
         doc.setFont("helvetica", "bold");
         doc.text(nameLines, margin + 5, y + 2);
-        y += nameLines.length * 5 + 2;
+        y += nameLines.length * lineHeight10 + 2;
         
         doc.setFont("helvetica", "normal");
         doc.setTextColor(100, 100, 100);
         doc.text(roleLines, margin + 5, y + 2);
-        y += roleLines.length * 5 + 2;
+        y += roleLines.length * lineHeight10 + 2;
         
         doc.setTextColor(0, 0, 0);
         doc.text(reasonLines, margin + 5, y + 2);
-        y += reasonLines.length * 4 + 8;
+        y += reasonLines.length * lineHeight10 + 8;
       }
     }
 
-    y = 280;
+    y = maxY - 10;
     doc.setFontSize(8);
     doc.setTextColor(150, 150, 150);
     const dateStr = createdAt ? new Date(createdAt).toLocaleDateString() : new Date().toLocaleDateString();
@@ -228,7 +238,7 @@ export async function POST(req: Request) {
 
     const pdfBase64 = doc.output("datauristring");
 
-    return NextResponse.json({ pdf: pdfBase64 });
+    return NextResponse.json({ pdf: pdfBase64, confidenceScore });
   } catch (error: any) {
     console.error("PDF generation error:", error);
     return NextResponse.json({ error: "Failed to generate PDF" }, { status: 500 });

@@ -320,7 +320,7 @@ const ProfilePage = () => {
                                   {tx.planId?.replace("_", " ") || "Purchase"}
                                 </p>
                                 <p className="text-[10px] text-slate-400 font-mono uppercase">
-                                  ID: {tx.id.slice(0, 8)}
+                                  TX: {tx.id.slice(0, 8).toUpperCase()}
                                 </p>
                               </td>
                               <td className="px-6 py-4 text-slate-500">

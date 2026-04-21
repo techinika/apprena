@@ -7,6 +7,7 @@ import {
   getDoc,
   getDocs,
   updateDoc,
+  deleteDoc,
   query,
   where,
   serverTimestamp,
@@ -98,5 +99,27 @@ export async function PUT(req: Request) {
   } catch (error: any) {
     console.error("Update template error:", error);
     return NextResponse.json({ error: "Failed to update template" }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const templateId = searchParams.get("templateId");
+
+  if (!templateId) {
+    return NextResponse.json({ error: "Missing templateId" }, { status: 400 });
+  }
+
+  try {
+    const templateDoc = await getDoc(doc(db, "organizationTemplates", templateId));
+    if (!templateDoc.exists()) {
+      return NextResponse.json({ error: "Template not found" }, { status: 404 });
+    }
+
+    await deleteDoc(doc(db, "organizationTemplates", templateId));
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error("Delete template error:", error);
+    return NextResponse.json({ error: "Failed to delete template" }, { status: 500 });
   }
 }

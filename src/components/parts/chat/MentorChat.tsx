@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { MessageCircle, X, Send, Loader2, Bot, User, Trash2, Sparkles } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { useAuth } from "@/lib/AuthContext";
 import { db } from "@/db/firebase";
 import { doc, getDoc, collection, query, where, orderBy, limit, getDocs } from "firebase/firestore";
@@ -261,7 +263,13 @@ export default function MentorChat() {
                       {msg.role === "user" && (
                         <User size={16} className="text-slate-900 mt-1 shrink-0" />
                       )}
-                      <p className="text-sm leading-relaxed">{msg.content}</p>
+                      <div className="text-sm leading-relaxed [&_h1]:font-bold [&_h1]:text-lg [&_h1]:text-slate-800 [&_h1]:mt-2 [&_h1]:mb-1 [&_h2]:font-bold [&_h2]:text-base [&_h2]:text-slate-800 [&_h2]:mt-2 [&_h2]:mb-1 [&_h3]:font-bold [&_h3]:text-base [&_h3]:text-slate-800 [&_h3]:mt-2 [&_h3]:mb-1 [&_p]:mb-1 [&_p]:mt-0 [&_ul]:my-1 [&_ul]:pl-4 [&_ul]:list-disc [&_ol]:my-1 [&_ol]:pl-4 [&_ol]:list-decimal [&_li]:my-0 [&_code]:bg-slate-100 [&_code]:text-amber-600 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-xs [&_code]:font-mono [&_pre]:bg-slate-800 [&_pre]:text-slate-100 [&_pre]:rounded-lg [&_pre]:p-3 [&_pre]:overflow-x-auto [&_pre]:text-xs [&_blockquote]:border-l-4 [&_blockquote]:border-amber-500 [&_blockquote]:pl-3 [&_blockquote]:italic [&_blockquote]:text-slate-600 [&_a]:text-amber-600 [&_a]:underline [&_table]:w-full [&_table]:border-collapse [&_th]:border [&_th]:border-slate-300 [&_th]:p-2 [&_th]:bg-slate-100 [&_td]:border [&_td]:border-slate-300 [&_td]:p-2">
+                        <ReactMarkdown 
+                          remarkPlugins={[remarkGfm]}
+                        >
+                          {msg.content}
+                        </ReactMarkdown>
+                      </div>
                     </div>
                   </div>
                 </div>
