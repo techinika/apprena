@@ -116,7 +116,6 @@ export default function MentorChat() {
   const getUserContext = async () => {
     if (!user) return null;
 
-    const roadmapRef = doc(db, "activities");
     const roadmapsQuery = query(
       collection(db, "activities"),
       where("userId", "==", user.uid),
