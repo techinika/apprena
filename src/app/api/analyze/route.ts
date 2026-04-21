@@ -184,7 +184,7 @@ Create a detailed, personalized career transformation plan that:
 
 ## OUTPUT FORMAT (JSON ONLY - No other text)
 {
-  "title": "Short 2-4 word title for this path",
+  "title": "Clear, descriptive title that captures the goal achievement (e.g., 'Frontend Dev to Senior Engineer', 'Marketing to Product Manager', 'Junior to Lead Developer in 12 Months'). Make it specific to the user's target role and timeframe.",
   "slug": "url-friendly-version-of-title",
   "confidenceScore": number (0-100 based on realism of goal),
   "roadmap": [
@@ -210,6 +210,7 @@ Create a detailed, personalized career transformation plan that:
 }
 
 ## RULES
+- **CRITICAL: Title must be specific and action-oriented** - It should clearly communicate what the user will achieve (e.g., "Junior Dev to Senior in 18 Months", "Career Pivot to AI/ML Engineer", "Non-Tech to Product Manager")
 - Use simple, powerful language (no corporate jargon)
 - Mermaid code must be valid and clean
 - Be honest but encouraging about feasibility
