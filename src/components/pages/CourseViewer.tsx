@@ -424,6 +424,18 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
     }
   };
 
+  const handleNextModule = () => {
+    if (!plan) return;
+    const currentModuleIdx = parseInt(moduleIndex);
+    const nextModuleIdx = currentModuleIdx + 1;
+    
+    if (nextModuleIdx < plan.modules.length) {
+      router.push(`/learning/${learningId}/course/${nextModuleIdx}/0`);
+    } else {
+      router.push(`/learning/${learningId}`);
+    }
+  };
+
   if (loading) return <Loading />;
   if (!plan || !currentContent) return <Loading />;
 
@@ -719,7 +731,7 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
 
                   {contentIndex === totalContent - 1 && currentContent.completed && !allModulesComplete && (
                     <button
-                      onClick={() => router.push(`/learning/${learningId}`)}
+                      onClick={handleNextModule}
                       className="px-8 py-4 bg-emerald-600 text-white rounded-2xl font-black hover:bg-emerald-700 transition-all flex items-center gap-2"
                     >
                       <CheckCircle2 size={20} />

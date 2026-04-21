@@ -31,29 +31,28 @@ export default function PublicRoadmapView({ slug }: { slug: string }) {
   useEffect(() => {
     const fetchActivity = async () => {
       try {
-        const docRef = doc(db, "activities", slug);
-        const docSnap = await getDoc(docRef);
+        let docRef = doc(db, "activities", slug);
+        let docSnap = await getDoc(docRef);
         
         if (docSnap.exists()) {
           const data = docSnap.data() as Activity;
           if (data.isPublic) {
             setActivity({ ...data, id: docSnap.id });
-          } else {
-            setError(true);
-          }
-        } else {
-          const q = await getDoc(doc(db, "activities", slug));
-          if (q.exists()) {
-            const data = q.data() as Activity;
-            if (data.isPublic && data.publicSlug === slug) {
-              setActivity({ ...data, id: q.id });
-            } else {
-              setError(true);
-            }
-          } else {
-            setError(true);
+            return;
           }
         }
+        
+        docRef = doc(db, "activities", slug);
+        docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data() as Activity;
+          if (data.isPublic && data.publicSlug === slug) {
+            setActivity({ ...data, id: docSnap.id });
+            return;
+          }
+        }
+        
+        setError(true);
       } catch (err) {
         console.error("Fetch error:", err);
         setError(true);

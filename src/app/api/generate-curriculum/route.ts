@@ -13,6 +13,7 @@ import { createNotification, NotificationMessages } from "@/lib/notificationUtil
 interface GenerateCurriculumRequest {
   userId: string;
   planId?: string;
+  activityId?: string;
   roadmapData: {
     title: string;
     goal: string;
@@ -30,7 +31,7 @@ interface GenerateCurriculumRequest {
 export async function POST(req: Request) {
   try {
     const body: GenerateCurriculumRequest = await req.json();
-    const { userId, roadmapData, targetSkill, planId } = body;
+    const { userId, roadmapData, targetSkill, planId, activityId } = body;
 
     if (!userId || !roadmapData || !targetSkill) {
       return NextResponse.json(
@@ -167,6 +168,7 @@ Create a detailed curriculum with learning modules. Each module should have:
         isGenerated: true,
         totalHours: aiResponse.totalHours || Math.round(modules.length * 3),
         lastUpdated,
+        parentRoadmapId: activityId || null,
       });
       await createNotification({
         ...NotificationMessages.courseGenerated(planTitle),
@@ -186,6 +188,7 @@ Create a detailed curriculum with learning modules. Each module should have:
         totalHours: aiResponse.totalHours || Math.round(modules.length * 3),
         createdAt,
         lastUpdated,
+        parentRoadmapId: activityId || null,
       });
       await createNotification({
         ...NotificationMessages.courseGenerated(planTitle),

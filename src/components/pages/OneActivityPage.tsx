@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useEffect, useState, lazy, Suspense } from "react";
-import { Map, BookOpen, Repeat, Users, Trophy, FileText, Eye, ExternalLink, TrendingUp, Share2, Link, Globe, Lock, Loader2, Copy, Check, Trash2 } from "lucide-react";
+import { Map, BookOpen, Repeat, Users, Trophy, FileText, Eye, ExternalLink, TrendingUp, Share2, Link, Globe, Lock, Loader2, Copy, Check, Trash2, Download } from "lucide-react";
 import { RoadmapSection } from "../parts/activity/RoadmapView";
 import { RoadmapProgress } from "../parts/activity/RoadmapProgress";
 import { fetchActivityById } from "@/db/operations/GetActivities";
@@ -43,6 +43,7 @@ const AnalysisDetail = ({ activityId }: { activityId: string }) => {
   const [copied, setCopied] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   const navItems = [
     { id: "roadmap", label: "Roadmap", icon: Map },
@@ -144,6 +145,40 @@ const AnalysisDetail = ({ activityId }: { activityId: string }) => {
     }
   };
 
+  const handleDownloadPdf = async () => {
+    if (!activity) return;
+    setDownloading(true);
+    try {
+      const res = await fetch("/api/generate-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          roadmap: activity.roadmap,
+          title: activity.title,
+          goal: activity.userInput?.goal,
+          confidenceScore: activity.confidenceScore,
+          curriculum: activity.curriculum,
+          habits: activity.habits,
+          network: activity.network,
+          createdAt: activity.createdAt,
+        }),
+      });
+      const result = await res.json();
+      if (result.pdf) {
+        const link = document.createElement("a");
+        link.href = result.pdf;
+        link.download = `${activity.title.replace(/\s+/g, "-")}-roadmap.pdf`;
+        link.click();
+        toast.success("PDF downloaded!");
+      }
+    } catch (error) {
+      console.error("Download error:", error);
+      toast.error("Failed to download PDF");
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   if (loading) return <Loading />;
 
   if (error) {
@@ -189,8 +224,16 @@ const AnalysisDetail = ({ activityId }: { activityId: string }) => {
 
         <div className="mt-auto p-6 border-t border-slate-50 relative">
           <button 
+            onClick={handleDownloadPdf}
+            disabled={downloading}
+            className="w-full bg-amber-500 text-slate-900 p-4 rounded-2xl text-sm font-bold hover:bg-amber-600 transition-colors flex items-center justify-center gap-2"
+          >
+            {downloading ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
+            Download PDF
+          </button>
+          <button 
             onClick={() => setShowShareMenu(!showShareMenu)}
-            className="w-full bg-slate-900 text-white p-4 rounded-2xl text-sm font-bold hover:bg-amber-600 transition-colors flex items-center justify-center gap-2"
+            className="w-full mt-2 bg-slate-900 text-white p-4 rounded-2xl text-sm font-bold hover:bg-amber-600 transition-colors flex items-center justify-center gap-2"
           >
             <Share2 size={18} />
             {activity?.isPublic ? "Public" : "Share Analysis"}

@@ -329,9 +329,9 @@ const ProfilePage = () => {
                                   : "---"}
                               </td>
                               <td className="px-6 py-4 font-bold text-slate-900">
-                                {new Intl.NumberFormat("en-US", {
+                                {new Intl.NumberFormat("en-RW", {
                                   style: "currency",
-                                  currency: "USD",
+                                  currency: "RWF",
                                 }).format(tx.amount)}
                               </td>
                               <td className="px-6 py-4">

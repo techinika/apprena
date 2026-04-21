@@ -31,7 +31,7 @@ export const createOrGetOrder = async (
     userId,
     planId,
     amount,
-    currency: "USD",
+    currency: "RWF",
     status: "pending",
     createdAt: serverTimestamp(),
     invoiceNumber: `INV-${Date.now()}`,

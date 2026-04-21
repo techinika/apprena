@@ -23,6 +23,7 @@ import {
   getDocs,
   doc,
   updateDoc,
+  getDoc,
 } from "firebase/firestore";
 import { useAuth } from "@/lib/AuthContext";
 import { toast } from "sonner";
@@ -127,6 +128,7 @@ export const LearningSection = ({
         body: JSON.stringify({
           userId: user.uid,
           planId: generatedPlanId || undefined,
+          activityId: activityId,
           roadmapData: {
             title: title || "",
             goal: goal || userInput?.goal || "",
@@ -143,6 +145,24 @@ export const LearningSection = ({
 
       if (response.ok) {
         setGeneratedPlanId(result.planId);
+        
+        if (activityId) {
+          const activityRef = doc(db, "activities", activityId);
+          const currentLinks = [];
+          const activitySnap = await getDoc(activityRef);
+          if (activitySnap.exists()) {
+            const data = activitySnap.data();
+            if (data.linkedLearningPlanIds) {
+              currentLinks.push(...data.linkedLearningPlanIds);
+            }
+          }
+          if (!currentLinks.includes(result.planId)) {
+            await updateDoc(activityRef, {
+              linkedLearningPlanIds: [...currentLinks, result.planId],
+            });
+          }
+        }
+        
         toast.success("Custom curriculum generated!");
         router.push(`/learning/${result.planId}`);
       } else {
