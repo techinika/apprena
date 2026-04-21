@@ -21,20 +21,27 @@ export default function MentorChat() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  if (authLoading || !user) {
-    return null;
-  }
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    if (isOpen && user) {
+    if (!authLoading) {
+      setIsReady(true);
+    }
+  }, [authLoading]);
+
+  useEffect(() => {
+    if (isReady && isOpen && user) {
       loadChatHistory();
     }
-  }, [isOpen, user]);
+  }, [isReady, isOpen, user]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  if (authLoading || !user || !isReady) {
+    return null;
+  }
 
   const loadChatHistory = async () => {
     if (!user) return;
