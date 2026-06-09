@@ -68,7 +68,7 @@ NEXT_PUBLIC_MEASUREMENT_ID=G-XXXXXXXXXX
 
 # App Configuration
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
-NEXT_PUBLIC_BASE_DOMAIN=https://apprena.app
+NEXT_PUBLIC_BASE_DOMAIN=https://apprena.techinika.com
 
 # AI Providers (at least GEMINI required)
 GEMINI_API_KEY=your_gemini_api_key

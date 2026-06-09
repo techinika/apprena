@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
 import { APP } from "@/variables/globals";
 import AuthNav from "@/components/parts/AuthNav";
-import dynamic from "next/dynamic";
-
-const MentorChat = dynamic(() => import("@/components/parts/chat/MentorChat"), {
-  ssr: false,
-});
+import MentorChat from "@/components/parts/chat/MentorChatWrapper";
 
 export const metadata: Metadata = {
   title: `${APP?.NAME} | ${APP?.SLOGAN}`,

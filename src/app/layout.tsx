@@ -5,13 +5,9 @@ import { Nunito } from "next/font/google";
 import { AuthProvider } from "@/lib/AuthContext";
 import { ThemeProvider } from "@/lib/theme/ThemeProvider";
 import { Toaster } from "sonner";
-import dynamic from "next/dynamic";
+import MentorChat from "@/components/parts/chat/MentorChatWrapper";
 
-const MentorChat = dynamic(() => import("@/components/parts/chat/MentorChat"), {
-  ssr: false,
-});
-
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://apprena.app";
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://apprena.techinika.com";
 
 export const metadata: Metadata = {
   title: {
@@ -70,9 +66,10 @@ const Font = Nunito({
   variable: "--font-main",
 });
 
-const IREMBOPAY_SCRIPT = process.env.NODE_ENV === "production"
-  ? "https://dashboard.irembopay.com/assets/payment/inline.js"
-  : "https://dashboard.sandbox.irembopay.com/assets/payment/inline.js";
+const IREMBOPAY_SCRIPT =
+  process.env.NODE_ENV === "production"
+    ? "https://dashboard.irembopay.com/assets/payment/inline.js"
+    : "https://dashboard.sandbox.irembopay.com/assets/payment/inline.js";
 
 export default function RootLayout({
   children,
@@ -92,12 +89,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
       </head>
       <body className={`${Font.variable} antialiased`}>
-        <script
-          src={IREMBOPAY_SCRIPT}
-          async
-          defer
-          data-init={false}
-        />
+        <script src={IREMBOPAY_SCRIPT} async defer data-init={false} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
