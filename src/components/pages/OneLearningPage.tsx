@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -27,7 +27,7 @@ import { LearningPlan } from "@/types/learning";
 import { db } from "@/db/firebase";
 import Link from "next/link";
 import Loading from "@/app/loading";
-import confetti from "canvas-confetti";
+
 import { SuccessModal } from "../parts/learning/SuccessOverlay";
 import { Trash2, Sparkles, Loader2 } from "lucide-react";
 import { ConfirmModal } from "../parts/ConfirmModal";
@@ -43,6 +43,13 @@ export default function SingleLearningPlan({ id }: { id: string }) {
   const [badgeData, setBadgeData] = useState<{ id: string; title: string }>();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isGeneratingMilestones, setIsGeneratingMilestones] = useState(false);
+  const fireworksRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (fireworksRef.current) clearInterval(fireworksRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (!user || !id) return;
@@ -60,7 +67,7 @@ export default function SingleLearningPlan({ id }: { id: string }) {
     return () => unsubscribe();
   }, [id, user]);
 
-  const triggerFireworks = () => {
+  const triggerFireworks = async () => {
     const duration = 3 * 1000;
     const animationEnd = Date.now() + duration;
     const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
@@ -68,9 +75,16 @@ export default function SingleLearningPlan({ id }: { id: string }) {
     const randomInRange = (min: number, max: number) =>
       Math.random() * (max - min) + min;
 
-    const interval: any = setInterval(function () {
+    const confettiModule = await import("canvas-confetti");
+    const confetti = confettiModule.default;
+    if (fireworksRef.current) clearInterval(fireworksRef.current);
+    fireworksRef.current = setInterval(() => {
       const timeLeft = animationEnd - Date.now();
-      if (timeLeft <= 0) return clearInterval(interval);
+      if (timeLeft <= 0) {
+        if (fireworksRef.current) clearInterval(fireworksRef.current);
+        fireworksRef.current = null;
+        return;
+      }
 
       const particleCount = 50 * (timeLeft / duration);
       confetti({
@@ -250,7 +264,7 @@ export default function SingleLearningPlan({ id }: { id: string }) {
         }
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error("Failed to update progress");
     }
   };

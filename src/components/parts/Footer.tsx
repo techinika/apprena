@@ -37,7 +37,7 @@ function Footer() {
           <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl flex items-center gap-4 hover:shadow-lg hover:shadow-slate-200/50 transition-all">
             <img
               src="/seal.png"
-              alt="EdTech Project Certification"
+              alt="EdTech Project Certification seal from DBI Rwanda"
               className="h-30 w-auto grayscale group-hover:grayscale-0 transition-all"
             />
             <div className="text-left border-l border-slate-200 pl-4">

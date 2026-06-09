@@ -1,12 +1,27 @@
 import { NextResponse } from "next/server";
+import { verifyAuth } from "@/lib/apiAuth";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "@/db/firebase";
+import { sendShareNotificationEmail } from "@/lib/email";
+
+function generateSlug(title: string, id: string): string {
+  const slugify = (text: string) => {
+    return text
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+  };
+  const titleSlug = slugify(title).slice(0, 50);
+  const idSlug = id.slice(0, 8);
+  return `${titleSlug}-${idSlug}`;
+}
 
 export async function POST(req: Request) {
   try {
-    const { activityId, userId, makePublic } = await req.json();
+    const { uid } = await verifyAuth(req);
+    const { activityId, makePublic, tags } = await req.json();
 
-    if (!activityId || !userId) {
+    if (!activityId) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -19,22 +34,31 @@ export async function POST(req: Request) {
 
     const activityData = activitySnap.data();
 
-    if (activityData.userId !== userId) {
+    if (activityData.userId !== uid) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const publicSlug = makePublic ? activityId : null;
+    const publicSlug = makePublic 
+      ? (activityData.slug || generateSlug(activityData.title || "roadmap", activityId))
+      : null;
 
-    await updateDoc(activityRef, {
+    const updateData: Record<string, any> = {
       isPublic: makePublic,
       publicSlug: publicSlug,
       updatedAt: new Date().toISOString(),
-    });
+    };
+
+    if (tags && Array.isArray(tags)) {
+      updateData.tags = tags;
+    }
+
+    await updateDoc(activityRef, updateData);
 
     return NextResponse.json({
       success: true,
       isPublic: makePublic,
-      publicUrl: makePublic ? `/share/${activityId}` : null,
+      publicUrl: makePublic ? `/share/${publicSlug}` : null,
+      slug: publicSlug,
     });
   } catch (error: any) {
     console.error("Share error:", error);

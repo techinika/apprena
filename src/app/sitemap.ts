@@ -1,15 +1,63 @@
 import { MetadataRoute } from "next";
+import { db } from "@/db/firebase";
+import { collection, getDocs, query, where } from "firebase/firestore";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-  const routes = ["", "/login", "/terms", "/privacy", "/support"].map(
-    (route) => ({
-      url: `${baseUrl}${route}`,
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://apprena.techinika.com";
+
+  const staticRoutes = [
+    { url: baseUrl, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 1 },
+    {
+      url: `${baseUrl}/login`,
       lastModified: new Date(),
       changeFrequency: "monthly" as const,
-      priority: route === "" ? 1 : 0.8,
-    })
-  );
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/terms`,
+      lastModified: new Date(),
+      changeFrequency: "yearly" as const,
+      priority: 0.3,
+    },
+    {
+      url: `${baseUrl}/privacy`,
+      lastModified: new Date(),
+      changeFrequency: "yearly" as const,
+      priority: 0.3,
+    },
+    {
+      url: `${baseUrl}/support`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.5,
+    },
+    {
+      url: `${baseUrl}/explore`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/upgrade`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    },
+  ];
 
-  return routes;
+  try {
+    const publicRoadmaps = query(collection(db, "activities"), where("isPublic", "==", true));
+    const snapshot = await getDocs(publicRoadmaps);
+
+    const dynamicRoutes = snapshot.docs.map((doc) => ({
+      url: `${baseUrl}/share/${doc.id}`,
+      lastModified: doc.data().createdAt?.toDate() || new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+    }));
+
+    return [...staticRoutes, ...dynamicRoutes];
+  } catch {
+    return staticRoutes;
+  }
 }

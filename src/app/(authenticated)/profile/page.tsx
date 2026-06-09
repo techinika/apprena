@@ -1,11 +1,12 @@
 import ProfilePage from "@/components/pages/ProfilePage";
+import { APP } from "@/variables/globals";
+import type { Metadata } from "next";
 
-function page() {
-  return (
-    <div>
-      <ProfilePage />
-    </div>
-  );
+export const metadata: Metadata = {
+  title: `Profile | ${APP?.NAME}`,
+  robots: { index: false, follow: false },
+};
+
+export default function Page() {
+  return <ProfilePage />;
 }
-
-export default page;

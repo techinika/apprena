@@ -1,6 +1,10 @@
+"use client";
+
+import { useState } from "react";
 import { AchievementItem } from "@/types/activity";
-import { Trophy } from "lucide-react";
+import { Trophy, Sparkles, Loader2 } from "lucide-react";
 import { SectionFeedback } from "./SectionFeedback";
+import { toast } from "sonner";
 
 interface AchievementsSectionProps {
   achievements: AchievementItem[] | undefined;
@@ -11,19 +15,82 @@ export const AchievementsSection = ({
   achievements,
   activityId,
 }: AchievementsSectionProps) => {
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const handleGenerateAchievements = async () => {
+    if (!activityId) return;
+    
+    setIsGenerating(true);
+    try {
+      const res = await fetch("/api/generate-section", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ activityId, section: "achievements" }),
+      });
+      
+      const result = await res.json();
+      
+      if (res.ok) {
+        toast.success("Achievements generated!");
+        window.location.reload();
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to generate achievements");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   if (!achievements || achievements.length === 0) {
     return (
       <div className="p-12 text-center bg-slate-50 rounded-[3rem] border-2 border-dashed border-slate-200">
         <Trophy className="mx-auto text-slate-300 mb-4" size={48} />
-        <p className="text-slate-500 font-bold">
+        <p className="text-slate-500 font-bold mb-4">
           Visionary milestones will appear here.
         </p>
+        {activityId && (
+          <button
+            onClick={handleGenerateAchievements}
+            disabled={isGenerating}
+            className="flex items-center gap-2 px-6 py-3 bg-amber-600 text-white rounded-xl font-bold hover:bg-amber-700 disabled:opacity-50 mx-auto"
+          >
+            {isGenerating ? (
+              <>
+                <Loader2 size={18} className="animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Sparkles size={18} />
+                Generate Achievements
+              </>
+            )}
+          </button>
+        )}
       </div>
     );
   }
 
   return (
     <div className="space-y-12 py-10">
+      {activityId && (
+        <div className="flex justify-end">
+          <button
+            onClick={handleGenerateAchievements}
+            disabled={isGenerating}
+            className="flex items-center gap-2 px-4 py-2 bg-amber-100 text-amber-700 rounded-xl font-bold hover:bg-amber-200 disabled:opacity-50 text-sm"
+          >
+            {isGenerating ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <Sparkles size={16} />
+            )}
+            Regenerate
+          </button>
+        </div>
+      )}
       <div className="relative">
         <div className="absolute left-4 md:left-1/2 md:-translate-x-1/2 top-0 bottom-0 w-0.5 bg-slate-100" />
 

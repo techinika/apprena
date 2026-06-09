@@ -3,7 +3,7 @@ import { CheckCircle2, Layers, List, Sparkles, Loader2 } from "lucide-react";
 import { RoadmapStep, Milestone } from "@/types/activity";
 import dynamic from "next/dynamic";
 import { StepFeedback } from "./StepFeedback";
-import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { doc, updateDoc, serverTimestamp, getDoc } from "firebase/firestore";
 import { db } from "@/db/firebase";
 import { useAuth } from "@/lib/AuthContext";
 import { toast } from "sonner";
@@ -43,8 +43,22 @@ export const RoadmapSection = ({
         status: "pending" as const,
       }));
 
+      const activitySnap = await getDoc(doc(db, "activities", activityId));
+      const activityData = activitySnap.exists() ? activitySnap.data() : {};
+      
+      let filledSections = 0;
+      if (activityData.roadmap?.length > 0) filledSections++;
+      if (activityData.curriculum?.length > 0) filledSections++;
+      if (activityData.habits?.length > 0) filledSections++;
+      if (activityData.network?.length > 0) filledSections++;
+      if (activityData.achievements?.length > 0) filledSections++;
+      if (milestones.length > 0) filledSections++;
+
+      const newConfidence = Math.round((filledSections / 6) * 100);
+
       await updateDoc(doc(db, "activities", activityId), {
         milestones: milestones,
+        confidenceScore: newConfidence,
         lastUpdated: serverTimestamp(),
       });
       

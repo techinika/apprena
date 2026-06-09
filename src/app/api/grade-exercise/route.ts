@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { generateWithFallback } from "@/lib/ai";
+import { verifyAuth } from "@/lib/apiAuth";
 
 export async function POST(req: Request) {
   try {
-    const { userId, contentTitle, contentType, exerciseContent, userAnswer, planId, aiSolution } = await req.json();
+    const { contentTitle, contentType, exerciseContent, userAnswer, planId, aiSolution } = await req.json();
+    const { uid } = await verifyAuth(req);
 
-    if (!userId || !exerciseContent || !userAnswer) {
+    if (!uid || !exerciseContent || !userAnswer) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 

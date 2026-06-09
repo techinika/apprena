@@ -26,6 +26,7 @@ export interface LearningPlan {
   id: string;
   userId: string;
   parentActivityId?: string;
+  parentRoadmapId?: string;
   title: string;
   target: string;
   modules: LearningModule[];
@@ -53,6 +54,11 @@ export interface LearningPlan {
     ecosystem: string;
   };
   milestones?: LearningMilestone[];
+  progress?: {
+    completedItems: number;
+    totalItems: number;
+    lastUpdated: string;
+  };
 }
 
 export interface LearningMilestone {

@@ -1,4 +1,6 @@
 export interface UserProfile {
+  displayName?: string;
+  email?: string;
   accountType: "free" | "pro" | "architect";
   joinedAt: string;
   lastLogin: string;

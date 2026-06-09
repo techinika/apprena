@@ -11,6 +11,7 @@ import {
   ArrowUpRight,
   Sparkles,
   Wand2,
+  Plus,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -23,6 +24,7 @@ import {
   getDocs,
   doc,
   updateDoc,
+  getDoc,
 } from "firebase/firestore";
 import { useAuth } from "@/lib/AuthContext";
 import { toast } from "sonner";
@@ -43,6 +45,8 @@ export const LearningSection = ({
   const [isSyncing, setIsSyncing] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isGeneratingGaps, setIsGeneratingGaps] = useState(false);
+  const [isGeneratingCurriculum, setIsGeneratingCurriculum] = useState(false);
   const [existingPlanId, setExistingPlanId] = useState<string | null>(null);
   const [generatedPlanId, setGeneratedPlanId] = useState<string | null>(null);
 
@@ -127,6 +131,7 @@ export const LearningSection = ({
         body: JSON.stringify({
           userId: user.uid,
           planId: generatedPlanId || undefined,
+          activityId: activityId,
           roadmapData: {
             title: title || "",
             goal: goal || userInput?.goal || "",
@@ -143,6 +148,24 @@ export const LearningSection = ({
 
       if (response.ok) {
         setGeneratedPlanId(result.planId);
+        
+        if (activityId) {
+          const activityRef = doc(db, "activities", activityId);
+          const currentLinks = [];
+          const activitySnap = await getDoc(activityRef);
+          if (activitySnap.exists()) {
+            const data = activitySnap.data();
+            if (data.linkedLearningPlanIds) {
+              currentLinks.push(...data.linkedLearningPlanIds);
+            }
+          }
+          if (!currentLinks.includes(result.planId)) {
+            await updateDoc(activityRef, {
+              linkedLearningPlanIds: [...currentLinks, result.planId],
+            });
+          }
+        }
+        
         toast.success("Custom curriculum generated!");
         router.push(`/learning/${result.planId}`);
       } else {
@@ -155,57 +178,169 @@ export const LearningSection = ({
     }
   };
 
+  const handleGenerateLearningGaps = async () => {
+    if (!activityId) return;
+    
+    setIsGeneratingGaps(true);
+    try {
+      const res = await fetch("/api/generate-section", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ activityId, section: "learningGaps" }),
+      });
+      
+      const result = await res.json();
+      
+      if (res.ok) {
+        toast.success("Learning gaps analyzed!");
+        window.location.reload();
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to analyze learning gaps");
+    } finally {
+      setIsGeneratingGaps(false);
+    }
+  };
+
+  const handleGenerateCurriculumDirect = async () => {
+    if (!activityId) return;
+    
+    setIsGeneratingCurriculum(true);
+    try {
+      const res = await fetch("/api/generate-section", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ activityId, section: "curriculum" }),
+      });
+      
+      const result = await res.json();
+      
+      if (res.ok) {
+        toast.success("Curriculum generated!");
+        window.location.reload();
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to generate curriculum");
+    } finally {
+      setIsGeneratingCurriculum(false);
+    }
+  };
+
   return (
     <div className="space-y-10">
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* Technical Gaps Card */}
-        <div className="bg-white border border-slate-100 p-8 rounded-3xl shadow-sm">
-          <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-            <div className="w-2 h-6 bg-amber-600 rounded-full" /> Technical Gaps
-          </h3>
-          <ul className="space-y-6">
-            {learningGaps?.technical?.map((item, index) => (
-              <li key={index + 1}>
-                <div className="flex justify-between text-sm font-bold mb-2">
-                  <span className="text-slate-700">{item.skill}</span>
-                  <span
-                    className={
-                      item.priority === "High"
-                        ? "text-amber-600"
-                        : "text-slate-400"
-                    }
-                  >
-                    {item.priority} Priority
-                  </span>
-                </div>
-                <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                  <div
-                    className="bg-amber-600 h-full transition-all duration-1000"
-                    style={{ width: `${item.progress}%` }}
-                  />
-                </div>
-              </li>
-            ))}
-          </ul>
+      {!learningGaps?.technical?.length && !learningGaps?.soft?.length && activityId && (
+        <div className="p-8 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
+          <p className="text-slate-500 font-medium mb-4">No learning gaps analyzed yet.</p>
+          <button
+            onClick={handleGenerateLearningGaps}
+            disabled={isGeneratingGaps}
+            className="flex items-center gap-2 px-6 py-3 bg-amber-600 text-white rounded-xl font-bold hover:bg-amber-700 disabled:opacity-50 mx-auto"
+          >
+            {isGeneratingGaps ? (
+              <>
+                <Loader2 size={18} className="animate-spin" />
+                Analyzing...
+              </>
+            ) : (
+              <>
+                <Sparkles size={18} />
+                Analyze Learning Gaps
+              </>
+            )}
+          </button>
         </div>
+      )}
 
-        <div className="bg-white border border-slate-100 p-8 rounded-3xl shadow-sm">
-          <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-            <div className="w-2 h-6 bg-amber-600 rounded-full" /> Mindset & Soft
-            Skills
-          </h3>
-          <ul className="space-y-4">
-            {learningGaps?.soft?.map((skill, index) => (
-              <li
-                key={index + 1}
-                className="flex items-center gap-3 p-3 bg-amber-50 rounded-xl text-amber-700 text-sm font-bold border border-amber-100/50"
-              >
-                <ArrowRight size={16} className="text-amber-400" /> {skill}
-              </li>
-            ))}
-          </ul>
+      {learningGaps?.technical?.length || learningGaps?.soft?.length ? (
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Technical Gaps Card */}
+          <div className="bg-white border border-slate-100 p-8 rounded-3xl shadow-sm">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-bold flex items-center gap-2">
+                <div className="w-2 h-6 bg-amber-600 rounded-full" /> Technical Gaps
+              </h3>
+              {activityId && (
+                <button
+                  onClick={handleGenerateLearningGaps}
+                  disabled={isGeneratingGaps}
+                  className="p-2 text-slate-400 hover:text-amber-600 disabled:opacity-50"
+                  title="Regenerate"
+                >
+                  {isGeneratingGaps ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+                </button>
+              )}
+            </div>
+            <ul className="space-y-6">
+              {learningGaps?.technical?.map((item, index) => (
+                <li key={index + 1}>
+                  <div className="flex justify-between text-sm font-bold mb-2">
+                    <span className="text-slate-700">{item.skill}</span>
+                    <span
+                      className={
+                        item.priority === "High"
+                          ? "text-amber-600"
+                          : "text-slate-400"
+                      }
+                    >
+                      {item.priority} Priority
+                    </span>
+                  </div>
+                  <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className="bg-amber-600 h-full transition-all duration-1000"
+                      style={{ width: `${item.progress}%` }}
+                    />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="bg-white border border-slate-100 p-8 rounded-3xl shadow-sm">
+            <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
+              <div className="w-2 h-6 bg-amber-600 rounded-full" /> Mindset & Soft
+              Skills
+            </h3>
+            <ul className="space-y-4">
+              {learningGaps?.soft?.map((skill, index) => (
+                <li
+                  key={index + 1}
+                  className="flex items-center gap-3 p-3 bg-amber-50 rounded-xl text-amber-700 text-sm font-bold border border-amber-100/50"
+                >
+                  <ArrowRight size={16} className="text-amber-400" /> {skill}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-      </div>
+      ) : null}
+
+      {!curriculum?.length && activityId && (
+        <div className="p-8 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
+          <p className="text-slate-500 font-medium mb-4">No curriculum generated yet.</p>
+          <button
+            onClick={handleGenerateCurriculumDirect}
+            disabled={isGeneratingCurriculum}
+            className="flex items-center gap-2 px-6 py-3 bg-amber-600 text-white rounded-xl font-bold hover:bg-amber-700 disabled:opacity-50 mx-auto"
+          >
+            {isGeneratingCurriculum ? (
+              <>
+                <Loader2 size={18} className="animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Sparkles size={18} />
+                Generate Curriculum
+              </>
+            )}
+          </button>
+        </div>
+      )}
 
       <div className="bg-slate-900 rounded-[2.5rem] p-8 md:p-12 text-white shadow-xl relative overflow-hidden">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 relative z-10">

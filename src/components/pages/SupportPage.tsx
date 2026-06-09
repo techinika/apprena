@@ -29,6 +29,7 @@ import {
 import { useAuth } from "@/lib/AuthContext";
 import Footer from "../parts/Footer";
 import Link from "next/link";
+import { toast } from "sonner";
 
 const FAQS = [
   {
@@ -212,6 +213,7 @@ export default function SupportPage() {
       setTimeout(() => setSubmitted(false), 5000);
     } catch (error) {
       console.error(error);
+      toast.error("Failed to submit ticket. Please try again.");
     } finally {
       setLoading(false);
     }

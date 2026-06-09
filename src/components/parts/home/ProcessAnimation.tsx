@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
@@ -33,11 +33,29 @@ export const ProcessAnimation = () => {
     "typing"
   );
   const [textIndex, setTextIndex] = useState(0);
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReducedMotion(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   useEffect(() => {
     if (phase === "typing") {
-      const timer = setTimeout(() => setPhase("analyzing"), 4000);
-      return () => clearTimeout(timer);
+      const textTimer = setInterval(() => {
+        setTextIndex((prev) => (prev + 1) % TYPED_TEXTS.length);
+      }, 3000);
+      const phaseTimer = setTimeout(() => {
+        clearInterval(textTimer);
+        setPhase("analyzing");
+      }, 10000);
+      return () => {
+        clearInterval(textTimer);
+        clearTimeout(phaseTimer);
+      };
     }
     if (phase === "analyzing") {
       const timer = setTimeout(() => setPhase("complete"), 3000);
@@ -60,9 +78,10 @@ export const ProcessAnimation = () => {
           {phase === "typing" && (
             <motion.div
               key="typing"
-              initial={{ opacity: 0, y: 20 }}
+              initial={reducedMotion ? { opacity: 1 } : { opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95 }}
+              exit={reducedMotion ? { opacity: 1 } : { opacity: 0, scale: 0.95 }}
+              transition={{ duration: reducedMotion ? 0 : 0.3 }}
               className="space-y-8"
             >
               <div className="text-center space-y-4">
@@ -80,11 +99,16 @@ export const ProcessAnimation = () => {
                   <Search size={24} />
                 </div>
                 <div className="w-full bg-slate-50 border-2 border-slate-100 rounded-4xl px-16 py-8 text-2xl font-bold text-slate-800 shadow-inner overflow-hidden flex items-center">
-                  <motion.span
-                    animate={{ opacity: [1, 0] }}
-                    transition={{ repeat: Infinity, duration: 0.8 }}
-                    className="inline-block w-1 h-8 bg-amber-500 mr-1"
-                  />
+                  {!reducedMotion && (
+                    <motion.span
+                      animate={{ opacity: [1, 0] }}
+                      transition={{ repeat: Infinity, duration: 0.8 }}
+                      className="inline-block w-1 h-8 bg-amber-500 mr-1"
+                    />
+                  )}
+                  {reducedMotion && (
+                    <span className="inline-block w-1 h-8 bg-amber-500 mr-1" />
+                  )}
                   {TYPED_TEXTS[textIndex]}
                 </div>
               </div>
@@ -94,9 +118,10 @@ export const ProcessAnimation = () => {
           {phase === "analyzing" && (
             <motion.div
               key="analyzing"
-              initial={{ opacity: 0 }}
+              initial={{ opacity: reducedMotion ? 1 : 0 }}
               animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              exit={{ opacity: reducedMotion ? 1 : 0 }}
+              transition={{ duration: reducedMotion ? 0 : 0.3 }}
               className="flex flex-col items-center justify-center space-y-8"
             >
               <div className="relative">
@@ -124,8 +149,9 @@ export const ProcessAnimation = () => {
           {phase === "complete" && (
             <motion.div
               key="complete"
-              initial={{ opacity: 0 }}
+              initial={{ opacity: reducedMotion ? 1 : 0 }}
               animate={{ opacity: 1 }}
+              transition={{ duration: reducedMotion ? 0 : 0.3 }}
               className="space-y-10"
             >
               <div className="flex flex-col md:flex-row items-center justify-between gap-6">
@@ -149,9 +175,9 @@ export const ProcessAnimation = () => {
                 {MOCK_STEPS.map((step, i) => (
                   <motion.div
                     key={step.id}
-                    initial={{ opacity: 0, x: -20 }}
+                    initial={reducedMotion ? { opacity: 1 } : { opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.2 }}
+                    transition={{ delay: reducedMotion ? 0 : i * 0.2, duration: reducedMotion ? 0 : 0.3 }}
                     className="p-6 bg-slate-50 border border-slate-100 rounded-3xl flex flex-col gap-4 relative overflow-hidden group"
                   >
                     <div className="flex justify-between items-start">

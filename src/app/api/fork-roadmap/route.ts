@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { verifyAuth } from "@/lib/apiAuth";
 import { generateWithFallback } from "@/lib/ai";
 import { db } from "@/db/firebase";
 import {
@@ -11,9 +12,10 @@ import {
 
 export async function POST(req: Request) {
   try {
-    const { userId, originalRoadmapId } = await req.json();
+    const { uid } = await verifyAuth(req);
+    const { originalRoadmapId } = await req.json();
 
-    if (!userId || !originalRoadmapId) {
+    if (!originalRoadmapId) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -76,7 +78,7 @@ Provide a brief personalization summary in JSON:
     }
 
     const newDoc = await addDoc(collection(db, "activities"), {
-      userId,
+      userId: uid,
       title: `${originalData.title} (Personalized)`,
       category: originalData.category || "career",
       status: "claimed",

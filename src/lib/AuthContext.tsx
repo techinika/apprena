@@ -6,12 +6,13 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { onAuthStateChanged, User, signOut } from "firebase/auth";
 import { useRouter, usePathname } from "next/navigation";
 import { auth, db } from "@/db/firebase";
-import { doc, onSnapshot } from "firebase/firestore";
+import { doc, onSnapshot, Unsubscribe } from "firebase/firestore";
 import { UserProfile } from "@/types/user";
 
 interface AuthContextType {
@@ -34,15 +35,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
+  const profileUnsubRef = useRef<Unsubscribe | null>(null);
 
   useEffect(() => {
-    // Define routes that don't require login
     const isPublicRoute =
       pathname === "/" ||
       pathname === "/login" ||
       pathname === "/terms" ||
       pathname === "/privacy" ||
-      pathname.startsWith("/verify/");
+      pathname.startsWith("/verify/") ||
+      pathname.startsWith("/share/");
 
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -58,19 +60,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (currentUser) {
         const userRef = doc(db, "profiles", currentUser.uid);
-        const unsubscribeProfile = onSnapshot(userRef, (docSnap) => {
+        profileUnsubRef.current = onSnapshot(userRef, (docSnap) => {
           if (docSnap.exists()) {
             setProfile(docSnap.data() as UserProfile);
           }
         });
-        return () => unsubscribeProfile();
       } else {
+        if (profileUnsubRef.current) {
+          profileUnsubRef.current();
+          profileUnsubRef.current = null;
+        }
         setProfile(null);
       }
     });
 
-    return () => unsubscribe();
-  }, [pathname, router]);
+    return () => {
+      unsubscribe();
+      if (profileUnsubRef.current) {
+        profileUnsubRef.current();
+        profileUnsubRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!user && pathname.startsWith("/workspace")) {
+      router.push("/login");
+    }
+  }, [pathname, user, router]);
 
   const logout = useCallback(async () => {
     await signOut(auth);

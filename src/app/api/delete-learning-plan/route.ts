@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
+import { verifyAuth } from "@/lib/apiAuth";
 import { db } from "@/db/firebase";
 import { doc, deleteDoc, getDoc } from "firebase/firestore";
 
 export async function DELETE(req: Request) {
   try {
+    const { uid } = await verifyAuth(req);
     const { searchParams } = new URL(req.url);
     const planId = searchParams.get("planId");
-    const userId = searchParams.get("userId");
 
-    if (!planId || !userId) {
+    if (!planId) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -21,7 +22,7 @@ export async function DELETE(req: Request) {
 
     const planData = planSnap.data();
 
-    if (planData.userId !== userId) {
+    if (planData.userId !== uid) {
       return NextResponse.json({ error: "Not authorized" }, { status: 403 });
     }
 

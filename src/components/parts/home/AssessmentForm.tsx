@@ -63,7 +63,6 @@ export const AssessmentForm = () => {
         setResult(data);
         setShowLoginGate(true);
       }
-      console.log(data);
     } catch (err) {
       console.error(err);
     } finally {

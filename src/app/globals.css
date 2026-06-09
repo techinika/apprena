@@ -62,8 +62,16 @@
 
 @layer utilities {
   * {
-    outline: none;
     box-sizing: border-box;
+  }
+
+  *:focus {
+    outline: none;
+  }
+
+  *:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
   }
 }
 
@@ -108,9 +116,82 @@
     --black: #000;
     --white: #fff;
     --brand: 0 0% 98%;
-    --brand-foreground: 122% 0% 120%;
+    --brand-foreground: 0 0% 98%;
   }
   * {
     @apply border-border;
   }
+}
+
+@custom-variant dark (&:is(.dark *));
+
+@layer base {
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 6%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 6%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --sidebar-background: 0 0% 6%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 224 76% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 14.9%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 0 0% 14.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+    --gray-2: 0 0% 14.9%;
+    --gray-3: 0 0% 20%;
+    --purple-light: 0 0% 10%;
+    --black: #fff;
+    --white: #111;
+    --brand: 217.2 91.2% 59.8%;
+    --brand-foreground: 0 0% 100%;
+  }
+}
+
+@keyframes progress-fast {
+  0% { transform: scaleX(0); transform-origin: left; }
+  50% { transform: scaleX(0.6); transform-origin: left; }
+  100% { transform: scaleX(1); transform-origin: right; }
+}
+
+.animate-progress-fast {
+  animation: progress-fast 2s ease-in-out infinite;
+}
+
+@keyframes bounce-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-bounce-slow {
+  animation: bounce-slow 3s ease-in-out infinite;
+}
+
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 3s linear infinite;
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { Zap, ShieldCheck, Loader2 } from "lucide-react";
 import { APP } from "@/variables/globals";
 import Link from "next/link";
@@ -23,11 +24,12 @@ const LoginPage = () => {
             href="/"
             className="flex items-center gap-2 text-white font-black text-2xl tracking-tighter mb-12"
           >
-            <div className="relative w-30 transition-transform group-hover:scale-105">
-              <img
+            <div className="relative w-30 h-12 transition-transform group-hover:scale-105">
+              <Image
                 src="/transparent-logo.png"
                 alt={`${APP?.NAME} Logo`}
-                className="object-contain w-full h-full"
+                fill
+                className="object-contain"
               />
             </div>
           </Link>
@@ -60,11 +62,12 @@ const LoginPage = () => {
         <div className="w-full max-w-sm">
           <div className="lg:hidden flex justify-center mb-12">
             <div className="flex items-center gap-2 text-slate-900 font-black text-3xl tracking-tighter">
-              <div className="relative w-30 transition-transform group-hover:scale-105">
-                <img
+              <div className="relative w-30 h-12 transition-transform group-hover:scale-105">
+                <Image
                   src="/transparent-black.png"
                   alt={`${APP?.NAME} Logo`}
-                  className="object-contain w-full h-full"
+                  fill
+                  className="object-contain"
                 />
               </div>
             </div>

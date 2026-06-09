@@ -38,22 +38,11 @@ export default function PublicRoadmapView({ slug }: { slug: string }) {
           const data = docSnap.data() as Activity;
           if (data.isPublic) {
             setActivity({ ...data, id: docSnap.id });
-          } else {
-            setError(true);
-          }
-        } else {
-          const q = await getDoc(doc(db, "activities", slug));
-          if (q.exists()) {
-            const data = q.data() as Activity;
-            if (data.isPublic && data.publicSlug === slug) {
-              setActivity({ ...data, id: q.id });
-            } else {
-              setError(true);
-            }
-          } else {
-            setError(true);
+            return;
           }
         }
+        
+        setError(true);
       } catch (err) {
         console.error("Fetch error:", err);
         setError(true);

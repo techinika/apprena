@@ -2,6 +2,7 @@ export interface Activity {
   id: string;
   title: string;
   slug?: string;
+  tags?: string[];
   category: string;
   status: "todo" | "in-progress" | "completed";
   priority: number;
@@ -31,6 +32,16 @@ export interface Activity {
   forkedFrom?: string;
   ownFeedbacks?: OwnFeedback[];
   curriculumNeedsGeneration?: boolean;
+  linkedLearningPlanIds?: string[];
+  roadmapProgress?: RoadmapProgress;
+}
+
+export interface RoadmapProgress {
+  totalSteps: number;
+  completedSteps: number;
+  totalLearningItems: number;
+  completedLearningItems: number;
+  lastUpdated: string;
 }
 
 export interface OwnFeedback {

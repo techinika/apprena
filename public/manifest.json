@@ -1,0 +1,17 @@
+{
+  "name": "Apprena",
+  "short_name": "Apprena",
+  "description": "Transform your ambitions into actionable learning paths. Generate personalized roadmaps, track progress in your workspace, and earn verified achievements.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/logo-short.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

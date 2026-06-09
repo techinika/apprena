@@ -122,6 +122,13 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
   const [showAiSolution, setShowAiSolution] = useState(false);
   const [warnedContentId, setWarnedContentId] = useState<string | null>(null);
   const [finalComparison, setFinalComparison] = useState<any[] | null>(null);
+  const fireworksRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (fireworksRef.current) clearInterval(fireworksRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (!user || !learningId) return;
@@ -151,9 +158,14 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
     const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
     const randomInRange = (min: number, max: number) =>
       Math.random() * (max - min) + min;
-    const interval: any = setInterval(function () {
+    if (fireworksRef.current) clearInterval(fireworksRef.current);
+    fireworksRef.current = setInterval(() => {
       const timeLeft = animationEnd - Date.now();
-      if (timeLeft <= 0) return clearInterval(interval);
+      if (timeLeft <= 0) {
+        if (fireworksRef.current) clearInterval(fireworksRef.current);
+        fireworksRef.current = null;
+        return;
+      }
       const particleCount = 50 * (timeLeft / duration);
       confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
       confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
@@ -421,6 +433,18 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
       router.push(`/learning/${learningId}/course/${newIndex}`);
     } else {
       toast.error("Complete the previous content first");
+    }
+  };
+
+  const handleNextModule = () => {
+    if (!plan) return;
+    const currentModuleIdx = parseInt(moduleIndex);
+    const nextModuleIdx = currentModuleIdx + 1;
+    
+    if (nextModuleIdx < plan.modules.length) {
+      router.push(`/learning/${learningId}/course/${nextModuleIdx}/0`);
+    } else {
+      router.push(`/learning/${learningId}`);
     }
   };
 
@@ -719,7 +743,7 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
 
                   {contentIndex === totalContent - 1 && currentContent.completed && !allModulesComplete && (
                     <button
-                      onClick={() => router.push(`/learning/${learningId}`)}
+                      onClick={handleNextModule}
                       className="px-8 py-4 bg-emerald-600 text-white rounded-2xl font-black hover:bg-emerald-700 transition-all flex items-center gap-2"
                     >
                       <CheckCircle2 size={20} />

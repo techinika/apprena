@@ -68,12 +68,15 @@ const Workspace = () => {
       : 0;
 
   useEffect(() => {
-    if (user) {
-      getUserActivities(user.uid).then((data) => {
+    if (!user) return;
+    let cancelled = false;
+    getUserActivities(user.uid).then((data) => {
+      if (!cancelled) {
         setActivities(data);
         setLoading(false);
-      });
-    }
+      }
+    });
+    return () => { cancelled = true; };
   }, [user]);
 
   if (loading) return <Loading />;

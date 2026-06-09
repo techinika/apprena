@@ -1,14 +1,11 @@
 import { NextResponse } from "next/server";
+import { verifyAuth } from "@/lib/apiAuth";
 import { getSubscriptionStatus, hasActiveSubscription } from "@/db/operations/CreditCheck";
 
 export async function GET(req: Request) {
   try {
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
-
-    if (!userId) {
-      return NextResponse.json({ error: "User ID required" }, { status: 400 });
-    }
+    const { uid } = await verifyAuth(req);
+    const userId = uid;
 
     const hasActive = await hasActiveSubscription(userId);
     const status = await getSubscriptionStatus(userId);

@@ -5,7 +5,6 @@ import React, { useEffect, useState } from "react";
 import {
   ArrowLeft,
   CreditCard,
-  Smartphone,
   ShieldCheck,
   Lock,
   Loader2,
@@ -28,43 +27,29 @@ import {
   orderBy,
   limit,
   getDocs,
+  addDoc,
 } from "firebase/firestore";
 import { db } from "@/db/firebase";
 import Loading from "@/app/loading";
 import { useRouter } from "next/navigation";
 import { PLANS } from "@/types/plan";
+import dynamic from "next/dynamic";
+import { toast } from "sonner";
 
-const paymentMethods = [
-  {
-    id: "card",
-    label: "Credit Card",
-    icon: CreditCard,
-    color: "text-blue-500",
-  },
-  {
-    id: "mobile_money",
-    label: "Mobile Money",
-    icon: Smartphone,
-    color: "text-orange-500",
-  },
-  {
-    id: "paypal",
-    label: "PayPal",
-    icon: () => (
-      <span className="font-black italic text-blue-800 text-xs">PayPal</span>
-    ),
-    color: "text-blue-800",
-  },
-];
+const IremboPayWidget = dynamic(
+  () => import("@/components/parts/IremboPayWidget"),
+  { ssr: false, loading: () => <button disabled className="w-full py-4 bg-amber-600 text-white rounded-2xl font-bold flex items-center justify-center gap-2"><Loader2 className="animate-spin" size={20} />Loading...</button> }
+);
 
 const CheckoutPage = () => {
   const { user } = useAuth();
   const router = useRouter();
-  const [method, setMethod] = useState("card");
   const [loading, setLoading] = useState(true);
   const [pendingOrders, setPendingOrders] = useState<any[]>([]);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [paying, setPaying] = useState(false);
+  const [invoiceNumber, setInvoiceNumber] = useState<string | null>(null);
+  const [orderIds, setOrderIds] = useState<string[]>([]);
 
   const [showCancelModal, setShowCancelModal] = useState<{
     show: boolean;
@@ -76,7 +61,6 @@ const CheckoutPage = () => {
 
   useEffect(() => {
     if (!user) return;
-    setLoading(true);
     const q = query(
       collection(db, "orders"),
       where("userId", "==", user.uid),
@@ -89,15 +73,132 @@ const CheckoutPage = () => {
         ...doc.data(),
       }));
       setPendingOrders(orders);
+      setLoading(false);
       setIsInitialLoad(false);
     });
-
-    setLoading(false);
 
     return () => unsubscribe();
   }, [user]);
 
   const totalAmount = pendingOrders.reduce((acc, curr) => acc + curr.amount, 0);
+
+  const handleInitiatePayment = async () => {
+    if (pendingOrders.length === 0) return;
+    setPaying(true);
+
+    try {
+      const orderIdsList = pendingOrders.map(o => o.id);
+      setOrderIds(orderIdsList);
+
+      const res = await fetch("/api/create-payment-invoice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderIds: orderIdsList,
+          amount: totalAmount,
+          customer: {
+            email: user?.email,
+            name: user?.displayName || user?.email?.split("@")[0] || "Customer",
+          },
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.invoiceNumber) {
+        setInvoiceNumber(data.invoiceNumber);
+      } else {
+        throw new Error(data.error || "Failed to create invoice");
+      }
+    } catch (error: any) {
+      console.error("Invoice creation error:", error);
+      toast.error(error.message || "Failed to create payment invoice");
+      setPaying(false);
+    }
+  };
+
+  const handlePaymentSuccess = async () => {
+    try {
+      const batch = writeBatch(db);
+
+      const hasArchitectPlan = pendingOrders.some(o => o.planId === PLANS?.architect);
+      let existingSubEnd: Date | null = null;
+
+      if (hasArchitectPlan) {
+        const subQuery = query(
+          collection(db, "subscriptions"),
+          where("userId", "==", user?.uid),
+          where("status", "==", "active")
+        );
+        const subSnap = await getDocs(subQuery);
+        if (!subSnap.empty) {
+          for (const subDoc of subSnap.docs) {
+            const subData = subDoc.data();
+            if (subData.endDate) {
+              let currentEnd: Date;
+              if (subData.endDate.toDate) currentEnd = subData.endDate.toDate();
+              else if (subData.endDate instanceof Date) currentEnd = subData.endDate;
+              else currentEnd = new Date(subData.endDate);
+              if (!existingSubEnd || currentEnd > existingSubEnd) existingSubEnd = currentEnd;
+            }
+          }
+        }
+      }
+
+      for (const order of pendingOrders) {
+        const orderRef = doc(db, "orders", order.id);
+        batch.update(orderRef, {
+          status: "activated",
+          paidAt: serverTimestamp(),
+        });
+
+        const txRef = doc(collection(db, "transactions"));
+        batch.set(txRef, {
+          orderId: order.id,
+          userId: user?.uid,
+          amount: order.amount,
+          method: "irembopay",
+          status: "success",
+          timestamp: serverTimestamp(),
+        });
+
+        const profileRef = doc(db, "profiles", String(user?.uid));
+        if (order.planId === PLANS?.sprint) {
+          batch.update(profileRef, {
+            accountType: "pro",
+            purchasedCredits: increment(1),
+          });
+        } else if (order.planId === PLANS?.architect) {
+          const now = new Date();
+          const startDate = existingSubEnd && existingSubEnd > now ? existingSubEnd : now;
+          const endDate = new Date(startDate);
+          endDate.setDate(endDate.getDate() + 30);
+
+          const subRef = doc(collection(db, "subscriptions"));
+          batch.set(subRef, {
+            userId: user?.uid,
+            orderId: order.id,
+            status: "active",
+            planId: "architect",
+            startDate: startDate,
+            endDate: endDate,
+            createdAt: serverTimestamp(),
+          });
+
+          batch.update(profileRef, { 
+            accountType: "architect",
+            subscriptionEndDate: endDate,
+          });
+        }
+      }
+
+      await batch.commit();
+      router.push("/workspace?payment=success");
+    } catch (error) {
+      console.error("Payment activation error:", error);
+      toast.error("Payment successful but activation failed. Contact support.");
+    }
+  };
 
   const confirmCancel = async () => {
     if (!showCancelModal.orderId) return;
@@ -136,98 +237,6 @@ const CheckoutPage = () => {
       </div>
     );
   }
-
-  const handlePayment = async () => {
-    setPaying(true);
-    const batch = writeBatch(db);
-
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      for (const order of pendingOrders) {
-        const orderRef = doc(db, "orders", order.id);
-        batch.update(orderRef, {
-          status: "activated",
-          paidAt: serverTimestamp(),
-        });
-
-        const txRef = doc(collection(db, "transactions"));
-        batch.set(txRef, {
-          orderId: order.id,
-          userId: user?.uid,
-          amount: order.amount,
-          method: method,
-          status: "success",
-          timestamp: serverTimestamp(),
-        });
-
-        const profileRef = doc(db, "profiles", String(user?.uid));
-        if (order.planId === PLANS?.sprint) {
-          batch.update(profileRef, {
-            accountType: "pro",
-            purchasedCredits: increment(1),
-          });
-        } else if (order.planId === PLANS?.architect) {
-          const subQuery = query(
-            collection(db, "subscriptions"),
-            where("userId", "==", user?.uid),
-            where("status", "==", "active")
-          );
-          const subSnap = await getDocs(subQuery);
-
-          const now = new Date();
-          let startDate = now;
-          
-          if (!subSnap.empty) {
-            for (const subDoc of subSnap.docs) {
-              const subData = subDoc.data();
-              if (subData.endDate) {
-                let currentEnd: Date;
-                if (subData.endDate.toDate) {
-                  currentEnd = subData.endDate.toDate();
-                } else if (subData.endDate instanceof Date) {
-                  currentEnd = subData.endDate;
-                } else {
-                  currentEnd = new Date(subData.endDate);
-                }
-                
-                if (currentEnd > now) {
-                  startDate = currentEnd;
-                  break;
-                }
-              }
-            }
-          }
-
-          const endDate = new Date(startDate);
-          endDate.setDate(endDate.getDate() + 30);
-
-          const subRef = doc(collection(db, "subscriptions"));
-          batch.set(subRef, {
-            userId: user?.uid,
-            orderId: order.id,
-            status: "active",
-            planId: "architect",
-            startDate: startDate,
-            endDate: endDate,
-            createdAt: serverTimestamp(),
-          });
-
-          batch.update(profileRef, { 
-            accountType: "architect",
-            subscriptionEndDate: endDate,
-          });
-        }
-      };
-
-      await batch.commit();
-      router.push("/workspace?payment=success");
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setPaying(false);
-    }
-  };
 
   return (
     <div className="min-h-screen text-slate-900 pb-20">
@@ -277,127 +286,47 @@ const CheckoutPage = () => {
             <h1 className="text-3xl font-black text-slate-900">
               Payment Method
             </h1>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {paymentMethods.map((pmId) => (
+            <div className="bg-white border border-slate-100 rounded-[2rem] p-8 shadow-sm">
+              <div className="flex items-center gap-3 mb-4">
+                <ShieldCheck className="text-amber-600" size={24} />
+                <h3 className="font-bold text-slate-900">Pay with IremboPay</h3>
+              </div>
+              <p className="text-sm text-slate-500 mb-6">
+                Secure payment via Mobile Money (MTN, Airtel) or Credit Card
+              </p>
+
+              {!invoiceNumber ? (
                 <button
-                  key={pmId.id}
-                  onClick={() => setMethod(pmId.id)}
-                  className={`relative p-6 rounded-2xl border-2 flex flex-col items-center gap-3 transition-all ${
-                    method === pmId?.id
-                      ? "border-amber-600 bg-amber-50/50"
-                      : "border-slate-100 bg-white"
-                  }`}
+                  onClick={handleInitiatePayment}
+                  disabled={paying}
+                  className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-2 transition-all disabled:opacity-50"
                 >
-                  {pmId.id === "card" && (
-                    <CreditCard className="text-blue-500" size={28} />
-                  )}
-                  {pmId.id === "mobile_money" && (
-                    <Smartphone className="text-orange-500" size={28} />
-                  )}
-                  {pmId.id === "paypal" && (
-                    <span className="font-black italic text-blue-800 text-xs">
-                      PayPal
-                    </span>
-                  )}
-                  <span className="text-sm font-bold capitalize">
-                    {pmId.label.replace("_", " ")}
-                  </span>
-                  {method === pmId.id && (
-                    <div className="absolute top-2 right-2 bg-amber-600 text-white p-0.5 rounded-full">
-                      <Check size={10} />
-                    </div>
+                  {paying ? (
+                    <>
+                      <Loader2 className="animate-spin" size={18} />
+                      Creating Invoice...
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard size={18} />
+                      Proceed to Pay
+                    </>
                   )}
                 </button>
-              ))}
-            </div>
-
-            <div className="bg-white border border-slate-100 rounded-[2rem] p-8 shadow-sm">
-              {method === "card" && (
+              ) : (
                 <div className="space-y-4">
-                  <div className="space-y-1">
-                    <label className="text-xs font-black uppercase text-slate-400">
-                      Card Number
-                    </label>
-
-                    <input
-                      type="text"
-                      placeholder="xxxx xxxx xxxx xxxx"
-                      className="w-full bg-slate-50 border-slate-100 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-amber-500"
-                    />
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                    <p className="text-xs font-bold text-amber-700 uppercase mb-1">Invoice Number</p>
+                    <p className="font-mono font-bold text-amber-900">{invoiceNumber}</p>
                   </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <label className="text-xs font-black uppercase text-slate-400">
-                        Expiry
-                      </label>
-
-                      <input
-                        type="text"
-                        placeholder="MM/YY"
-                        className="w-full bg-slate-50 border-slate-100 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-amber-500"
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-xs font-black uppercase text-slate-400">
-                        CVC
-                      </label>
-
-                      <input
-                        type="text"
-                        placeholder="123"
-                        className="w-full bg-slate-50 border-slate-100 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-amber-500"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {method === "mobile_money" && (
-                <div className="space-y-4">
-                  <div className="space-y-1">
-                    <label className="text-xs font-black uppercase text-slate-400">
-                      Select Provider
-                    </label>
-
-                    <select className="w-full bg-slate-50 border-slate-100 rounded-xl px-4 py-3 outline-none">
-                      <option>MTN MoMo</option>
-
-                      <option>Airtel Money</option>
-
-                      <option>M-Pesa</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-black uppercase text-slate-400">
-                      Phone Number
-                    </label>
-
-                    <input
-                      type="tel"
-                      placeholder="+250 XXX XXX XXX"
-                      className="w-full bg-slate-50 border-slate-100 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-amber-500"
-                    />
-                  </div>
-
-                  <p className="text-xs text-slate-400 italic">
-                    You will receive a prompt on your phone to enter your PIN.
-                  </p>
-                </div>
-              )}
-
-              {method === "paypal" && (
-                <div className="text-center py-6">
-                  <p className="text-slate-600 mb-6">
-                    You will be redirected to PayPal to complete your purchase
-                    safely.
-                  </p>
-
-                  <div className="bg-blue-50 text-blue-700 font-bold p-4 rounded-2xl flex items-center justify-center gap-2">
-                    Proceed to PayPal Official Site
-                  </div>
+                  <IremboPayWidget
+                    invoiceNumber={invoiceNumber}
+                    onSuccess={handlePaymentSuccess}
+                    onError={(error: string) => {
+                      console.error("Payment error:", error);
+                      toast.error("Payment failed. Please try again.");
+                    }}
+                  />
                 </div>
               )}
             </div>
@@ -447,12 +376,14 @@ const CheckoutPage = () => {
               </div>
 
               <button
-                disabled={paying}
-                onClick={handlePayment}
+                disabled={paying || !!invoiceNumber}
+                onClick={handleInitiatePayment}
                 className="w-full bg-amber-500 hover:bg-amber-400 text-white font-black py-5 rounded-2xl flex items-center justify-center gap-3 transition-all active:scale-[0.98] disabled:opacity-50"
               >
                 {paying ? (
                   <Loader2 className="animate-spin" />
+                ) : invoiceNumber ? (
+                  "Invoice Created"
                 ) : (
                   "Complete Payment"
                 )}

@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { APP } from "@/variables/globals";
 import AuthNav from "@/components/parts/AuthNav";
+import MentorChat from "@/components/parts/chat/MentorChatWrapper";
 
 export const metadata: Metadata = {
-  title: `${APP?.NAME} — ${APP?.SLOGAN}`,
+  title: `${APP?.NAME} | ${APP?.SLOGAN}`,
   description: APP?.DESCRIPTION,
+  robots: { index: false, follow: false },
 };
 
 export default function AuthLayout({
@@ -16,6 +18,7 @@ export default function AuthLayout({
     <div>
       <AuthNav />
       {children}
+      <MentorChat />
     </div>
   );
 }
