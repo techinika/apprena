@@ -1,20 +1,24 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { APP } from "@/variables/globals";
+import { useTheme } from "@/lib/theme/ThemeProvider";
 import {
   LayoutDashboard,
   LogOut,
   User as UserIcon,
   Mail,
   Shield,
+  Moon,
+  Sun,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 function AuthNav() {
   const { logout, user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -32,68 +36,91 @@ function AuthNav() {
   }, []);
 
   return (
-    <header className="bg-white border-b border-slate-200 sticky top-0 z-30">
+    <header className="bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30">
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         <div className="flex items-center gap-8">
           <Link href="/workspace">
-            <div className="relative w-30 transition-transform group-hover:scale-105">
-              <img
+            <div className="relative w-30 h-10 transition-transform group-hover:scale-105">
+              <Image
                 src="/transparent-black.png"
                 alt={`${APP?.NAME} Logo`}
-                className="object-contain w-full h-full"
+                fill
+                className="object-contain dark:hidden"
+              />
+              <Image
+                src="/transparent-logo.png"
+                alt={`${APP?.NAME} Logo`}
+                fill
+                className="object-contain hidden dark:block"
               />
             </div>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-6 text-sm font-bold text-slate-500">
-            <Link href="/workspace" className="text-amber-600">
+          <nav className="hidden md:flex items-center gap-6 text-sm font-bold text-slate-500 dark:text-slate-400">
+            <Link href="/workspace" className="text-amber-600 dark:text-amber-500">
               Workspace
             </Link>
-            <Link href="/learning" className="hover:text-slate-800 transition">
+            <Link href="/learning" className="hover:text-slate-800 dark:hover:text-slate-200 transition">
               My Learning
             </Link>
-            <Link href="/organization" className="hover:text-slate-800 transition">
+            <Link href="/organization" className="hover:text-slate-800 dark:hover:text-slate-200 transition">
               Organizations
             </Link>
-            <Link href="/explore" className="hover:text-slate-800 transition">
+            <Link href="/explore" className="hover:text-slate-800 dark:hover:text-slate-200 transition">
               Explore
             </Link>
-            <Link href="/support" className="hover:text-slate-800 transition">
+            <Link href="/support" className="hover:text-slate-800 dark:hover:text-slate-200 transition">
               Support
             </Link>
           </nav>
         </div>
 
         <div className="flex items-center gap-3">
+          <button
+            onClick={toggleTheme}
+            className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:ring-4 hover:ring-amber-50 dark:hover:ring-amber-900 transition-all"
+            aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+          >
+            {theme === "light" ? (
+              <Moon size={18} className="text-slate-500" />
+            ) : (
+              <Sun size={18} className="text-amber-400" />
+            )}
+          </button>
+
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden hover:ring-4 hover:ring-amber-50 transition-all focus:outline-none"
+              className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden hover:ring-4 hover:ring-amber-50 dark:hover:ring-amber-900 transition-all focus:outline-none"
             >
               {user?.photoURL ? (
-                <img
+                <Image
                   src={user.photoURL}
                   alt="Profile"
+                  width={40}
+                  height={40}
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-amber-100 text-amber-600 font-black uppercase">
+                <div className="w-full h-full flex items-center justify-center bg-amber-100 dark:bg-amber-900 text-amber-600 dark:text-amber-300 font-black uppercase">
                   {user?.displayName?.charAt(0) || <UserIcon size={18} />}
                 </div>
               )}
             </button>
 
             {isDropdownOpen && (
-              <div className="absolute right-0 mt-3 w-72 bg-white border border-slate-100 rounded-[2rem] shadow-2xl z-50 py-4 animate-in fade-in slide-in-from-top-2 duration-200">
-                <div className="px-6 py-4 border-b border-slate-50">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">
+              <div className="absolute right-0 mt-3 w-72 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[2rem] shadow-2xl z-50 py-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="px-6 py-4 border-b border-slate-50 dark:border-slate-800">
+                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-3">
                     Your Account
                   </p>
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 font-bold shrink-0">
+                    <div className="w-10 h-10 rounded-lg bg-amber-50 dark:bg-amber-900 flex items-center justify-center text-amber-600 dark:text-amber-300 font-bold shrink-0 overflow-hidden">
                       {user?.photoURL ? (
-                        <img
+                        <Image
                           src={user.photoURL}
+                          width={40}
+                          height={40}
                           className="rounded-lg"
                           alt="User Profile"
                         />
@@ -102,10 +129,10 @@ function AuthNav() {
                       )}
                     </div>
                     <div className="truncate">
-                      <p className="text-sm font-black text-slate-900 truncate leading-none mb-1">
+                      <p className="text-sm font-black text-slate-900 dark:text-slate-100 truncate leading-none mb-1">
                         {user?.displayName}
                       </p>
-                      <p className="text-xs text-slate-500 truncate font-medium">
+                      <p className="text-xs text-slate-500 dark:text-slate-400 truncate font-medium">
                         {user?.email}
                       </p>
                     </div>
@@ -115,25 +142,25 @@ function AuthNav() {
                 <div className="p-2">
                   <Link
                     href="/profile"
-                    className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all font-bold text-sm"
+                    className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-xl transition-all font-bold text-sm"
                   >
                     <Shield size={18} strokeWidth={2.5} /> Profile Settings
                   </Link>
                   <Link
                     href="/notifications"
-                    className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all font-bold text-sm"
+                    className="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-xl transition-all font-bold text-sm"
                   >
                     <Mail size={18} strokeWidth={2.5} /> Notifications
                   </Link>
                 </div>
 
-                <div className="mt-2 pt-2 border-t border-slate-50 px-2">
+                <div className="mt-2 pt-2 border-t border-slate-50 dark:border-slate-800 px-2">
                   <button
                     onClick={() => {
                       setIsDropdownOpen(false);
                       logout();
                     }}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 rounded-xl transition-all font-black text-sm"
+                    className="w-full flex items-center gap-3 px-4 py-3 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition-all font-black text-sm"
                   >
                     <LogOut size={18} strokeWidth={2.5} />
                     Sign Out

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { jsPDF } from "jspdf";
+import { verifyAuth } from "@/lib/apiAuth";
 
 const LINE_HEIGHT_MULTIPLIER = 1.5;
 
@@ -15,6 +16,7 @@ export async function POST(req: Request) {
       network,
       createdAt 
     } = await req.json();
+    const { uid } = await verifyAuth(req);
 
     if (!roadmap || !title) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });

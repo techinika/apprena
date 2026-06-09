@@ -1,8 +1,8 @@
-/* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Image from "next/image";
 import { useAuth } from "@/lib/AuthContext";
 import { formatDate } from "../../lib/functions";
 import {
@@ -186,9 +186,11 @@ const ProfilePage = () => {
               {activeTab === "general" && (
                 <div className="space-y-10 animate-in fade-in slide-in-from-right-4 duration-300">
                   <div className="flex items-center gap-6">
-                    <img
+                    <Image
                       src={user?.photoURL || ""}
-                      className="w-24 h-24 rounded-4xl border-4 border-slate-50 shadow-sm"
+                      width={96}
+                      height={96}
+                      className="rounded-4xl border-4 border-slate-50 shadow-sm"
                       alt="Profile"
                     />
                     <div>

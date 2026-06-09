@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { verifyAuth } from "@/lib/apiAuth";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "@/db/firebase";
 import { sendShareNotificationEmail } from "@/lib/email";
@@ -17,9 +18,10 @@ function generateSlug(title: string, id: string): string {
 
 export async function POST(req: Request) {
   try {
-    const { activityId, userId, makePublic, tags } = await req.json();
+    const { uid } = await verifyAuth(req);
+    const { activityId, makePublic, tags } = await req.json();
 
-    if (!activityId || !userId) {
+    if (!activityId) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -32,7 +34,7 @@ export async function POST(req: Request) {
 
     const activityData = activitySnap.data();
 
-    if (activityData.userId !== userId) {
+    if (activityData.userId !== uid) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db/firebase";
+import { verifyAuth } from "@/lib/apiAuth";
 import {
   collection,
   addDoc,
@@ -11,9 +12,10 @@ import { generateJsonWithFallback } from "@/lib/ai";
 
 export async function POST(req: Request) {
   try {
-    const { prompt, memberId, memberName, targetRole, organizationId } = await req.json();
+    const { prompt, memberName, targetRole, organizationId } = await req.json();
+    const { uid } = await verifyAuth(req);
 
-    if (!prompt || !memberId || !organizationId) {
+    if (!prompt || !uid || !organizationId) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -29,8 +31,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid roadmap generated" }, { status: 502 });
     }
 
-    const memberDoc = await getDoc(doc(db, "organizationMembers", memberId));
-    const userId = memberDoc.exists() ? memberDoc.data().userId : null;
+    const userId = uid;
 
     const docRef = await addDoc(collection(db, "activities"), {
       ...aiResponse,

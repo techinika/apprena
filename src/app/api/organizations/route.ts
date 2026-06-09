@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { verifyAuth } from "@/lib/apiAuth";
 import { db } from "@/db/firebase";
 import {
   collection,
@@ -33,9 +34,10 @@ function getMaxMembers(tierId: string): number {
 
 export async function POST(req: Request) {
   try {
-    const { userId, name, tierId, billingCycle = "monthly", userEmail, userName } = await req.json();
+    const { uid } = await verifyAuth(req);
+    const { name, tierId, billingCycle = "monthly", userEmail, userName } = await req.json();
 
-    if (!userId || !name) {
+    if (!name) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -45,7 +47,7 @@ export async function POST(req: Request) {
 
     const orgRef = await addDoc(collection(db, "organizations"), {
       name,
-      ownerId: userId,
+      ownerId: uid,
       memberCount: 1,
       maxMembers,
       subscription: {
@@ -87,7 +89,7 @@ export async function POST(req: Request) {
 
     const invoiceRef = await addDoc(collection(db, "organizationInvoices"), {
       organizationId: orgRef.id,
-      userId,
+      userId: uid,
       amount: amountRwf,
       amountRwf,
       currency: "RWF",
@@ -106,7 +108,7 @@ export async function POST(req: Request) {
 
     await addDoc(collection(db, "organizationMembers"), {
       organizationId: orgRef.id,
-      userId,
+      userId: uid,
       role: "owner",
       status: "pending",
       permissions: {
@@ -132,14 +134,9 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const userId = searchParams.get("userId");
-
-  if (!userId) {
-    return NextResponse.json({ error: "Missing userId" }, { status: 400 });
-  }
-
   try {
+    const { uid } = await verifyAuth(req);
+    const userId = uid;
     const memberQuery = query(
       collection(db, "organizationMembers"),
       where("userId", "==", userId),
@@ -167,20 +164,20 @@ export async function GET(req: Request) {
 export async function DELETE(req: Request) {
   const { searchParams } = new URL(req.url);
   const organizationId = searchParams.get("organizationId");
-  const userId = searchParams.get("userId");
 
-  if (!organizationId || !userId) {
-    return NextResponse.json({ error: "Missing organizationId or userId" }, { status: 400 });
+  if (!organizationId) {
+    return NextResponse.json({ error: "Missing organizationId" }, { status: 400 });
   }
 
   try {
+    const { uid } = await verifyAuth(req);
     const orgDoc = await getDoc(doc(db, "organizations", organizationId));
     if (!orgDoc.exists()) {
       return NextResponse.json({ error: "Organization not found" }, { status: 404 });
     }
 
     const orgData = orgDoc.data();
-    if (orgData.ownerId !== userId) {
+    if (orgData.ownerId !== uid) {
       return NextResponse.json({ error: "Only the owner can delete this organization" }, { status: 403 });
     }
 

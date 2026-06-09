@@ -8,6 +8,22 @@ export interface Organization {
   settings: OrganizationSettings;
   memberCount: number;
   maxMembers: number;
+  pendingInvoiceId?: string;
+  isActive?: boolean;
+}
+
+export interface OrganizationInvoice {
+  id: string;
+  organizationId: string;
+  amount: number;
+  currency: string;
+  status: "pending" | "paid" | "expired" | "cancelled";
+  billingCycle: "monthly" | "annual";
+  tierId: string;
+  amountRwf: number;
+  createdAt: string;
+  paidAt?: string;
+  expiresAt: string;
 }
 
 export interface OrganizationSubscription {

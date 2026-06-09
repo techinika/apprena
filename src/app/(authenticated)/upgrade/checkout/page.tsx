@@ -1,12 +1,12 @@
 import CheckoutPage from "@/components/pages/CheckoutPage";
-import React from "react";
+import { APP } from "@/variables/globals";
+import type { Metadata } from "next";
 
-function page() {
-  return (
-    <div>
-      <CheckoutPage />
-    </div>
-  );
+export const metadata: Metadata = {
+  title: `Checkout | ${APP?.NAME}`,
+  robots: { index: false, follow: false },
+};
+
+export default function Page() {
+  return <CheckoutPage />;
 }
-
-export default page;

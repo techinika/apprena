@@ -29,6 +29,7 @@ import { db } from "@/db/firebase";
 import { UserNotification } from "@/types/user";
 import Link from "next/link";
 import Loading from "@/app/loading";
+import { toast } from "sonner";
 
 export default function NotificationsPage() {
   const { user } = useAuth();
@@ -65,6 +66,7 @@ export default function NotificationsPage() {
       });
     } catch (error) {
       console.error("Error marking notification as read:", error);
+      toast.error("Failed to mark as read");
     }
   };
 
@@ -79,8 +81,10 @@ export default function NotificationsPage() {
           })
         )
       );
+      toast.success("All notifications marked as read");
     } catch (error) {
       console.error("Error marking all as read:", error);
+      toast.error("Failed to mark all as read");
     }
   };
 
@@ -89,6 +93,7 @@ export default function NotificationsPage() {
       await deleteDoc(doc(db, "notifications", id));
     } catch (error) {
       console.error("Error deleting notification:", error);
+      toast.error("Failed to delete notification");
     }
   };
 
@@ -97,8 +102,10 @@ export default function NotificationsPage() {
       await Promise.all(
         notifications.map((n) => deleteDoc(doc(db, "notifications", n.id)))
       );
+      toast.success("All notifications cleared");
     } catch (error) {
       console.error("Error clearing notifications:", error);
+      toast.error("Failed to clear notifications");
     }
   };
 

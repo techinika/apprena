@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { verifyAuth } from "@/lib/apiAuth";
 import { db } from "@/db/firebase";
 import {
   collection,
@@ -17,9 +18,10 @@ import { sendInvitationEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
   try {
-    const { organizationId, email, role, invitedBy, invitedUserId } = await req.json();
+    const { uid } = await verifyAuth(req);
+    const { organizationId, email, role, invitedUserId } = await req.json();
 
-    if (!organizationId || !email || !invitedBy) {
+    if (!organizationId || !email) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -49,19 +51,22 @@ export async function POST(req: Request) {
       email: email.toLowerCase(),
       invitedUserId: linkedUserId || null,
       role: role || "member",
-      invitedBy,
+      invitedBy: uid,
       token,
       status: "pending",
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       createdAt: serverTimestamp(),
     });
 
-    const inviterDoc = await getDoc(doc(db, "profiles", invitedBy));
+    const inviterDoc = await getDoc(doc(db, "profiles", uid));
     const inviterName = inviterDoc.exists() 
       ? inviterDoc.data().displayName || inviterDoc.data().email?.split("@")[0] 
       : "Someone";
 
-    await sendInvitationEmail(email, orgData.name, inviterName, token);
+    const emailResult = await sendInvitationEmail(email, orgData.name, inviterName, token);
+    if (!emailResult.success) {
+      console.warn("Invitation email failed to send:", emailResult.error);
+    }
 
     return NextResponse.json({ 
       success: true, 
@@ -83,6 +88,7 @@ export async function DELETE(req: Request) {
   }
 
   try {
+    const { uid } = await verifyAuth(req);
     const memberDoc = await getDoc(doc(db, "organizationMembers", memberId));
     if (!memberDoc.exists()) {
       return NextResponse.json({ error: "Member not found" }, { status: 404 });
@@ -118,6 +124,7 @@ export async function GET(req: Request) {
   }
 
   try {
+    const { uid } = await verifyAuth(req);
     const membersQuery = query(
       collection(db, "organizationMembers"),
       where("organizationId", "==", organizationId),

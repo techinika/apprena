@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { generateWithFallback } from "@/lib/ai";
+import { verifyAuth } from "@/lib/apiAuth";
 import {
   collection,
   addDoc,
@@ -11,7 +12,6 @@ import {
 import { db } from "@/db/firebase";
 
 interface SectionFeedbackRequest {
-  userId: string;
   activityId: string;
   sectionType?: string;
   sectionTitle?: string;
@@ -24,14 +24,15 @@ interface SectionFeedbackRequest {
 export async function POST(req: Request) {
   try {
     const body: SectionFeedbackRequest = await req.json();
-    const { userId, activityId, sectionType, sectionTitle, sectionContent, itemId, itemTitle, feedback } = body;
+    const { activityId, sectionType, sectionTitle, sectionContent, itemId, itemTitle, feedback } = body;
+    const { uid } = await verifyAuth(req);
 
-    if (!userId || !activityId || !feedback) {
+    if (!uid || !activityId || !feedback) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
     const sectionData = {
-      userId,
+      uid,
       activityId,
       sectionType,
       sectionTitle,
@@ -125,10 +126,14 @@ Focus on being helpful and practical.
       aiResponse = { needsModification: false, reason: "Feedback received but AI processing failed" };
     }
 
-    await updateDoc(doc(db, "sectionFeedback", feedbackRef.id), {
-      aiProcessed: true,
-      aiResponse: aiResponse,
-    }).catch(() => {});
+    try {
+      await updateDoc(doc(db, "sectionFeedback", feedbackRef.id), {
+        aiProcessed: true,
+        aiResponse: aiResponse,
+      });
+    } catch (updateErr) {
+      console.error("Failed to update sectionFeedback with AI response:", updateErr);
+    }
 
     return NextResponse.json({
       success: true,

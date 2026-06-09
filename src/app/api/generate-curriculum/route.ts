@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { verifyAuth } from "@/lib/apiAuth";
 import { generateWithFallback } from "@/lib/ai";
 import {
   collection,
@@ -30,10 +31,11 @@ interface GenerateCurriculumRequest {
 
 export async function POST(req: Request) {
   try {
+    const { uid } = await verifyAuth(req);
     const body: GenerateCurriculumRequest = await req.json();
-    const { userId, roadmapData, targetSkill, planId, activityId } = body;
+    const { roadmapData, targetSkill, planId, activityId } = body;
 
-    if (!userId || !roadmapData || !targetSkill) {
+    if (!roadmapData || !targetSkill) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -172,13 +174,13 @@ Create a detailed curriculum with learning modules. Each module should have:
       });
       await createNotification({
         ...NotificationMessages.courseGenerated(planTitle),
-        userId,
+        userId: uid,
         link: `/learning/${planId}`,
       });
       return NextResponse.json({ success: true, planId, modules });
     } else {
       const docRef = await addDoc(collection(db, "learningPlans"), {
-        userId,
+        userId: uid,
         title: planTitle,
         target: roadmapData.goal,
         modules,
@@ -192,7 +194,7 @@ Create a detailed curriculum with learning modules. Each module should have:
       });
       await createNotification({
         ...NotificationMessages.courseGenerated(planTitle),
-        userId,
+        userId: uid,
         link: `/learning/${docRef.id}`,
       });
       return NextResponse.json({ success: true, planId: docRef.id, modules });

@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
+import { verifyAuth } from "@/lib/apiAuth";
 import { db } from "@/db/firebase";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { createInvoice } from "@/lib/payments";
 
 export async function POST(req: Request) {
   try {
+    const { uid } = await verifyAuth(req);
     const { orderIds, amount, customer } = await req.json();
 
     if (!orderIds || orderIds.length === 0 || !amount) {

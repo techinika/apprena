@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { generateWithFallback } from "@/lib/ai";
+import { verifyAuth } from "@/lib/apiAuth";
 import {
   collection,
   addDoc,
@@ -11,7 +12,6 @@ import {
 import { db } from "@/db/firebase";
 
 interface RoadmapFeedbackRequest {
-  userId: string;
   activityId: string;
   roadmapStepId: string;
   stepTitle: string;
@@ -22,14 +22,15 @@ interface RoadmapFeedbackRequest {
 export async function POST(req: Request) {
   try {
     const body: RoadmapFeedbackRequest = await req.json();
-    const { userId, activityId, roadmapStepId, stepTitle, stepDescription, feedback } = body;
+    const { activityId, roadmapStepId, stepTitle, stepDescription, feedback } = body;
+    const { uid } = await verifyAuth(req);
 
-    if (!userId || !activityId || !feedback) {
+    if (!uid || !activityId || !feedback) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
     const feedbackRef = await addDoc(collection(db, "roadmapFeedback"), {
-      userId,
+      uid,
       activityId,
       roadmapStepId,
       content: feedback,
@@ -115,10 +116,14 @@ Analyze the feedback and determine if the roadmap step needs modification. Retur
       }
     }
 
-    await updateDoc(doc(db, "roadmapFeedback", feedbackRef.id), {
-      aiProcessed: true,
-      aiResponse: aiResponse,
-    }).catch(() => {});
+    try {
+      await updateDoc(doc(db, "roadmapFeedback", feedbackRef.id), {
+        aiProcessed: true,
+        aiResponse: aiResponse,
+      });
+    } catch (updateErr) {
+      console.error("Failed to update roadmapFeedback with AI response:", updateErr);
+    }
 
     return NextResponse.json({
       success: true,

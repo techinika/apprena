@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/AuthContext";
 import { Check, Star } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { PRICING_TIERS, BILLING_CYCLE } from "@/types/pricing";
 
@@ -92,8 +91,9 @@ export const Pricing = () => {
                 ))}
               </ul>
               
-              <Link href={user ? "/upgrade" : "/login"}>
-                <button className={`w-full py-4 rounded-2xl font-black border-2 transition-all uppercase text-xs tracking-widest ${
+              <button
+                onClick={() => router.push(user ? "/upgrade" : "/login")}
+                className={`w-full py-4 rounded-2xl font-black border-2 transition-all uppercase text-xs tracking-widest ${
                   isPopular
                     ? "bg-amber-600 text-white hover:bg-amber-700 border-amber-600 shadow-xl shadow-amber-200"
                     : tier.id === "free"
@@ -101,8 +101,7 @@ export const Pricing = () => {
                       : "bg-white text-slate-900 hover:bg-amber-50"
                 }`}>
                   {tier.id === "free" ? "Start Free" : "Get Started"}
-                </button>
-              </Link>
+              </button>
             </div>
           );
         })}

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { getBadgeData } from "@/db/operations/BadgeVerify";
 import { formatDate } from "@/lib/functions";
 import { APP } from "@/variables/globals";
@@ -14,9 +15,11 @@ export default async function VerifyPage({ id }: { id: string }) {
             <div className="top-0 left-0 w-full h-3 bg-linear-to-r from-amber-400 to-amber-500" />
 
             <div className="mt-4 mb-8">
-              <img
+              <Image
                 src={data.photoURL || ""}
-                className="w-20 h-20 rounded-full mx-auto border-4 border-white shadow-lg -mt-16"
+                width={80}
+                height={80}
+                className="rounded-full mx-auto border-4 border-white shadow-lg -mt-16"
                 alt="Verified User"
               />
               <h1 className="text-2xl font-black text-slate-900 mt-4 leading-tight">

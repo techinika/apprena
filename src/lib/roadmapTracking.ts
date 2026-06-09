@@ -44,9 +44,11 @@ export function calculateRoadmapProgress(
     }
   }
 
+  const completedSteps = 0;
+
   return {
     totalSteps: roadmapStepCount,
-    completedSteps: 0,
+    completedSteps,
     totalLearningItems,
     completedLearningItems,
     lastUpdated: new Date().toISOString(),

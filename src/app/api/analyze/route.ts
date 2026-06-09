@@ -1,3 +1,5 @@
+import { verifyAuth } from "@/lib/apiAuth";
+import { rateLimitMiddleware } from "@/lib/rateLimit";
 import { db } from "@/db/firebase";
 import {
   collection,
@@ -12,6 +14,10 @@ import { createNotification, NotificationMessages } from "@/lib/notificationUtil
 
 const ALLOWED_FILE_TYPES = ["application/pdf"];
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const PDF_MAGIC_BYTES = [0x25, 0x50, 0x44, 0x46];
+const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+const CLOUDINARY_API_KEY = process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY;
+const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET;
 
 interface AssessmentAnswers {
   current?: string;
@@ -38,23 +44,36 @@ function sanitizeString(str: string, maxLength = 2000): string {
 }
 
 async function uploadToCloudinary(file: File): Promise<string> {
-  const formData = new FormData();
   try {
+    const formData = new FormData();
     formData.append("file", file);
-    formData.append(
-      "upload_preset",
-      process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "apprena_docs",
-    );
+    formData.append("api_key", CLOUDINARY_API_KEY || "");
+
+    const timestamp = Math.round(Date.now() / 1000);
+    formData.append("timestamp", String(timestamp));
+
+    const toSign = `timestamp=${timestamp}${CLOUDINARY_API_SECRET ? `&upload_preset=apprena_signed` : ""}`;
+    const signature = CLOUDINARY_API_SECRET
+      ? await generateSignature(toSign, CLOUDINARY_API_SECRET)
+      : "";
+
+    if (signature) {
+      formData.append("signature", signature);
+      formData.append("upload_preset", "apprena_signed");
+    } else {
+      formData.append(
+        "upload_preset",
+        process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "apprena_docs",
+      );
+    }
 
     const response = await fetch(
-      `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/auto/upload`,
+      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`,
       {
         method: "POST",
         body: formData,
       },
     );
-
-    console.log(response);
 
     if (!response.ok) {
       throw new Error("Failed to upload file to Cloudinary");
@@ -63,36 +82,43 @@ async function uploadToCloudinary(file: File): Promise<string> {
     const data = await response.json();
     return data.secure_url;
   } catch (error) {
-    console.log(error);
+    console.error("Cloudinary upload error:", error);
     return "";
   }
 }
 
-async function parsePDFWithAI(pdfText: string): Promise<string> {
-  const { generateText } = await import("@/lib/ai");
-
-  const prompt = `
-You are a professional resume and document analyzer. Extract and summarize the following document content, focusing on:
-1. Key skills and competencies
-2. Work experience and titles
-3. Education and certifications
-4. Notable achievements or metrics
-
-Document content:
-${pdfText.slice(0, 15000)}
-
-Provide a structured summary in plain text format.
-`;
-
-  return await generateText(prompt);
+async function generateSignature(toSign: string, secret: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(toSign + secret);
+  const hashBuffer = await crypto.subtle.digest("SHA-1", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 export async function POST(req: Request) {
   try {
+    const { uid } = await verifyAuth(req);
+
+    const { allowed, remaining, resetAt } = rateLimitMiddleware(req, 5, 60);
+    if (!allowed) {
+      return NextResponse.json(
+        {
+          error: "Too many requests. Please wait before generating another roadmap.",
+          retryAfter: Math.ceil((resetAt - Date.now()) / 1000),
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(Math.ceil((resetAt - Date.now()) / 1000)),
+            "X-RateLimit-Remaining": "0",
+          },
+        },
+      );
+    }
+
     const formData = await req.formData();
     const files = formData.getAll("file") as File[];
     const assessmentAnswers = formData.get("answers") as string;
-    const userId = formData.get("userId") as string;
     const ip =
       req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "anonymous";
 
@@ -124,6 +150,17 @@ export async function POST(req: Request) {
         );
       }
 
+      const header = new Uint8Array(await file.slice(0, 4).arrayBuffer());
+      if (
+        header.length < PDF_MAGIC_BYTES.length ||
+        !PDF_MAGIC_BYTES.every((b, i) => header[i] === b)
+      ) {
+        return NextResponse.json(
+          { error: `File ${file.name} appears to be corrupted or not a valid PDF.` },
+          { status: 400 },
+        );
+      }
+
       const cloudinaryUrl = await uploadToCloudinary(file);
       uploadedDocs.push({ name: file.name, url: cloudinaryUrl });
     }
@@ -145,11 +182,8 @@ export async function POST(req: Request) {
             .join("\n")
         : "No documents provided";
 
-    const prompt = `
-You are a world-class Career Strategist and Executive Coach with 20+ years of experience helping professionals achieve their "North Star" goals. Your approach combines strategic thinking with practical, actionable steps.
-
-## YOUR ROLE
-Analyze the user's current reality and create a comprehensive, jargon-free roadmap to their dream role.
+    const { CAREER_ANALYSIS_SYSTEM_PROMPT } = await import("@/prompts/career-analysis");
+    const prompt = `${CAREER_ANALYSIS_SYSTEM_PROMPT}
 
 ## USER'S INPUT
 
@@ -170,52 +204,6 @@ ${sanitizedAnswers.ecosystem}
 
 ### Documents
 ${documentsInfo}
-
-## YOUR TASK
-Create a detailed, personalized career transformation plan that:
-
-1. **Analyzes the Gap** - Compare current skills/experience with target role requirements
-2. **Maps the Path** - Create a phased roadmap with clear milestones
-3. **Identifies Learning Gaps** - Technical skills and soft skills needed
-4. **Suggests Curriculum** - Specific courses with links
-5. **Proposes Habits** - Daily/weekly actions for transformation
-6. **Recommends Network** - Who to connect with and why
-7. **Sets Achievements** - Measurable milestones to celebrate
-
-## OUTPUT FORMAT (JSON ONLY - No other text)
-{
-  "title": "Clear, descriptive title that captures the goal achievement (e.g., 'Frontend Dev to Senior Engineer', 'Marketing to Product Manager', 'Junior to Lead Developer in 12 Months'). Make it specific to the user's target role and timeframe.",
-  "slug": "url-friendly-version-of-title",
-  "confidenceScore": number (0-100 based on realism of goal),
-  "roadmap": [
-    { "tag": "Phase timeline (e.g. Month 1-2)", "title": "Phase name", "desc": "Detailed actionable steps", "result": "Measurable outcome" }
-  ],
-  "mermaidChart": "Valid Mermaid.js graph TD showing the journey with decision points and milestones",
-  "learningGaps": {
-    "technical": [{ "skill": "Specific skill name", "priority": "High|Medium", "progress": number (0-100) }],
-    "soft": ["Specific behavior or mindset shift needed"]
-  },
-  "curriculum": [{ "course": "Course name", "provider": "Platform", "url": "Course link" }],
-  "habits": [{ "title": "Habit name", "desc": "Why it matters", "icon": "Emoji" }],
-  "network": [{ "name": "Persona type", "role": "Industry role", "type": "Mentor|Peer|Gatekeeper", "reason": "Why connect" }],
-  "networkReason": "Overall strategy for network building",
-  "achievements": [
-    { "time": "Short|Medium|Long term", "title": "Milestone", "achievement": "Specific outcome" }
-  ],
-  "milestones": [
-    { "id": "milestone-1", "type": "learning", "title": "Milestone title", "description": "What to achieve", "status": "pending" },
-    { "id": "milestone-2", "type": "network", "title": "Milestone title", "description": "What to achieve", "status": "pending" },
-    { "id": "milestone-3", "type": "habit", "title": "Milestone title", "description": "What to achieve", "status": "pending" }
-  ]
-}
-
-## RULES
-- **CRITICAL: Title must be specific and action-oriented** - It should clearly communicate what the user will achieve (e.g., "Junior Dev to Senior in 18 Months", "Career Pivot to AI/ML Engineer", "Non-Tech to Product Manager")
-- Use simple, powerful language (no corporate jargon)
-- Mermaid code must be valid and clean
-- Be honest but encouraging about feasibility
-- If data is sparse, make reasonable assumptions based on industry standards
-- Focus on practical, not theoretical, steps
 `;
 
     let aiResponse;
@@ -223,13 +211,11 @@ Create a detailed, personalized career transformation plan that:
       aiResponse = await generateJsonWithFallback(prompt);
     } catch (parseError) {
       console.error("AI JSON parse error:", parseError);
-      if (userId) {
-        try {
-          const userRef = doc(db, "profiles", userId);
-          await updateDoc(userRef, { purchasedCredits: increment(1) });
-        } catch (refundError) {
-          console.error("Refund failed:", refundError);
-        }
+      try {
+        const userRef = doc(db, "profiles", uid);
+        await updateDoc(userRef, { purchasedCredits: increment(1) });
+      } catch (refundError) {
+        console.error("Refund failed:", refundError);
       }
       return NextResponse.json(
         { error: "Failed to generate valid roadmap. Please try again." },
@@ -239,26 +225,28 @@ Create a detailed, personalized career transformation plan that:
 
     const docRef = await addDoc(collection(db, "activities"), {
       ...aiResponse,
-      status: userId ? "claimed" : "unclaimed",
-      userId: userId || null,
+      status: "claimed",
+      userId: uid,
       ipAddress: ip,
       createdAt: serverTimestamp(),
       userInput: sanitizedAnswers,
       uploadedDocuments: uploadedDocs,
     });
 
-    if (userId) {
-      await createNotification({
-        ...NotificationMessages.roadmapGenerated(aiResponse.title || "Your Career Roadmap"),
-        userId,
-        link: `/workspace/${docRef.id}`,
-      });
-    }
-
-    return NextResponse.json({
-      id: docRef.id,
-      ...aiResponse,
+    await createNotification({
+      ...NotificationMessages.roadmapGenerated(aiResponse.title || "Your Career Roadmap"),
+      userId: uid,
+      link: `/workspace/${docRef.id}`,
     });
+
+    return NextResponse.json(
+      { id: docRef.id, ...aiResponse },
+      {
+        headers: {
+          "X-RateLimit-Remaining": String(remaining),
+        },
+      },
+    );
   } catch (error: any) {
     console.error("AI Analysis Error:", error);
 

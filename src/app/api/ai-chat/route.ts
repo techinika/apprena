@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { verifyAuth } from "@/lib/apiAuth";
 import { generateText } from "@/lib/ai";
 import {
   collection,
@@ -14,14 +15,15 @@ import { db } from "@/db/firebase";
 
 export async function POST(req: Request) {
   try {
-    const { userId, message, context } = await req.json();
+    const { uid } = await verifyAuth(req);
+    const { message, context } = await req.json();
 
-    if (!userId || !message) {
+    if (!message) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
     const userContextPrompt = buildUserContextPrompt(context);
-    const chatHistory = await getChatHistory(userId);
+    const chatHistory = await getChatHistory(uid);
     
     const systemPrompt = `You are Apprena AI, a personal career mentor and assistant. You help users with their career development, learning paths, and professional growth.
 
@@ -44,7 +46,7 @@ Provide a helpful, personalized response:`;
     const response = await generateText(systemPrompt);
 
     await addDoc(collection(db, "chatHistory"), {
-      userId,
+      userId: uid,
       messages: [
         { role: "user", content: message, createdAt: new Date().toISOString() },
         { role: "assistant", content: response, createdAt: new Date().toISOString() },

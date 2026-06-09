@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { generateJsonWithFallback, genAI } from "@/lib/ai";
+import { verifyAuth } from "@/lib/apiAuth";
 import {
   collection,
   addDoc,
@@ -11,7 +12,6 @@ import {
 import { db } from "@/db/firebase";
 
 interface EvidenceReviewRequest {
-  userId: string;
   activityId: string;
   milestoneId: string;
   evidenceUrl: string;
@@ -28,9 +28,10 @@ interface EvidenceReviewRequest {
 export async function POST(req: Request) {
   try {
     const body: EvidenceReviewRequest = await req.json();
-    const { userId, activityId, milestoneId, evidenceUrl, evidenceType, description, context } = body;
+    const { activityId, milestoneId, evidenceUrl, evidenceType, description, context } = body;
+    const { uid } = await verifyAuth(req);
 
-    if (!userId || !activityId || !milestoneId || !evidenceUrl) {
+    if (!uid || !activityId || !milestoneId || !evidenceUrl) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -102,7 +103,7 @@ Be encouraging but honest. Focus on helping the user grow.
     }
 
     const evidenceRef = await addDoc(collection(db, "evidence"), {
-      userId,
+      uid,
       activityId,
       milestoneId,
       type: evidenceType,

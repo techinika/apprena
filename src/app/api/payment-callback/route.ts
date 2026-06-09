@@ -4,6 +4,15 @@ import { doc, updateDoc, getDoc, collection, query, where, getDocs, serverTimest
 
 export async function POST(req: Request) {
   try {
+    const webhookSecret = process.env.PAYMENT_CALLBACK_SECRET;
+    if (webhookSecret) {
+      const requestSecret = req.headers.get("x-webhook-secret");
+      if (requestSecret !== webhookSecret) {
+        console.error("Payment callback: invalid webhook secret");
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+    }
+
     const body = await req.json();
 
     if (!body.success || body.data?.paymentStatus !== "PAID") {

@@ -3,8 +3,15 @@ import "./globals.css";
 import { APP } from "@/variables/globals";
 import { Nunito } from "next/font/google";
 import { AuthProvider } from "@/lib/AuthContext";
+import { ThemeProvider } from "@/lib/theme/ThemeProvider";
 import { Toaster } from "sonner";
-import MentorChat from "@/components/parts/chat/MentorChat";
+import dynamic from "next/dynamic";
+
+const MentorChat = dynamic(() => import("@/components/parts/chat/MentorChat"), {
+  ssr: false,
+});
+
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://apprena.app";
 
 export const metadata: Metadata = {
   title: {
@@ -12,6 +19,7 @@ export const metadata: Metadata = {
     template: `%s | ${APP?.NAME}`,
   },
   description: APP?.DESCRIPTION,
+  viewport: "width=device-width, initial-scale=1",
   keywords: [
     "AI Roadmap",
     "Career Path",
@@ -24,19 +32,24 @@ export const metadata: Metadata = {
   authors: [{ name: APP?.OWNER || "Apprena" }],
   creator: APP?.NAME,
   publisher: APP?.NAME,
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "https://apprena.app"),
+  metadataBase: new URL(baseUrl),
+  alternates: {
+    canonical: baseUrl,
+  },
   openGraph: {
     title: `${APP?.NAME} | ${APP?.SLOGAN}`,
     description: APP?.SHORT_DESCRIPTION,
-    url: process.env.NEXT_PUBLIC_BASE_URL || "https://apprena.app",
+    url: baseUrl,
     siteName: APP?.NAME,
     locale: "en_US",
     type: "website",
+    images: [{ url: "/api/og", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
     title: `${APP?.NAME} | ${APP?.SLOGAN}`,
     description: APP?.SHORT_DESCRIPTION,
+    images: ["/api/og"],
   },
   robots: {
     index: true,
@@ -57,14 +70,34 @@ const Font = Nunito({
   variable: "--font-main",
 });
 
+const IREMBOPAY_SCRIPT = process.env.NODE_ENV === "production"
+  ? "https://dashboard.irembopay.com/assets/payment/inline.js"
+  : "https://dashboard.sandbox.irembopay.com/assets/payment/inline.js";
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-icon" href="/logo-short.png" />
+        <link rel="preload" href={IREMBOPAY_SCRIPT} as="script" />
+        <link rel="preconnect" href="https://*.googleapis.com" />
+        <link rel="preconnect" href="https://*.firestore.googleapis.com" />
+        <link rel="preconnect" href="https://res.cloudinary.com" />
+        <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
+      </head>
       <body className={`${Font.variable} antialiased`}>
+        <script
+          src={IREMBOPAY_SCRIPT}
+          async
+          defer
+          data-init={false}
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -73,7 +106,7 @@ export default function RootLayout({
               "@type": "WebApplication",
               name: APP?.NAME,
               description: APP?.DESCRIPTION,
-              url: process.env.NEXT_PUBLIC_BASE_URL || "https://apprena.app",
+              url: baseUrl,
               applicationCategory: "Career & Education",
               operatingSystem: "Web Browser",
               offers: {
@@ -88,10 +121,12 @@ export default function RootLayout({
             }),
           }}
         />
-        <AuthProvider>
-          <Toaster position="top-center" expand={true} richColors />
-          {children}
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <Toaster position="top-center" expand={true} richColors />
+            {children}
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

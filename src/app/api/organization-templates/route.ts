@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { verifyAuth } from "@/lib/apiAuth";
 import { db } from "@/db/firebase";
 import {
   collection,
@@ -16,9 +17,10 @@ import { OrganizationTemplate } from "@/types/organization";
 
 export async function POST(req: Request) {
   try {
-    const { organizationId, name, description, category, roadmap, learningModules, createdBy, isPublic } = await req.json();
+    const { uid } = await verifyAuth(req);
+    const { organizationId, name, description, category, roadmap, learningModules, isPublic } = await req.json();
 
-    if (!organizationId || !name || !roadmap || !createdBy) {
+    if (!organizationId || !name || !roadmap) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -29,7 +31,7 @@ export async function POST(req: Request) {
       category: category || "general",
       roadmap,
       learningModules: learningModules || [],
-      createdBy,
+      createdBy: uid,
       isPublic: isPublic || false,
       createdAt: serverTimestamp(),
     });
@@ -50,6 +52,7 @@ export async function GET(req: Request) {
   const templateId = searchParams.get("templateId");
 
   try {
+    const { uid } = await verifyAuth(req);
     if (templateId) {
       const docSnap = await getDoc(doc(db, "organizationTemplates", templateId));
       if (!docSnap.exists()) {
@@ -84,6 +87,7 @@ export async function GET(req: Request) {
 
 export async function PUT(req: Request) {
   try {
+    const { uid } = await verifyAuth(req);
     const { templateId, ...updates } = await req.json();
 
     if (!templateId) {
@@ -111,6 +115,7 @@ export async function DELETE(req: Request) {
   }
 
   try {
+    const { uid } = await verifyAuth(req);
     const templateDoc = await getDoc(doc(db, "organizationTemplates", templateId));
     if (!templateDoc.exists()) {
       return NextResponse.json({ error: "Template not found" }, { status: 404 });

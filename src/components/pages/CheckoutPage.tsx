@@ -61,7 +61,6 @@ const CheckoutPage = () => {
 
   useEffect(() => {
     if (!user) return;
-    setLoading(true);
     const q = query(
       collection(db, "orders"),
       where("userId", "==", user.uid),
@@ -74,10 +73,9 @@ const CheckoutPage = () => {
         ...doc.data(),
       }));
       setPendingOrders(orders);
+      setLoading(false);
       setIsInitialLoad(false);
     });
-
-    setLoading(false);
 
     return () => unsubscribe();
   }, [user]);
@@ -123,6 +121,30 @@ const CheckoutPage = () => {
     try {
       const batch = writeBatch(db);
 
+      const hasArchitectPlan = pendingOrders.some(o => o.planId === PLANS?.architect);
+      let existingSubEnd: Date | null = null;
+
+      if (hasArchitectPlan) {
+        const subQuery = query(
+          collection(db, "subscriptions"),
+          where("userId", "==", user?.uid),
+          where("status", "==", "active")
+        );
+        const subSnap = await getDocs(subQuery);
+        if (!subSnap.empty) {
+          for (const subDoc of subSnap.docs) {
+            const subData = subDoc.data();
+            if (subData.endDate) {
+              let currentEnd: Date;
+              if (subData.endDate.toDate) currentEnd = subData.endDate.toDate();
+              else if (subData.endDate instanceof Date) currentEnd = subData.endDate;
+              else currentEnd = new Date(subData.endDate);
+              if (!existingSubEnd || currentEnd > existingSubEnd) existingSubEnd = currentEnd;
+            }
+          }
+        }
+      }
+
       for (const order of pendingOrders) {
         const orderRef = doc(db, "orders", order.id);
         batch.update(orderRef, {
@@ -147,37 +169,8 @@ const CheckoutPage = () => {
             purchasedCredits: increment(1),
           });
         } else if (order.planId === PLANS?.architect) {
-          const subQuery = query(
-            collection(db, "subscriptions"),
-            where("userId", "==", user?.uid),
-            where("status", "==", "active")
-          );
-          const subSnap = await getDocs(subQuery);
-
           const now = new Date();
-          let startDate = now;
-          
-          if (!subSnap.empty) {
-            for (const subDoc of subSnap.docs) {
-              const subData = subDoc.data();
-              if (subData.endDate) {
-                let currentEnd: Date;
-                if (subData.endDate.toDate) {
-                  currentEnd = subData.endDate.toDate();
-                } else if (subData.endDate instanceof Date) {
-                  currentEnd = subData.endDate;
-                } else {
-                  currentEnd = new Date(subData.endDate);
-                }
-                
-                if (currentEnd > now) {
-                  startDate = currentEnd;
-                  break;
-                }
-              }
-            }
-          }
-
+          const startDate = existingSubEnd && existingSubEnd > now ? existingSubEnd : now;
           const endDate = new Date(startDate);
           endDate.setDate(endDate.getDate() + 30);
 

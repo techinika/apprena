@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { verifyAuth } from "@/lib/apiAuth";
 import { generateWithFallback } from "@/lib/ai";
 
 interface Exercise {
@@ -10,6 +11,7 @@ interface Exercise {
 
 export async function POST(req: Request) {
   try {
+    const { uid } = await verifyAuth(req);
     const { exercises } = await req.json();
 
     if (!exercises || !Array.isArray(exercises) || exercises.length === 0) {

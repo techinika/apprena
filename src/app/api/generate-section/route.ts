@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db/firebase";
+import { verifyAuth } from "@/lib/apiAuth";
 import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { generateJsonWithFallback } from "@/lib/ai";
 
 export async function POST(req: Request) {
   try {
     const { activityId, section } = await req.json();
+    const { uid } = await verifyAuth(req);
 
     if (!activityId || !section) {
       return NextResponse.json({ error: "Missing activityId or section" }, { status: 400 });

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { verifyAuth } from "@/lib/apiAuth";
 import { db } from "@/db/firebase";
 import {
   doc,
@@ -22,6 +23,7 @@ export async function GET(req: Request) {
   }
 
   try {
+    const { uid } = await verifyAuth(req);
     const invitationQuery = query(
       collection(db, "organizationInvitations"),
       where("token", "==", token),
@@ -62,9 +64,10 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const { token, userId } = await req.json();
+    const { uid } = await verifyAuth(req);
+    const { token } = await req.json();
 
-    if (!token || !userId) {
+    if (!token) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -83,11 +86,11 @@ export async function POST(req: Request) {
     const invitationDoc = snapshot.docs[0];
     const invitationData = invitationDoc.data();
 
-    if (invitationData.invitedUserId && invitationData.invitedUserId !== userId) {
+    if (invitationData.invitedUserId && invitationData.invitedUserId !== uid) {
       return NextResponse.json({ error: "This invitation was not sent to you" }, { status: 403 });
     }
 
-    const invitedProfile = await getDoc(doc(db, "profiles", userId));
+    const invitedProfile = await getDoc(doc(db, "profiles", uid));
     if (!invitedProfile.exists()) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
@@ -116,13 +119,13 @@ export async function POST(req: Request) {
 
     await updateDoc(invitationDoc.ref, {
       status: "accepted",
-      userId,
+      userId: uid,
       acceptedAt: serverTimestamp(),
     });
 
     await addDoc(collection(db, "organizationMembers"), {
       organizationId: invitationData.organizationId,
-      userId,
+      userId: uid,
       role: invitationData.role,
       status: "active",
       permissions: {
@@ -145,7 +148,7 @@ export async function POST(req: Request) {
       ? (inviterDoc.data().displayName || inviterDoc.data().email?.split("@")[0] || "Someone")
       : "Someone";
 
-    await sendEmail(
+    const emailResult = await sendEmail(
       invitationData.email,
       `Welcome to ${orgData.name}!`,
       `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
@@ -154,6 +157,9 @@ export async function POST(req: Request) {
         <p>You can now access the organization dashboard.</p>
       </div>`
     );
+    if (!emailResult.success) {
+      console.warn("Welcome email failed to send:", emailResult.error);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
