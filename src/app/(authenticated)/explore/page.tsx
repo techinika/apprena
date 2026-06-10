@@ -5,6 +5,7 @@ import ExplorePage from "@/components/pages/ExplorePage";
 export const metadata: Metadata = {
   title: `Explore Public Roadmaps | ${APP?.NAME}`,
   description: "Discover career roadmaps shared by professionals.",
+  alternates: { canonical: "/explore" },
 };
 
 export default function page() {

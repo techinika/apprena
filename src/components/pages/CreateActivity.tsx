@@ -152,8 +152,9 @@ export default function CreateRoadmap() {
           </h2>
 
           <textarea
+            id="question-answer"
             autoFocus
-            key={step} // Reset animation/focus on step change
+            key={step}
             value={answers[QUESTIONS[step].id] || ""}
             onChange={(e) => updateAnswer(e.target.value)}
             placeholder={QUESTIONS[step].placeholder}
@@ -163,11 +164,12 @@ export default function CreateRoadmap() {
           {/* Attachments Section - Only show on last step or specific step */}
           {step === QUESTIONS.length - 1 && (
             <div className="mt-8">
-              <label className="text-sm font-bold text-slate-500 block mb-4">
+              <label htmlFor="supporting-files" className="text-sm font-bold text-slate-500 block mb-4">
                 Supporting Files (Optional)
               </label>
               <div className="relative border-2 border-dashed border-slate-200 rounded-3xl p-8 text-center bg-white">
                 <input
+                  id="supporting-files"
                   type="file"
                   multiple
                   accept=".pdf"

@@ -10,6 +10,7 @@ export async function generateMetadata({
 
   return {
     title: `Roadmap ${activity} | Workspace`,
+    description: "View your career roadmap details and track progress on Apprena.",
     robots: { index: false, follow: false },
   };
 }

@@ -150,7 +150,7 @@ export default function NotificationsPage() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-6 md:p-12">
-      <div className="max-w-4xl mx-auto">
+      <main className="max-w-4xl mx-auto">
         <header className="mb-8">
           <div className="flex items-center justify-between">
             <div>
@@ -277,7 +277,7 @@ export default function NotificationsPage() {
             </div>
           )}
         </div>
-      </div>
+      </main>
     </div>
   );
 }

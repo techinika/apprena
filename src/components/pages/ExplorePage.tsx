@@ -85,7 +85,7 @@ export default function ExplorePage() {
 
   return (
     <div className="min-h-screen bg-slate-50 p-6 md:p-12">
-      <div className="max-w-7xl mx-auto">
+      <main className="max-w-7xl mx-auto">
         <header className="mb-12">
           <h1 className="text-4xl font-black text-slate-900 mb-4">Explore</h1>
           <p className="text-slate-500 text-lg">
@@ -98,6 +98,7 @@ export default function ExplorePage() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
             <input
               type="text"
+              aria-label="Search roadmaps"
               placeholder="Search roadmaps by title or goal..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -172,7 +173,7 @@ export default function ExplorePage() {
             </p>
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }

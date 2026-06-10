@@ -21,7 +21,6 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: [
       "lucide-react",
-      "react-icons",
       "framer-motion",
       "date-fns",
       "react-markdown",

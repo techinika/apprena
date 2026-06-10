@@ -1,3 +1,5 @@
+export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://apprena.techinika.com";
+
 export enum APP {
   NAME = "Apprena",
   OWNER = "Techinika",

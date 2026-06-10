@@ -6,6 +6,7 @@ export const metadata = {
   title: `Login | ${APP?.NAME}`,
   description:
     "Sign in to your account to continue your learning journey and access your custom roadmaps.",
+  alternates: { canonical: "/login" },
 };
 
 function page() {

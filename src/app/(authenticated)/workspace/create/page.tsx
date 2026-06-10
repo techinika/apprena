@@ -4,6 +4,7 @@ import React from "react";
 
 export const metadata = {
   title: `Create New Roadmap | ${APP?.NAME}`,
+  description: "Create a new AI-powered career roadmap tailored to your goals on Apprena.",
   robots: { index: false, follow: false },
 };
 

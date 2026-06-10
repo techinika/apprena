@@ -199,10 +199,11 @@ Output ONLY valid JSON.
           {step === "select" && (
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">
+                <label htmlFor="team-member" className="block text-sm font-bold text-slate-700 mb-2">
                   Select Team Member
                 </label>
                 <select
+                  id="team-member"
                   value={selectedMember}
                   onChange={(e) => {
                     setSelectedMember(e.target.value);
@@ -225,10 +226,11 @@ Output ONLY valid JSON.
 
               {templates.length > 0 && (
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">
+                  <label htmlFor="use-template" className="block text-sm font-bold text-slate-700 mb-2">
                     Use Template (Optional)
                   </label>
                   <select
+                    id="use-template"
                     value={selectedTemplate}
                     onChange={(e) => setSelectedTemplate(e.target.value)}
                     className="w-full p-4 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-amber-500"
@@ -257,10 +259,11 @@ Output ONLY valid JSON.
             <div className="space-y-6">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">
+                  <label htmlFor="member-name" className="block text-sm font-bold text-slate-700 mb-2">
                     Member Name
                   </label>
                   <input
+                    id="member-name"
                     type="text"
                     value={roadmapDetails.memberName}
                     onChange={(e) => setRoadmapDetails(prev => ({ ...prev, memberName: e.target.value }))}
@@ -269,10 +272,11 @@ Output ONLY valid JSON.
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">
+                  <label htmlFor="current-role" className="block text-sm font-bold text-slate-700 mb-2">
                     Current Role
                   </label>
                   <input
+                    id="current-role"
                     type="text"
                     value={roadmapDetails.currentRole}
                     onChange={(e) => setRoadmapDetails(prev => ({ ...prev, currentRole: e.target.value }))}
@@ -283,10 +287,11 @@ Output ONLY valid JSON.
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">
+                <label htmlFor="target-role" className="block text-sm font-bold text-slate-700 mb-2">
                   Target Role (Required)
                 </label>
                 <input
+                  id="target-role"
                   type="text"
                   value={roadmapDetails.targetRole}
                   onChange={(e) => setRoadmapDetails(prev => ({ ...prev, targetRole: e.target.value }))}
@@ -296,10 +301,11 @@ Output ONLY valid JSON.
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">
+                <label htmlFor="key-skills" className="block text-sm font-bold text-slate-700 mb-2">
                   Key Skills
                 </label>
                 <textarea
+                  id="key-skills"
                   value={roadmapDetails.skills}
                   onChange={(e) => setRoadmapDetails(prev => ({ ...prev, skills: e.target.value }))}
                   placeholder="What skills does this person already have?"
@@ -308,10 +314,11 @@ Output ONLY valid JSON.
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">
+                <label htmlFor="timeline" className="block text-sm font-bold text-slate-700 mb-2">
                   Timeline
                 </label>
                 <select
+                  id="timeline"
                   value={roadmapDetails.timeline}
                   onChange={(e) => setRoadmapDetails(prev => ({ ...prev, timeline: e.target.value }))}
                   className="w-full p-4 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-amber-500"

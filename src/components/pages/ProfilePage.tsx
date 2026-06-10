@@ -151,6 +151,7 @@ const ProfilePage = () => {
         </div>
       )}
       <main className="max-w-6xl mx-auto px-6 py-12">
+        <h1 className="sr-only">Profile</h1>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           <div className="lg:col-span-4 space-y-2">
             {[

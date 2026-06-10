@@ -245,8 +245,8 @@ export default function SupportPage() {
         strategy="lazyOnload"
         src="https://embed.tawk.to/67e0a9fa4d96ff1912ebc675/1k5c9d3s8"
       />
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
+      <main className="max-w-6xl mx-auto">
+        <header className="text-center mb-12">
           <div className="w-20 h-20 bg-gradient-to-br from-amber-500 to-orange-500 text-white rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-amber-200">
             <LifeBuoy size={40} />
           </div>
@@ -257,7 +257,7 @@ export default function SupportPage() {
             Search our knowledge base or submit a ticket. We typically respond
             within 24 hours.
           </p>
-        </div>
+        </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
@@ -337,12 +337,28 @@ export default function SupportPage() {
                 </h2>
                 <input
                   type="text"
+                  aria-label="Search frequently asked questions"
                   placeholder="Search frequently asked questions..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 font-medium text-sm focus:ring-2 focus:ring-amber-500 outline-none"
                 />
               </div>
+              <Script
+                id="faq-schema"
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                  __html: JSON.stringify({
+                    "@context": "https://schema.org",
+                    "@type": "FAQPage",
+                    mainEntity: FAQS.map((faq) => ({
+                      "@type": "Question",
+                      name: faq.q,
+                      acceptedAnswer: { "@type": "Answer", text: faq.a },
+                    })),
+                  }),
+                }}
+              />
               <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
                 {filteredFaqs.length === 0 ? (
                   <div className="p-8 bg-white rounded-3xl border border-dashed border-slate-200 text-center">
@@ -407,10 +423,11 @@ export default function SupportPage() {
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-widest">
+                    <label htmlFor="support-category" className="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-widest">
                       Category
                     </label>
                     <select
+                      id="support-category"
                       name="category"
                       required
                       className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 outline-none font-bold text-sm focus:ring-2 focus:ring-amber-500"
@@ -424,10 +441,11 @@ export default function SupportPage() {
                     </select>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-widest">
+                    <label htmlFor="support-subject" className="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-widest">
                       Subject
                     </label>
                     <input
+                      id="support-subject"
                       name="subject"
                       required
                       placeholder="Brief description of your issue"
@@ -435,10 +453,11 @@ export default function SupportPage() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-widest">
+                    <label htmlFor="support-description" className="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-widest">
                       Description
                     </label>
                     <textarea
+                      id="support-description"
                       name="message"
                       rows={5}
                       required
@@ -475,7 +494,7 @@ export default function SupportPage() {
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

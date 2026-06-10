@@ -10,6 +10,7 @@ export async function generateMetadata({
 
   return {
     title: `Learning Path ${learning} | ${APP?.NAME}`,
+    description: "Explore your personalized learning path and track skill progress on Apprena.",
     robots: { index: false, follow: false },
   };
 }

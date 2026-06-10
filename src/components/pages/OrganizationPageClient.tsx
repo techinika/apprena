@@ -198,10 +198,11 @@ export default function OrganizationPageClient() {
             <h3 className="text-2xl font-black text-slate-900 mb-6">Create Organization</h3>
             
             <div className="mb-6">
-              <label className="block text-sm font-bold text-slate-700 mb-2">
+              <label htmlFor="org-name" className="block text-sm font-bold text-slate-700 mb-2">
                 Organization Name
               </label>
               <input
+                id="org-name"
                 type="text"
                 value={orgName}
                 onChange={(e) => setOrgName(e.target.value)}

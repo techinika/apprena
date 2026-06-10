@@ -4,6 +4,7 @@ import React from "react";
 
 export const metadata = {
   title: `My Workspace | ${APP?.NAME}`,
+  description: "Manage your roadmaps, track progress, and access your learning workspace on Apprena.",
   robots: { index: false, follow: false },
 };
 

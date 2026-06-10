@@ -6,6 +6,7 @@ export const metadata = {
   title: `Privacy Policy | ${APP?.NAME}`,
   description:
     "Read our legal documentation regarding the use of AI services and data protection.",
+  alternates: { canonical: "/privacy" },
 };
 
 function page() {

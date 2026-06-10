@@ -1,9 +1,10 @@
 import { MetadataRoute } from "next";
+import { BASE_URL } from "@/variables/globals";
 import { db } from "@/db/firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://apprena.techinika.com";
+  const baseUrl = BASE_URL;
 
   const staticRoutes = [
     { url: baseUrl, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 1 },

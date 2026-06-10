@@ -465,8 +465,9 @@ export default function OrganizationDetailClient() {
             <h3 className="text-xl font-black text-slate-900 mb-6">Invite Team Member</h3>
             
             <div className="mb-4">
-              <label className="block text-sm font-bold text-slate-700 mb-2">Email Address</label>
+              <label htmlFor="invite-email" className="block text-sm font-bold text-slate-700 mb-2">Email Address</label>
               <input
+                id="invite-email"
                 type="email"
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}

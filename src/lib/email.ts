@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { BASE_URL } from "@/variables/globals";
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -31,7 +32,7 @@ export async function sendInvitationEmail(
   invitedBy: string,
   token: string
 ) {
-  const confirmUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/invitation/${token}`;
+  const confirmUrl = `${BASE_URL}/invitation/${token}`;
   
   const html = `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
@@ -54,7 +55,7 @@ export async function sendShareNotificationEmail(
   sharedBy: string,
   slug: string
 ) {
-  const shareUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/share/${slug}`;
+  const shareUrl = `${BASE_URL}/share/${slug}`;
   
   const html = `
     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">

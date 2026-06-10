@@ -4,6 +4,7 @@ import CourseViewer from "@/components/pages/CourseViewer";
 
 export const metadata: Metadata = {
   title: `Course | ${APP?.NAME}`,
+  description: "Continue your course and track your learning progress on Apprena.",
   robots: { index: false, follow: false },
 };
 

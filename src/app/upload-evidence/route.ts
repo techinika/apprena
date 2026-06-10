@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { verifyAuth } from "@/lib/apiAuth";
 
 export async function POST(req: Request) {
   try {
+    const { uid } = await verifyAuth(req);
     const formData = await req.formData();
     const file = formData.get("file") as File;
 

@@ -1,7 +1,8 @@
 import { MetadataRoute } from "next";
+import { BASE_URL } from "@/variables/globals";
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://apprena.techinika.com";
+  const baseUrl = BASE_URL;
 
   return {
     rules: {

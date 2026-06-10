@@ -1,8 +1,8 @@
 import VerifyPage from "@/components/pages/VerifyPage";
-import { APP } from "@/variables/globals";
+import { APP, BASE_URL } from "@/variables/globals";
 import React from "react";
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://apprena.techinika.com";
+const baseUrl = BASE_URL;
 
 export const metadata = {
   title: `Credential Verification | ${APP?.NAME}`,

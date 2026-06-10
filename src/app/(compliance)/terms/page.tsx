@@ -6,6 +6,7 @@ export const metadata = {
   title: `Terms of Service | ${APP?.NAME}`,
   description:
     "Read our legal documentation regarding the use of AI services and data protection.",
+  alternates: { canonical: "/terms" },
 };
 
 function page() {

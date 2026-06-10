@@ -6,6 +6,7 @@ import React from "react";
 export const metadata: Metadata = {
   title: `${APP?.NAME} — ${APP?.SLOGAN}`,
   description: APP?.DESCRIPTION,
+  alternates: { canonical: "/" },
 };
 
 function page() {

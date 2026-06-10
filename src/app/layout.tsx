@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { APP } from "@/variables/globals";
+import { APP, BASE_URL } from "@/variables/globals";
 import { Nunito } from "next/font/google";
 import { AuthProvider } from "@/lib/AuthContext";
 import { ThemeProvider } from "@/lib/theme/ThemeProvider";
 import { Toaster } from "sonner";
 import MentorChat from "@/components/parts/chat/MentorChatWrapper";
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://apprena.techinika.com";
+const baseUrl = BASE_URL;
 
 export const metadata: Metadata = {
   title: {
@@ -29,13 +29,9 @@ export const metadata: Metadata = {
   creator: APP?.NAME,
   publisher: APP?.NAME,
   metadataBase: new URL(baseUrl),
-  alternates: {
-    canonical: baseUrl,
-  },
   openGraph: {
     title: `${APP?.NAME} | ${APP?.SLOGAN}`,
     description: APP?.SHORT_DESCRIPTION,
-    url: baseUrl,
     siteName: APP?.NAME,
     locale: "en_US",
     type: "website",
@@ -81,9 +77,9 @@ export default function RootLayout({
       <head>
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/logo-short.png" />
-        <link rel="preload" href={IREMBOPAY_SCRIPT} as="script" />
-        <link rel="preconnect" href="https://*.googleapis.com" />
-        <link rel="preconnect" href="https://*.firestore.googleapis.com" />
+        <link rel="preconnect" href="https://firestore.googleapis.com" />
+        <link rel="preconnect" href="https://identitytoolkit.googleapis.com" />
+        <link rel="preconnect" href="https://securetoken.googleapis.com" />
         <link rel="preconnect" href="https://res.cloudinary.com" />
         <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
@@ -109,6 +105,23 @@ export default function RootLayout({
               author: {
                 "@type": "Organization",
                 name: APP?.OWNER || "Apprena",
+              },
+            }),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: APP?.NAME,
+              url: baseUrl,
+              description: APP?.DESCRIPTION,
+              potentialAction: {
+                "@type": "SearchAction",
+                target: { "@type": "EntryPoint", urlTemplate: `${baseUrl}/explore?q={search_term}` },
+                "query-input": "required name=search_term",
               },
             }),
           }}

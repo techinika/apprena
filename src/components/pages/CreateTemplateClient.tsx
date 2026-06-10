@@ -147,8 +147,9 @@ export default function CreateTemplateClient() {
 
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Template Name</label>
+              <label htmlFor="template-name" className="block text-sm font-bold text-slate-700 mb-2">Template Name</label>
               <input
+                id="template-name"
                 type="text"
                 value={form.name}
                 onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))}
@@ -158,8 +159,9 @@ export default function CreateTemplateClient() {
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Description</label>
+              <label htmlFor="template-desc" className="block text-sm font-bold text-slate-700 mb-2">Description</label>
               <textarea
+                id="template-desc"
                 value={form.description}
                 onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="What is this template for? Who is it designed for?"
@@ -168,8 +170,9 @@ export default function CreateTemplateClient() {
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Category</label>
+              <label htmlFor="template-category" className="block text-sm font-bold text-slate-700 mb-2">Category</label>
               <select
+                id="template-category"
                 value={form.category}
                 onChange={(e) => setForm(prev => ({ ...prev, category: e.target.value }))}
                 className="w-full p-4 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-amber-500"
@@ -216,12 +219,14 @@ export default function CreateTemplateClient() {
                       value={step.title}
                       onChange={(e) => updateStep(index, "title", e.target.value)}
                       placeholder="Step title"
+                      aria-label={`Step ${index + 1} title`}
                       className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-500"
                     />
                     <textarea
                       value={step.desc}
                       onChange={(e) => updateStep(index, "desc", e.target.value)}
                       placeholder="Detailed description"
+                      aria-label={`Step ${index + 1} description`}
                       className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-500 min-h-[80px]"
                     />
                     <input
@@ -229,6 +234,7 @@ export default function CreateTemplateClient() {
                       value={step.result}
                       onChange={(e) => updateStep(index, "result", e.target.value)}
                       placeholder="Expected outcome/result"
+                      aria-label={`Step ${index + 1} expected outcome`}
                       className="w-full p-3 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-500"
                     />
                   </div>

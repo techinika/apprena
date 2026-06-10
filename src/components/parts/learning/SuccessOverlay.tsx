@@ -1,8 +1,7 @@
 "use client";
 import React, { useRef } from "react";
 import { Download, X } from "lucide-react";
-import html2canvas from "html2canvas-pro";
-import { APP } from "@/variables/globals";
+import { APP, BASE_URL } from "@/variables/globals";
 import { QRCodeCanvas } from "qrcode.react";
 import { useAuth } from "@/lib/AuthContext";
 
@@ -21,6 +20,7 @@ export const SuccessModal = ({
   const downloadFlier = async () => {
     if (!flierRef.current) return;
 
+    const html2canvas = (await import("html2canvas-pro")).default;
     const canvas = await html2canvas(flierRef.current, {
       backgroundColor: "#0f172a",
       scale: 3,
@@ -43,7 +43,7 @@ export const SuccessModal = ({
     link.click();
   };
 
-  const verificationUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/verify/${badgeId}`;
+  const verificationUrl = `${BASE_URL}/verify/${badgeId}`;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/95 backdrop-blur-md">
@@ -83,7 +83,7 @@ export const SuccessModal = ({
 
           <div className="relative z-10 flex flex-col items-center w-full">
             <div className="bg-white p-3 rounded-2xl mb-6 shadow-2xl">
-              <QRCodeCanvas
+              <QRCodeCanvas // eslint-disable-line
                 value={verificationUrl}
                 size={100}
                 level={"H"}

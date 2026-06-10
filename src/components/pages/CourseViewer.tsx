@@ -34,7 +34,7 @@ import { toast } from "sonner";
 import { LearningPlan, GeneratedContent } from "@/types/learning";
 import { db } from "@/db/firebase";
 import Loading from "@/app/loading";
-import confetti from "canvas-confetti";
+
 import { createNotification, NotificationMessages } from "@/lib/notificationUtils";
 
 export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
@@ -152,7 +152,8 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
     return () => unsubscribe();
   }, [learningId, user, moduleIndex, contentIndex]);
 
-  const triggerFireworks = () => {
+  const triggerFireworks = async () => {
+    const confetti = (await import("canvas-confetti")).default;
     const duration = 3 * 1000;
     const animationEnd = Date.now() + duration;
     const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
@@ -647,6 +648,8 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
                 <div className="mt-12 p-6 bg-slate-50 rounded-2xl">
                   <h3 className="font-black text-slate-900 mb-4">Submit Your Answer</h3>
                   <textarea
+                    id="exercise-answer"
+                    aria-label="Submit Your Answer"
                     value={exerciseAnswer}
                     onChange={(e) => setExerciseAnswer(e.target.value)}
                     placeholder="Write your answer here..."

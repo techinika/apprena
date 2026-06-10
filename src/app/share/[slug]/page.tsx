@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { db } from "@/db/firebase";
 import { doc, getDoc, query, where, getDocs, collection } from "firebase/firestore";
-import { APP } from "@/variables/globals";
+import { APP, BASE_URL } from "@/variables/globals";
 import PublicRoadmapView from "@/components/pages/PublicRoadmapView";
 
 interface Props {
@@ -51,7 +51,7 @@ async function findActivityBySlug(slug: string) {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://apprena.techinika.com";
+  const baseUrl = BASE_URL;
 
   try {
     const activity = await findActivityBySlug(slug);

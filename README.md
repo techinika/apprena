@@ -26,7 +26,7 @@ A Next.js 16 application providing personalized career roadmaps, learning paths,
 - **Authentication**: Firebase Auth (Google OAuth)
 - **Payments**: IremboPay (African payment gateway)
 - **File Storage**: Cloudinary (signed uploads with SHA-1 signature)
-- **Visualizations**: Mermaid.js, Cytoscape, html2canvas-pro, jsPDF
+- **Visualizations**: Mermaid.js, html2canvas-pro, jsPDF
 - **Animations**: Framer Motion, canvas-confetti
 
 ## Prerequisites
@@ -207,19 +207,18 @@ IremboPay payment lifecycle.
 
 ## Security
 
-- CSP headers enforced via middleware (form-action, object-src, base-uri)
-- HSTS (2 years), Permissions-Policy headers
+- API routes: Firebase Auth token verification enforced on all endpoints
 - Cloudinary uploads: signed with SHA-1 HMAC (no public unsigned preset)
 - File uploads: MIME type + PDF magic byte header validation, 5MB limit
 - API routes: rate-limited per IP (5 req/min for analysis)
-- Auth: Firebase Auth token verification on all API routes
+- CSP, HSTS (2 years), Permissions-Policy headers
 - `poweredByHeader: false` in Next.js config
 - `.env.example` documents all required variables (secrets never in client)
 
 ## Performance
 
-- Dynamic imports: MentorChat (`ssr: false`), canvas-confetti (lazy), IremboPayWidget
-- `optimizePackageImports` for lucide-react, react-icons, framer-motion, date-fns
+- Dynamic imports: MentorChat (`ssr: false`), canvas-confetti, html2canvas-pro, IremboPayWidget
+- `optimizePackageImports` for lucide-react, framer-motion, date-fns, react-markdown, sonner, qrcode.react
 - Static asset caching (`Cache-Control: immutable, 1 year`) for images and fonts
 - `output: "standalone"` for optimized Docker deployments
 - Preconnect hints for Firebase, Cloudinary in root layout

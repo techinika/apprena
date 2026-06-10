@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: `Invitation | ${APP?.NAME}`,
+  description: "Accept your organization invitation to join your team on Apprena.",
   robots: { index: false, follow: false },
 };
 

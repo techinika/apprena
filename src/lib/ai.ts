@@ -19,6 +19,14 @@ export interface AIResponse {
   parsed?: any;
 }
 
+function sanitizeJsonString(text: string): string {
+  let result = text;
+  result = result.replace(/`([^`]*)`/g, (_, content) => JSON.stringify(content));
+  result = result.replace(/:\s*'([^']*)'/g, (_, content) => `: ${JSON.stringify(content)}`);
+  result = result.replace(/,\s*([}\]])/g, "$1");
+  return result;
+}
+
 async function tryGroq(prompt: string, temperature: number = 0.3): Promise<any> {
   if (!groq) return null;
   
@@ -105,7 +113,8 @@ async function tryGemini(prompt: string, temperature: number = 0.3): Promise<any
         const result = await model.generateContent(prompt);
         const text = result.response.text().trim();
         
-        return JSON.parse(text);
+        const parsed = extractJson(text);
+        if (parsed) return parsed;
       } catch (error: any) {
         console.error(`Gemini (${modelName}) attempt ${attempt + 1} failed:`, error?.message || error);
         
@@ -187,35 +196,28 @@ function extractJson(text: string): any {
   
   const trimmed = text.trim();
   
-  try {
-    if (trimmed.startsWith('{')) {
-      return JSON.parse(trimmed);
-    }
+  const attempts: string[] = [
+    trimmed,
+    trimmed.replace(/```json\n?/g, '').replace(/```\n?/g, '').replace(/```/g, ''),
+  ];
+  
+  const jsonBlock = trimmed.match(/\{[\s\S]*\}/);
+  if (jsonBlock) attempts.push(jsonBlock[0]);
+  
+  const arrayBlock = trimmed.match(/\[[\s\S]*\]/);
+  if (arrayBlock) attempts.push(arrayBlock[0]);
+  
+  for (const raw of attempts) {
+    try {
+      return JSON.parse(raw);
+    } catch {}
     
-    const jsonMatch = trimmed.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]);
-    }
-    
-    const jsonArrayMatch = trimmed.match(/\[[\s\S]*\]/);
-    if (jsonArrayMatch) {
-      return JSON.parse(jsonArrayMatch[0]);
-    }
-    
-    const cleanText = trimmed
-      .replace(/```json\n?/g, '')
-      .replace(/```\n?/g, '')
-      .replace(/```/g, '')
-      .replace(/^[{[]/g, '')
-      .replace(/[}\]]$/g, '');
-    
-    if (cleanText.includes('{') || cleanText.includes('[')) {
-      const tryParse = '{' + cleanText.split('{').slice(1).join('{');
-      try { return JSON.parse(tryParse); } catch {}
-    }
-  } catch (e) {
-    console.error("extractJson error:", e);
+    try {
+      return JSON.parse(sanitizeJsonString(raw));
+    } catch {}
   }
+  
+  console.error("extractJson: all parse attempts failed for:", trimmed.slice(0, 200));
   return null;
 }
 

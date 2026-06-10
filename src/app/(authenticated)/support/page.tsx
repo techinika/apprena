@@ -6,6 +6,7 @@ export const metadata = {
   title: `Support & Help Center | ${APP?.NAME}`,
   description:
     "Need help? Contact our team for assistance with roadmaps, workspace tools, or account management.",
+  alternates: { canonical: "/support" },
 };
 
 function page() {
