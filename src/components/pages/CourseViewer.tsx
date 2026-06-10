@@ -356,6 +356,16 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
 
       await updateDoc(doc(db, "learningPlans", learningId), updateData);
 
+      setPlan({
+        ...plan,
+        modules: updatedModules,
+        isActive: !allModulesComplete,
+        ...(totalGrade > 0 ? { totalGrade } : {}),
+        ...(allModulesComplete && totalGrade >= 80 ? { passedAt: new Date().toISOString() } : {}),
+        ...(allModulesComplete && totalGrade < 80 ? { attempts: (plan.attempts || 0) + 1 } : {}),
+        lastUpdated: new Date().toISOString(),
+      });
+
       triggerFireworks();
       toast.success(grade && grade >= 70 ? `Great job! Score: ${grade}%` : "Content completed!");
 
@@ -683,6 +693,20 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
                   {currentContent.grade !== undefined && (
                     <p className="text-sm text-emerald-600">
                       You scored {currentContent.grade}% on this content.
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {currentContent.completed && currentContent.type === "exercise" && (
+                <div className="mt-8 p-6 bg-emerald-50 rounded-2xl border border-emerald-200">
+                  <div className="flex items-center gap-2 text-emerald-700 font-bold mb-2">
+                    <CheckCircle2 size={20} />
+                    Exercise Completed
+                  </div>
+                  {currentContent.grade !== undefined && (
+                    <p className="text-sm text-emerald-600">
+                      You scored {currentContent.grade}% on this exercise.
                     </p>
                   )}
                 </div>
