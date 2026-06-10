@@ -21,7 +21,7 @@ export interface AIResponse {
 
 function sanitizeJsonString(text: string): string {
   let result = text;
-  result = result.replace(/`([^`]*)`/g, (_, content) => JSON.stringify(content));
+  result = result.replace(/`([\s\S]*?)`/g, (_, content) => JSON.stringify(content));
   result = result.replace(/:\s*'([^']*)'/g, (_, content) => `: ${JSON.stringify(content)}`);
   result = result.replace(/,\s*([}\]])/g, "$1");
   return result;
@@ -30,7 +30,7 @@ function sanitizeJsonString(text: string): string {
 async function tryGroq(prompt: string, temperature: number = 0.3): Promise<any> {
   if (!groq) return null;
   
-  const groqModels = ["llama-3.1-70b-versatile", "llama-3.1-8b-instant", "llama-3.2-11b-vision-preview"];
+  const groqModels = ["llama-3.3-70b-versatile", "llama-3.1-70b-versatile", "llama-3.1-8b-instant"];
   const maxRetries = 3;
   
   for (const modelName of groqModels) {
@@ -99,7 +99,7 @@ async function tryClaude(prompt: string, temperature: number = 0.3): Promise<any
 async function tryGemini(prompt: string, temperature: number = 0.3): Promise<any> {
   if (!genAI) return null;
   
-  const geminiModels = ["gemini-1.5-flash-8b", "gemini-1.5-flash", "gemini-2.0-flash"];
+  const geminiModels = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
   const maxRetries = 3;
   
   for (const modelName of geminiModels) {
