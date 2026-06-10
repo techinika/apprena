@@ -20,6 +20,7 @@ export interface GeneratedContent {
   feedback?: string;
   aiSolution?: string;
   usedAiForAnswer?: boolean;
+  userAnswer?: string;
 }
 
 export interface LearningPlan {
@@ -66,7 +67,7 @@ export interface LearningMilestone {
   title: string;
   description: string;
   type: "learning" | "network" | "habit" | "achievement";
-  status: "pending" | "in_progress" | "completed";
+  status: "pending" | "in_progress" | "completed" | "needs_revision";
   moduleIds: string[];
   completedAt?: string;
 }

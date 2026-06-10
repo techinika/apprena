@@ -5,16 +5,16 @@ import { LearningPlan } from "@/types/learning";
 
 export async function getLinkedLearningPlans(activity: Activity): Promise<LearningPlan[]> {
   const linkedIds = activity.linkedLearningPlanIds || [];
-  const plans: LearningPlan[] = [];
+  if (linkedIds.length === 0) return [];
 
-  for (const planId of linkedIds) {
-    try {
-      const planSnap = await getDoc(doc(db, "learningPlans", planId));
-      if (planSnap.exists()) {
-        plans.push({ id: planSnap.id, ...planSnap.data() } as LearningPlan);
-      }
-    } catch (error) {
-      console.error(`Error fetching learning plan ${planId}:`, error);
+  const planSnaps = await Promise.all(
+    linkedIds.map(planId => getDoc(doc(db, "learningPlans", planId)).catch(() => null))
+  );
+
+  const plans: LearningPlan[] = [];
+  for (const planSnap of planSnaps) {
+    if (planSnap?.exists()) {
+      plans.push({ id: planSnap.id, ...planSnap.data() } as LearningPlan);
     }
   }
 
@@ -26,7 +26,8 @@ export function calculateRoadmapProgress(
   linkedPlans: LearningPlan[]
 ): RoadmapProgress {
   const roadmapStepCount = roadmapSteps?.length || 0;
-  
+  const completedSteps = roadmapSteps?.filter(s => s.tag === "completed").length || 0;
+
   let totalLearningItems = 0;
   let completedLearningItems = 0;
 
@@ -44,8 +45,6 @@ export function calculateRoadmapProgress(
     }
   }
 
-  const completedSteps = 0;
-
   return {
     totalSteps: roadmapStepCount,
     completedSteps,
@@ -58,7 +57,7 @@ export function calculateRoadmapProgress(
 export function calculateOverallProgress(progress: RoadmapProgress): number {
   const totalItems = progress.totalSteps + progress.totalLearningItems;
   if (totalItems === 0) return 0;
-  
+
   const completedItems = progress.completedSteps + progress.completedLearningItems;
   return Math.round((completedItems / totalItems) * 100);
 }

@@ -6,6 +6,7 @@ import {
   addDoc,
   serverTimestamp,
   doc,
+  getDoc,
   updateDoc,
 } from "firebase/firestore";
 import { db } from "@/db/firebase";
@@ -136,16 +137,10 @@ Create a detailed curriculum with learning modules. Each module should have:
       );
     }
 
-    const moduleTitles = [
-      "Foundations", "Core Principles", "Essential Skills", "Practical Application",
-      "Advanced Techniques", "Mastery Level", "Expert Implementation", "Real-World Projects"
-    ];
-    
     const modules = aiResponse.modules.slice(0, 6).map((m: any, idx: number) => {
-      const uniqueTitle = moduleTitles[idx] ? `${moduleTitles[idx]} in ${targetSkill}` : m.course || m.title;
       return {
         id: `module-${Date.now()}-${idx}`,
-        course: m.course || m.title || uniqueTitle,
+        course: m.course,
         provider: "Apprena AI",
         isGenerated: true,
         status: "not_started",
@@ -164,6 +159,10 @@ Create a detailed curriculum with learning modules. Each module should have:
 
     if (planId) {
       const planRef = doc(db, "learningPlans", planId);
+      const existingSnap = await getDoc(planRef);
+      if (existingSnap.exists() && existingSnap.data().userId !== uid) {
+        return NextResponse.json({ error: "Not authorized" }, { status: 403 });
+      }
       await updateDoc(planRef, {
         modules: modules,
         title: planTitle,
@@ -171,11 +170,7 @@ Create a detailed curriculum with learning modules. Each module should have:
         totalHours: aiResponse.totalHours || Math.round(modules.length * 3),
         lastUpdated,
         parentRoadmapId: activityId || null,
-      });
-      await createNotification({
-        ...NotificationMessages.courseGenerated(planTitle),
-        userId: uid,
-        link: `/learning/${planId}`,
+        parentActivityId: activityId || null,
       });
       return NextResponse.json({ success: true, planId, modules });
     } else {

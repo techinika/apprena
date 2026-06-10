@@ -98,6 +98,7 @@ export interface TechnicalSkill {
 }
 
 export interface CurriculumItem {
+  id?: string;
   course: string;
   provider: string;
   url: string;

@@ -87,20 +87,32 @@ export const LearningSection = ({
         provider: item.provider,
         url: item.url,
         status: "not_started" as const,
-        progress: 0,
       }));
 
       const docRef = await addDoc(collection(db, "learningPlans"), {
         userId: user.uid,
         parentActivityId: activityId,
+        parentRoadmapId: activityId,
         title: title || "New Learning Path",
         modules: modules,
         isActive: true,
         target: goal,
         createdAt: serverTimestamp(),
         lastUpdated: serverTimestamp(),
-        overallProgress: 0,
       });
+
+      if (activityId) {
+        const activityRef = doc(db, "activities", activityId);
+        const activitySnap = await getDoc(activityRef);
+        const currentLinks = activitySnap.exists()
+          ? activitySnap.data().linkedLearningPlanIds || []
+          : [];
+        if (!currentLinks.includes(docRef.id)) {
+          await updateDoc(activityRef, {
+            linkedLearningPlanIds: [...currentLinks, docRef.id],
+          });
+        }
+      }
 
       setIsSaved(true);
       setExistingPlanId(docRef.id);

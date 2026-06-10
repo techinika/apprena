@@ -42,7 +42,6 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
   const router = useRouter();
   const params = useParams();
   const learningId = params.learning as string;
-  const courseIndex = parseInt(params.course as string);
 
   const formatContent = (content: string) => {
     const elements: React.ReactNode[] = [];
@@ -115,7 +114,7 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
   const [plan, setPlan] = useState<LearningPlan | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentContent, setCurrentContent] = useState<GeneratedContent | null>(null);
-  const [contentIndex, setContentIndex] = useState(courseIndex);
+  const [contentIndex, setContentIndex] = useState(0);
   const [exerciseAnswer, setExerciseAnswer] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
@@ -150,7 +149,18 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
     });
 
     return () => unsubscribe();
-  }, [learningId, user, moduleIndex, contentIndex]);
+  }, [learningId, user, moduleIndex]);
+
+  useEffect(() => {
+    setContentIndex(0);
+  }, [moduleIndex]);
+
+  useEffect(() => {
+    const moduleIdx = parseInt(moduleIndex);
+    if (plan?.modules[moduleIdx]?.content?.[contentIndex]) {
+      setCurrentContent(plan.modules[moduleIdx].content[contentIndex]);
+    }
+  }, [plan, moduleIndex, contentIndex]);
 
   const triggerFireworks = async () => {
     const confetti = (await import("canvas-confetti")).default;
@@ -211,7 +221,6 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: user?.uid,
           contentTitle: currentContent.title,
           contentType: currentContent.type,
           exerciseContent: currentContent.content,
@@ -232,13 +241,13 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
       }
       
       if (res.ok) {
-        await markContentComplete(finalGrade, finalFeedback, result.aiDetected);
+        await markContentComplete(finalGrade, finalFeedback, result.aiDetected, exerciseAnswer);
       } else {
-        await markContentComplete(50, "Unable to grade. Keep learning!", false);
+        await markContentComplete(50, "Unable to grade. Keep learning!", false, exerciseAnswer);
       }
     } catch (error) {
       console.error("Exercise submit error:", error);
-      await markContentComplete(50, "Error processing submission.", false);
+      await markContentComplete(50, "Error processing submission.", false, exerciseAnswer);
     } finally {
       setSubmitting(false);
       setShowWarning(false);
@@ -265,7 +274,7 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
             exercises.push({
               exerciseId: content.id,
               title: content.title,
-              userAnswer: content.content,
+              userAnswer: content.userAnswer || "",
               aiSolution: content.aiSolution,
             });
           }
@@ -304,7 +313,7 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
     }
   };
 
-  const markContentComplete = async (grade?: number, feedback?: string, aiDetected?: boolean) => {
+  const markContentComplete = async (grade?: number, feedback?: string, aiDetected?: boolean, userAnswer?: string) => {
     if (!plan || !currentContent || !learningId || currentContent.completed) return;
 
     try {
@@ -320,6 +329,7 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
         const updates: Partial<GeneratedContent> = { completed: true, usedAiForAnswer: aiDetected ?? false };
         if (grade !== undefined) updates.grade = grade;
         if (feedback !== undefined) updates.feedback = feedback;
+        if (userAnswer !== undefined) updates.userAnswer = userAnswer;
         
         return { ...c, ...updates };
       });
@@ -431,7 +441,6 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
   const handleNavigate = (newIndex: number) => {
     if (canAccessContent(newIndex)) {
       setContentIndex(newIndex);
-      router.push(`/learning/${learningId}/course/${newIndex}`);
     } else {
       toast.error("Complete the previous content first");
     }
@@ -443,7 +452,8 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
     const nextModuleIdx = currentModuleIdx + 1;
     
     if (nextModuleIdx < plan.modules.length) {
-      router.push(`/learning/${learningId}/course/${nextModuleIdx}/0`);
+      setContentIndex(0);
+      router.push(`/learning/${learningId}/course/${nextModuleIdx}`);
     } else {
       router.push(`/learning/${learningId}`);
     }
@@ -465,13 +475,6 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
   );
   const passed = allModulesComplete && totalGrade >= 80;
   
-  const hasAiDetection = plan.modules.some(m => 
-    m.content?.some(c => c.type === "exercise" && c.usedAiForAnswer)
-  );
-  if (hasAiDetection) {
-    totalGrade = Math.max(0, totalGrade - 10);
-  }
-
   const getContentIcon = (type: string) => {
     switch (type) {
       case "lesson": return <BookOpen size={20} />;

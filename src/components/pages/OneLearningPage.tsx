@@ -203,19 +203,42 @@ export default function SingleLearningPlan({ id }: { id: string }) {
   const toggleModuleStatus = async (index: number, currentStatus: string) => {
     if (!plan || !id || !user) return;
 
-    const isNextModuleCompleted =
-      plan.modules[index + 1]?.status === "completed";
-    if (currentStatus === "completed" && isNextModuleCompleted) {
+    const module = plan.modules[index];
+    const isDerivedComplete = module.isGenerated && module.content
+      ? module.content.every((c: any) => c.completed)
+      : module.status === "completed";
+
+    const nextMod = plan.modules[index + 1];
+    const isNextModuleComplete = nextMod
+      ? nextMod.isGenerated && nextMod.content
+        ? nextMod.content.every((c: any) => c.completed)
+        : nextMod.status === "completed"
+      : false;
+    if (isDerivedComplete && isNextModuleComplete) {
       toast.error("You cannot undo this step while the next one is finished.");
       return;
     }
 
-    const newStatus =
-      currentStatus === "completed" ? "not_started" : "completed";
     const updatedModules = [...plan.modules];
-    updatedModules[index].status = newStatus;
+    const mod = updatedModules[index];
 
-    const allFinished = updatedModules.every((m) => m.status === "completed");
+    if (mod.isGenerated && mod.content) {
+      const newCompleted = !isDerivedComplete;
+      mod.content = mod.content.map((c: any) => ({ ...c, completed: newCompleted }));
+      mod.status = newCompleted ? "completed" : "not_started";
+    } else {
+      mod.status = currentStatus === "completed" ? "not_started" : "completed";
+    }
+
+    const isNowComplete = mod.isGenerated && mod.content
+      ? mod.content.every((c: any) => c.completed)
+      : mod.status === "completed";
+
+    const allFinished = updatedModules.every((m) =>
+      m.isGenerated && m.content
+        ? m.content.every((c: any) => c.completed)
+        : m.status === "completed"
+    );
 
     try {
       const planRef = doc(db, "learningPlans", id);
@@ -227,7 +250,7 @@ export default function SingleLearningPlan({ id }: { id: string }) {
         isActive: !allFinished,
       });
 
-      if (newStatus === "completed") {
+      if (isNowComplete) {
         triggerFireworks();
         toast.success("Step Mastered!");
 
@@ -346,7 +369,7 @@ export default function SingleLearningPlan({ id }: { id: string }) {
                   Duration
                 </p>
                 <p className="text-sm font-bold text-slate-900">
-                  ~{plan.modules.length * 2} Weeks
+                  ~{plan.totalHours ? `${plan.totalHours} Hours` : `${plan.modules.length * 2} Weeks`}
                 </p>
               </div>
             </div>

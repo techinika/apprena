@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { verifyAuth } from "@/lib/apiAuth";
 import { db } from "@/db/firebase";
-import { doc, deleteDoc, getDoc } from "firebase/firestore";
+import { doc, deleteDoc, getDoc, updateDoc } from "firebase/firestore";
 
 export async function DELETE(req: Request) {
   try {
@@ -24,6 +24,19 @@ export async function DELETE(req: Request) {
 
     if (planData.userId !== uid) {
       return NextResponse.json({ error: "Not authorized" }, { status: 403 });
+    }
+
+    const parentActivityId = planData.parentActivityId;
+    if (parentActivityId) {
+      const activityRef = doc(db, "activities", parentActivityId);
+      const activitySnap = await getDoc(activityRef);
+      if (activitySnap.exists()) {
+        const activityData = activitySnap.data();
+        const currentLinks = activityData.linkedLearningPlanIds || [];
+        await updateDoc(activityRef, {
+          linkedLearningPlanIds: currentLinks.filter((id: string) => id !== planId),
+        });
+      }
     }
 
     await deleteDoc(planRef);
