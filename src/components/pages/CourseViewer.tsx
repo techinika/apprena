@@ -113,8 +113,9 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
 
   const [plan, setPlan] = useState<LearningPlan | null>(null);
   const [loading, setLoading] = useState(true);
-  const [currentContent, setCurrentContent] = useState<GeneratedContent | null>(null);
   const [contentIndex, setContentIndex] = useState(0);
+
+  const currentContent: GeneratedContent | null = plan?.modules[parseInt(moduleIndex)]?.content?.[contentIndex] ?? null;
   const [exerciseAnswer, setExerciseAnswer] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
@@ -136,11 +137,6 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
       if (docSnap.exists()) {
         const data = { id: docSnap.id, ...docSnap.data() } as LearningPlan;
         setPlan(data);
-        
-        const moduleIdx = parseInt(moduleIndex);
-        if (data.modules[moduleIdx]?.content?.[contentIndex]) {
-          setCurrentContent(data.modules[moduleIdx].content[contentIndex]);
-        }
       } else {
         toast.error("Plan not found");
         router.push("/learning");
@@ -149,18 +145,11 @@ export default function CourseViewer({ moduleIndex }: { moduleIndex: string }) {
     });
 
     return () => unsubscribe();
-  }, [learningId, user, moduleIndex]);
+  }, [learningId, user]);
 
   useEffect(() => {
     setContentIndex(0);
   }, [moduleIndex]);
-
-  useEffect(() => {
-    const moduleIdx = parseInt(moduleIndex);
-    if (plan?.modules[moduleIdx]?.content?.[contentIndex]) {
-      setCurrentContent(plan.modules[moduleIdx].content[contentIndex]);
-    }
-  }, [plan, moduleIndex, contentIndex]);
 
   const triggerFireworks = async () => {
     const confetti = (await import("canvas-confetti")).default;
